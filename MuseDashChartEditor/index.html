@@ -82,6 +82,20 @@ dialog::backdrop{background:#0f172a99}
 .lib-acts{display:flex;gap:6px;flex-wrap:wrap}
 .lib-empty{padding:48px 20px;text-align:center;border:2px dashed var(--line);border-radius:14px;color:var(--muted)}
 .drop-hl{outline:3px dashed var(--red);outline-offset:6px;border-radius:14px}
+/* 操作ガイド（？） */
+.help-btn{width:30px;height:30px;border-radius:50%;border:2px solid #aeb7c7;background:transparent;color:#e5e9f0;font-weight:900;font-size:14px;padding:0;align-self:center;margin-right:8px;flex:0 0 auto}
+.help-btn:hover{border-color:#fff;color:#fff}
+.play-top .help-btn{width:26px;height:26px;font-size:12px;margin:0;border-color:#94a3b8}
+.help-dlg{width:min(680px,94vw);overflow:auto}
+.help-dlg .dlg-head{position:sticky;top:0;background:var(--white);z-index:1}
+.help-body section{padding:12px 20px;border-bottom:1px solid var(--line)}.help-body section:last-child{border-bottom:0}
+.help-body h3{margin:0 0 6px;font-size:13px;color:var(--red-dark)}html.dark .help-body h3{color:#fda4af}
+.help-body p{margin:0 0 6px;font-size:12.5px;line-height:1.75}
+/* バージョン表示と変更履歴 */
+.app-ver{margin:8px 0 0;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--muted)}
+.ver-log-btn{border:1px solid var(--line);background:none;color:inherit;font:inherit;font-size:11px;letter-spacing:0;padding:2px 10px;border-radius:999px;cursor:pointer}
+.ver-log-btn:hover{border-color:var(--red);color:var(--red)}
+.changelog h3{margin:0 0 6px;font-size:14px}.changelog ul{margin:0;padding-left:1.3em}.changelog li{font-size:13px;line-height:1.7}
 
 /* ===== エディット ===== */
 .ed-head{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
@@ -196,6 +210,7 @@ body.playing{overflow:hidden}
     <button class="save-btn ghost" id="exportBtn" title=".mdm ファイルとして書き出す">.mdm 書き出し</button>
   </div>
   <nav aria-label="メインメニュー">
+    <button class="help-btn" id="helpBtn" title="操作ガイド" aria-label="操作ガイド">？</button>
     <span class="lang-tg" id="langBtn" role="group" aria-label="Language"><button data-l="ja">日本語</button><button data-l="en">EN</button></span>
     <button class="nav-btn" data-page="library">曲一覧</button>
     <button class="nav-btn" data-page="settings">設定</button>
@@ -206,7 +221,9 @@ body.playing{overflow:hidden}
 <!-- ===== 曲一覧 ===== -->
 <section id="libraryPage" aria-label="曲一覧">
   <div class="page-head">
-    <div><p class="eyebrow">LIBRARY</p><h2>曲一覧</h2><p class="muted" style="margin:4px 0 0;font-size:12px">.mdm（譜面・ジャケット・音源をまとめた zip）を読み込むと、この端末に保存されます</p></div>
+    <div><p class="eyebrow">LIBRARY</p><h2>曲一覧</h2><p class="muted" style="margin:4px 0 0;font-size:12px">.mdm（譜面・ジャケット・音源をまとめた zip）を読み込むと、この端末に保存されます</p>
+      <!-- バージョン：更新したらここと変更履歴（#changelogDlg）を合わせる -->
+      <p class="app-ver"><span data-notr>Ver.1.0.0</span><button type="button" class="ver-log-btn" id="changelogBtn" title="変更履歴を見る">変更履歴</button></p></div>
   </div>
   <div class="lib-tools">
     <input id="libSearch" type="search" placeholder="曲名・アーティスト・タグで検索" aria-label="検索" />
@@ -280,8 +297,10 @@ body.playing{overflow:hidden}
 <!-- ===== プレイ ===== -->
 <section id="playPage" hidden aria-label="プレイ">
   <div class="play-top">
+    <button class="help-btn" id="playHelpBtn" title="操作ガイド" aria-label="操作ガイド">？</button>
     <h2 id="playTitle" data-notr></h2>
     <label class="switch" title="プレイ中でも切り替えられます（使うと自己ベストは記録されません）"><input type="checkbox" id="playAuto" />オート</label>
+    <button class="btn" id="playPause" title="一時停止／再開（Space）">⏸ 一時停止</button>
     <button class="btn" id="playRetry">↺ やり直す</button>
     <button class="btn" id="playQuit">やめる（Esc）</button>
   </div>
@@ -369,6 +388,21 @@ body.playing{overflow:hidden}
     </div>
   </div>
   <div class="dlg-foot"><button class="btn" id="rRetry">リトライ</button><button class="btn primary" id="rBack">戻る</button></div>
+</dialog>
+
+<!-- 操作ガイド（？）：開いている画面の内容だけを出す。中身は HELP（スクリプト）から日本語・英語で作る -->
+<dialog id="helpDlg" class="help-dlg" aria-label="操作ガイド" data-notr>
+  <div class="dlg-head"><h2 id="helpTitle"></h2><button data-close aria-label="閉じる">✕</button></div>
+  <div class="help-body" id="helpBody"></div>
+</dialog>
+
+<!-- 変更履歴：新しい版ほど上。版を上げたら section を先頭に足し、曲一覧の Ver 表示も合わせる -->
+<dialog id="changelogDlg" aria-label="変更履歴">
+  <div class="dlg-head"><h2>変更履歴</h2><button data-close aria-label="閉じる">✕</button></div>
+  <div class="dlg-body changelog">
+    <section><h3 data-notr>Ver.1.0.0（2026-11-17）</h3>
+      <ul><li>最初の公開版です。</li></ul></section>
+  </div>
 </dialog>
 
 <div id="toast" hidden role="status"></div>
@@ -734,13 +768,13 @@ const I18N_EN={
  'タップ（ぶつかると大きなダメージ）':'Tap (big damage if it hits you)','タップ（画面の上から飛び込んでくる。逆さは下から）':'Tap (dives in from the top; upside-down from the bottom)',
  'タップ（画面の上から振り下ろされる。逆さは下から。ジャンプでよけると MISS・ダメージなし）':'Tap (swings down from the top; upside-down from the bottom. Dodging by jumping is a MISS with no damage)',
  '空中と地上を同時にタップ':'Tap air and ground at the same time','タップ（どちらのレーンでも可）':'Tap (either lane)','タップ（判定枠の近くで見えなくなる。逃してもコンボは切れない）':'Tap (vanishes near the judge ring; missing it doesn’t break combo)',
- '押して、終点まで押し続ける（失敗で 2 ミス・ダメージなし）':'Press and hold until the end (failing counts 2 misses, no damage)','連打（どこを押しても可。上限＝長さ÷0.04 秒まで叩き切ると PERFECT、届かないと GREAT、1 打もないと MISS・ダメージ。FEVER の 1.5 倍はかからない）':'Mash with any key. Reaching the cap (length ÷ 0.04 s) is PERFECT, falling short is GREAT, no hits is a MISS with damage. FEVER’s 1.5× doesn’t apply',
+ '押して、終点まで押し続ける（失敗で 2 ミス・ダメージなし）':'Press and hold until the end (failing counts 2 misses, no damage)','連打（どこを押しても可。上限＝長さ÷0.05 秒まで叩き切ると PERFECT、届かないと GREAT、1 打もないと MISS・ダメージ。FEVER の 1.5 倍はかからない）':'Mash with any key. Reaching the cap (length ÷ 0.05 s) is PERFECT, falling short is GREAT, no hits is a MISS with damage. FEVER’s 1.5× doesn’t apply',
  '反対のレーンにいてよける（PASS）。判定は判定枠の後ろのキャラクターの位置':'Dodge by being in the other lane (PASS). Judged at the character behind the judge ring',
  '触れると取れる（判定なし）':'Collected on touch (no judgment)','触れると HP 回復（満タンなら +300）':'Restores HP on touch (+300 at full HP)','アイテム':'Item','タップ':'Tap',
  '。基本スコア':'. Base score','20×連打数（叩き切ると＋200）':'20 × hits (+200 when completed)','200×2＋0.1秒ごとに10':'200 × 2 + 10 per 0.1 s',' ・ FEVER +':' · FEVER +',
  // プレイ
  '難易度を選ぶ':'Choose difficulty','HP が 0 でも続ける':'Keep playing at 0 HP','譜面：':'Chart: ','プレイ画面':'Play screen',
- 'プレイ中でも切り替えられます（使うと自己ベストは記録されません）':'Can be toggled during play (best scores aren’t recorded if used)','↺ やり直す':'↺ Retry','やめる（Esc）':'Quit (Esc)',
+ 'プレイ中でも切り替えられます（使うと自己ベストは記録されません）':'Can be toggled during play (best scores aren’t recorded if used)','↺ やり直す':'↺ Retry','操作ガイド':'Guide','変更履歴を見る':'View the changelog','変更履歴':'Changelog','最初の公開版です。':'First public release.','⏸ 一時停止':'⏸ Pause','▶ 再開':'▶ Resume','一時停止／再開（Space）':'Pause / resume (Space)','やめる（Esc）':'Quit (Esc)',
  '空中：':'Air: ','地上：':'Ground: ','（タッチは上半分＝空中・下半分＝地上・下のパネル＝FEVER）　Esc でやめる':'  (touch: top half = air, bottom half = ground, bottom panel = FEVER)  Esc to quit',
  '（タッチは上半分＝地上・下半分＝空中・下のパネル＝FEVER）　Esc でやめる':'  (touch: top half = ground, bottom half = air, bottom panel = FEVER)  Esc to quit',
  '（タッチは左半分＝空中・右半分＝地上・下のパネル＝FEVER）　Esc でやめる':'  (touch: left half = air, right half = ground, bottom panel = FEVER)  Esc to quit',
@@ -1690,6 +1724,68 @@ $$('.nav-btn').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page
 $('#brandLink').addEventListener('click',e=>{e.preventDefault();showPage('library')});
 $('#edGoLib').addEventListener('click',()=>showPage('library'));
 $$('dialog [data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
+// 変更履歴（曲一覧の Ver の横）。外側をクリックしても閉じる
+$('#changelogBtn').addEventListener('click',()=>$('#changelogDlg').showModal());
+$('#changelogDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close()});
+// ===== 操作ガイド（？）：開いている画面（曲一覧／エディット／プレイ／設定）の内容だけを出す =====
+// [見出し, [段落…]] を日本語・英語で持つ。開くたびに今の言語で作る（辞書の置き換えは使わない）
+const HELP={
+ library:{ja:'操作ガイド（曲一覧）',en:'Guide (Songs)',s:[
+  [['曲一覧','Songs'],[
+   ['「.mdm を読み込む」で Muse Dash の譜面ファイル（.mdm：譜面・ジャケット・音源をまとめた zip）を読み込みます。複数まとめて選んだり、曲一覧にドラッグ＆ドロップしたりもできます。同じ曲名の曲があると、置き換えるか別の曲として追加するかを聞かれます。','Use "Import .mdm" to load Muse Dash chart files (.mdm: a zip of charts, cover art and audio). You can pick several at once or drag and drop them onto the song list. If a song with the same title exists, you are asked whether to replace it or add it as a separate song.'],
+   ['「＋ 新規作成」で曲名・アーティスト・BPM を決めて新しい曲を作ります。音源とジャケットは任意で、あとから「曲の情報」で追加できます。','"+ New song" creates a song from a title, artist and BPM. Audio and cover art are optional and can be added later in Song info.'],
+   ['検索欄では曲名・アーティスト・タグで絞り込めます。','The search box filters by title, artist or tag.']]],
+  [['曲ごとのボタン','Song buttons'],[
+   ['▶ プレイ：難易度を選んでプレイします。「オート」で自動演奏、「HP が 0 でも続ける」で最後まで遊べます（オートを使ったときは自己ベストを記録しません）。 · エディット：譜面を編集します。 · 書き出し：.mdm ファイルとして保存します。 · 削除：この端末から消します（元に戻せません）。','▶ Play: choose a difficulty and play. "Auto" plays automatically and "Keep playing at 0 HP" lets you reach the end (best scores aren’t recorded with Auto). · Edit: edit the chart. · Export: save as an .mdm file. · Delete: remove it from this device (cannot be undone).'],
+   ['難易度のチップの ★ は自己ベストがある印です。','A ★ on a difficulty chip means you have a best score.']]],
+  [['データの保存先','Where data is saved'],[
+   ['曲と設定はこの端末のブラウザの中に保存されます。別の端末やブラウザへは引き継がれないので、残したい曲はエディットで保存してから「書き出し」で .mdm にしてください。','Songs and settings are stored in this browser on this device. They do not carry over to other devices or browsers, so save in the editor and use "Export" to keep an .mdm file.']]]]},
+ editor:{ja:'操作ガイド（エディット）',en:'Guide (Edit)',s:[
+  [['上のバー','Top bar'],[
+   ['保存（Ctrl+S）：この端末に保存します（自動保存はされません）。 · ▶ テストプレイ：再生位置からプレイ画面で試します（「オート」で自動演奏）。 · .mdm 書き出し：.mdm ファイルとして保存します。','Save (Ctrl+S): save on this device (there is no auto-save). · ▶ Test play: try the chart on the play screen from the playhead ("Auto" plays automatically). · Export .mdm: save as an .mdm file.'],
+   ['曲名の右のタブで難易度（EASY〜HIDDEN）を切り替えます。点線のタブを押すと、その難易度の譜面を新しく作ります。「曲の情報」では info.json の項目・ジャケット・音源を変えられます。','Use the tabs next to the title to switch difficulty (EASY–HIDDEN). A dashed tab creates a chart for that difficulty. Song info lets you edit info.json, the cover image and the audio.']]],
+  [['ノーツを置く','Placing notes'],[
+   ['「ノーツを置く」で種類を選び、レーン（空中・地上）をクリックして置きます。ロングと連打は、置いたままドラッグすると長さを決められます。同時押しは空中・地上の両方に置かれます。イベント（速度・ボス・シーン切替・画面効果など）はレーンの上の欄に置きます。','Pick a type in "Place notes" and click a lane (air or ground). For holds and mashers, keep dragging to set the length. Double notes are placed on both lanes. Events (speed, boss, scene switch, screen effects and so on) go in the row above the lanes.'],
+   ['右クリックで削除。「消しゴム」（E）はなぞったノーツを消します。ノーツの見た目は、その位置のシーンに合わせて変わります。','Right-click deletes. The Eraser (E) deletes notes you drag over. Notes are drawn in the scene that applies at their position.']]],
+  [['選択・編集','Selecting and editing'],[
+   ['「選択」（V）でノーツをクリック。ドラッグで移動（上下に動かすとレーンが変わる）、空いた所をドラッグで範囲選択、ロングの終点をドラッグで長さを変えます。Shift / Ctrl＋クリックで選択を追加。','With Select (V), click a note. Drag to move it (move up/down to change lanes), drag empty space to box-select, and drag a hold’s end to change its length. Shift / Ctrl+click adds to the selection.'],
+   ['Ctrl+C / X / V：コピー・切り取り・再生位置に貼り付け · Del：削除 · ←→：選択を動かす（未選択なら再生位置を動かす） · Ctrl+A：すべて選択 · Ctrl+Z / Ctrl+Y：元に戻す・やり直す · Esc：選択を解除','Ctrl+C / X / V: copy, cut, paste at the playhead · Del: delete · ←→: move the selection (or the playhead when nothing is selected) · Ctrl+A: select all · Ctrl+Z / Ctrl+Y: undo, redo · Esc: deselect']]],
+  [['タイムラインと再生','Timeline and playback'],[
+   ['Space で再生・停止、Home で先頭へ。上の目盛りをクリックするとそこへ移動します。ホイールで横スクロール、Ctrl＋ホイールで拡大・縮小。下のバーでも再生位置を動かせます。','Space plays and stops, Home goes to the start. Click the ruler to jump there. The wheel scrolls; Ctrl+wheel zooms. The bar below also moves the playhead.'],
+   ['スナップ（置く位置の細かさ）・拡大・再生速度・レーンを流す・ヒット音・メトロノームはレーンの上で切り替えます。BPM の行をダブルクリックすると BPM 変更を追加します。','Snap (placement grid), zoom, playback speed, follow, hit sounds and metronome are above the lanes. Double-click the BPM row to add a BPM change.']]],
+  [['詳細設定','Properties'],[
+   ['ノーツを選ぶと、種類・レーン・ハート付き・一瞬で終わるロング（D チャンネル）・位置・長さを変えられます。','With a note selected you can change its type, lane, heart, instant hold (D channel), position and length.'],
+   ['何も選んでいないときは、基本 BPM・開始時の速度・BPM 変更の追加・小節の挿入と削除・小節の長さ（拍子）・小節ごとのスナップを設定できます。小節の挿入・削除は、後ろのノーツも 1 小節ぶんずらします。','With nothing selected you can set the base BPM, starting speed, add a BPM change, insert or delete a measure, set the measure length (time signature) and a per-measure snap. Inserting or deleting a measure shifts everything after it by one measure.']]]]},
+ play:{ja:'操作ガイド（プレイ）',en:'Guide (Play)',s:[
+  [['操作','Controls'],[
+   ['キー：空中 = F / D、地上 = J / K、FEVER = Enter（設定で変更できます。FEVER キーは「手動」のときに使います）。 · Space：一時停止・再開（右上の「⏸ 一時停止」でも可） · Esc：やめる','Keys: air = F / D, ground = J / K, FEVER = Enter (changeable in Settings; the FEVER key is used when FEVER is set to Manual). · Space: pause / resume (also the "⏸ Pause" button at the top right) · Esc: quit'],
+   ['一時停止中は ←→ で 1 小節、↑↓ で 5 小節移動できます（押し続けで連続）。移動してから再開すると、その小節から始め直します。','While paused, ←→ move 1 measure and ↑↓ move 5 (hold to repeat). Resuming after moving restarts from that measure.'],
+   ['スマホ・タブレット：画面の半分ずつで空中・地上（上下・左右と反転は設定のキー設定で選べます）。画面下の HP・FEVER のパネルを触ると FEVER です。','Phones and tablets: each half of the screen is air or ground (choose top/bottom or left/right, and swapping, in Key settings). Touch the HP/FEVER panel at the bottom for FEVER.']]],
+  [['ルール','Rules'],[
+   ['判定：PERFECT ±50ms、GREAT ±130ms。PERFECT のうち ±25ms を超えたときは EARLY / LATE が出ます。','Judgment: PERFECT ±50ms, GREAT ±130ms. A PERFECT more than ±25ms off shows EARLY / LATE.'],
+   ['空中キーでジャンプ（約 0.5 秒で着地）、地上キーで地上へ降ります。たたき損ねた敵がキャラクターのいるレーンに来るとダメージです。被弾後 1.2 秒は無敵です。','The air key jumps (you land after about 0.5 s) and the ground key drops you to the ground. A missed enemy that reaches your lane deals damage. You are invincible for 1.2 s after a hit.'],
+   ['ロング：押して終点まで押し続ける（早く離すと GREAT か MISS）。 · 連打：始まったら連打し、上限まで叩き切ると PERFECT。 · 歯車：反対のレーンにいてよける（連打を叩いている間は、上下どちらの歯車にも当たりません）。 · 音符・ハート：そのレーンにいるか、キーを押すと取れます（ロングを押している間も取れます）。','Holds: press and keep holding to the end (releasing early is GREAT or MISS). · Mashers: mash once it starts; reaching the cap is PERFECT. · Saws: dodge by being in the other lane (while mashing a masher, saws in either lane can’t hit you). · Notes and hearts: collected by being in that lane or pressing its key (also while holding a hold).']]],
+  [['スコアと FEVER','Score and FEVER'],[
+   ['10 コンボごとに得点が 10% ずつ増えます（最大 1.5 倍）。ゲージが満タンになると FEVER（5 秒間 1.5 倍）。自動で始まるか、手動で始めるかは設定で選べます。','Every 10 combo adds 10% to the score (up to 1.5×). A full gauge gives FEVER (1.5× for 5 seconds). Choose automatic or manual start in Settings.'],
+   ['左上の AP は、ここまで全部 PERFECT のときだけ出ます。','AP at the top left shows only while every judgment so far is PERFECT.']]]]},
+ settings:{ja:'操作ガイド（設定）',en:'Guide (Settings)',s:[
+  [['音量','Volume'],[
+   ['音源（曲）と効果音の音量、ヒット音の種類を選びます。ヒット音は選ぶと試しに鳴ります。','Set the music and sound-effect volume and pick a hit sound; choosing one plays a preview.']]],
+  [['キー設定','Key settings'],[
+   ['空中・地上・FEVER にそれぞれ 8 個までキーを割り当てられます。ボタンを押してからキーを押します（Esc で取り消し、Backspace で空欄）。Space は一時停止に使うので割り当てないでください。','Assign up to 8 keys each to air, ground and FEVER. Click a button, then press a key (Esc cancels, Backspace clears). Don’t assign Space, which is used for pause.'],
+   ['タッチの操作（上下・左右）と、空中と地上の反転もここで選びます。','Touch controls (top/bottom or left/right) and swapping air and ground are also set here.']]],
+  [['タイミング調整・プレイ','Timing and play'],[
+   ['判定のずれ（ms）：曲に対する譜面のタイミングです。プラスで譜面が遅く、マイナスで早くなります。プレイとエディットの再生に効き、譜面ファイルは変わりません。','Offset (ms): chart timing against the music. Positive delays the chart, negative makes it earlier. It applies to play and editor playback and does not change chart files.'],
+   ['ノーツの速さ・FEVER の発動（自動／手動）・空中キーの動き（ジャンプ／浮遊：地上キーを押すまで空中のまま）を選びます。','Choose note speed, FEVER activation (automatic / manual) and air key behavior (jump / float: stay in the air until you press the ground key).']]],
+  [['ゲームの値・表示','Game values and display'],[
+   ['HP の最大値・ハートの回復量・速度 1〜3 の速さは、実機に合わせて調整できます。ダークモードは「表示」で切り替えます。設定はこの端末に自動で保存されます。','Max HP, heart healing and the Speed 1–3 rates can be tuned to match the real game. Dark mode is under Display. Settings are saved on this device automatically.']]]]}};
+function openHelp(){const k=PAGE==='editor'||PAGE==='play'||PAGE==='settings'?PAGE:'library',h=HELP[k],en=LANG==='en';
+  $('#helpTitle').textContent=en?h.en:h.ja;$('#helpDlg').querySelector('[data-close]').setAttribute('aria-label',en?'Close':'閉じる');
+  $('#helpBody').innerHTML=h.s.map(([t,ps])=>`<section><h3>${esc(en?t[1]:t[0])}</h3>${ps.map(p=>`<p>${esc(en?p[1]:p[0])}</p>`).join('')}</section>`).join('');
+  $('#helpDlg').showModal();$('#helpBody').parentElement.scrollTop=0}
+$('#helpBtn').addEventListener('click',openHelp);
+$('#playHelpBtn').addEventListener('click',e=>{e.currentTarget.blur();if(P.running&&!P.paused)pausePlay();openHelp()}); // プレイ中は一時停止してから開く
+$('#helpDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close()});
 window.addEventListener('beforeunload',e=>{if(E.dirty){e.preventDefault();e.returnValue=''}});
 
 // ===== 曲一覧 =====
@@ -2125,7 +2221,7 @@ function renderProps(){
 }
 function noteRule(d){
   const c=CAT[d.cat];if(!c)return '';
-  const t={small:'タップ',medium:'タップ',large:'タップ（ぶつかると大きなダメージ）',raider:'タップ（画面の上から飛び込んでくる。逆さは下から）',hammer:'タップ（画面の上から振り下ろされる。逆さは下から。ジャンプでよけると MISS・ダメージなし）',gemini:'空中と地上を同時にタップ',boss:'タップ（どちらのレーンでも可）',bullet:'タップ',ghost:'タップ（判定枠の近くで見えなくなる。逃してもコンボは切れない）',hold:'押して、終点まで押し続ける（失敗で 2 ミス・ダメージなし）',mash:'連打（どこを押しても可。上限＝長さ÷0.04 秒まで叩き切ると PERFECT、届かないと GREAT、1 打もないと MISS・ダメージ。FEVER の 1.5 倍はかからない）',gear:'反対のレーンにいてよける（PASS）。判定は判定枠の後ろのキャラクターの位置',note:'触れると取れる（判定なし）',heart:'触れると HP 回復（満タンなら +300）',pitem:'アイテム'}[d.cat]||'';
+  const t={small:'タップ',medium:'タップ',large:'タップ（ぶつかると大きなダメージ）',raider:'タップ（画面の上から飛び込んでくる。逆さは下から）',hammer:'タップ（画面の上から振り下ろされる。逆さは下から。ジャンプでよけると MISS・ダメージなし）',gemini:'空中と地上を同時にタップ',boss:'タップ（どちらのレーンでも可）',bullet:'タップ',ghost:'タップ（判定枠の近くで見えなくなる。逃してもコンボは切れない）',hold:'押して、終点まで押し続ける（失敗で 2 ミス・ダメージなし）',mash:'連打（どこを押しても可。上限＝長さ÷0.05 秒まで叩き切ると PERFECT、届かないと GREAT、1 打もないと MISS・ダメージ。FEVER の 1.5 倍はかからない）',gear:'反対のレーンにいてよける（PASS）。判定は判定枠の後ろのキャラクターの位置',note:'触れると取れる（判定なし）',heart:'触れると HP 回復（満タンなら +300）',pitem:'アイテム'}[d.cat]||'';
   return `${t}。基本スコア ${d.cat==='mash'?'20×連打数（叩き切ると＋200）':d.cat==='hold'?'200×2＋0.1秒ごとに10':c.sc}${c.gg?' ・ FEVER +'+c.gg:''}`;
 }
 $('#props').addEventListener('change',e=>{
@@ -2253,6 +2349,11 @@ document.addEventListener('keyup',e=>{if(PAGE==='play')playKey(e,false)});
 
 // ===== プレイ =====
 // 判定幅・FEVER は Wiki の値。HP 最大・ハート回復量・連打の必要回数・速度の倍率は設定画面で変えられる（Wiki に数値がないもの）
+const MASH_HIT=.05; // 連打の必要回数：長さ ÷ この秒数（0.05 秒で 1 ヒット）
+const MASH_STAY=.5; // 連打を叩き終わったあと、レーンの中央に残る秒数
+// 歯車をプレイで後ろにずらす秒数。本家の動画（Mulch）と照らし合わせると、歯車は譜面の時刻に判定の円を通り、
+// その後ろのキャラクターの位置で判定されていた（ずらしはなし）。調整用に値だけ残す
+const GEAR_SHIFT=0;
 const HAMMER_BACK=3; // 打ち返したハンマーが戻る速さ（振り下ろされてきたときの何倍か）
 const PERFECT=.05,GREAT=.13,AIR_TIME=.5,/* ジャンプ（空中にいる）時間 */LAND_LOCK=.2,/* 着地後にジャンプできない時間 */FEVER_MAX=120,FEVER_SEC=5;
 const G=()=>S.game;
@@ -2279,9 +2380,13 @@ function buildPlayNotes(chart,tm,from){
     n.fromBoss=cat==='bullet'||!!(d&&d.boss);
     n.bossMash=cat==='mash'&&!!(d&&d.boss); // ボス連打：右側のボスが直接突撃してきて目の前で連打される
     n.flyBy=cat==='gear'; // 判定後もキャラクターの位置まで飛んでくる（ミスした敵もあとで true になる）
-    if(cat==='mash'){if(n.te==null||n.te-t<.2)n.te=t+(n.te==null?.5:.2);n.need=Math.max(1,Math.round((n.te-t)/.04)); // 上限の連打数：40 ミリ秒に 1 打（1 秒あたり 25 打）
+    // 必要回数は譜面の長さから決める（0.1 秒の連打なら 2 ヒット。本家の動画の「2 HITS」と同じ）。
+    // 叩ける時間だけは短すぎないよう 0.2 秒まで延ばす（長さのない連打は 0.5 秒）
+    if(cat==='mash'){const len=n.te==null?.5:n.te-t;if(n.te==null||len<.2)n.te=t+Math.max(.2,len);n.need=Math.max(1,Math.round(len/MASH_HIT)); // 上限の連打数：MASH_HIT 秒（0.05 秒）に 1 打（1 秒あたり 20 打）
       if(TAPHOLD.has(it.ch)){n.tap=true;n.need=1}} // 一瞬で終わるロング（D チャンネル）の連打は 1 ヒットで倒せる
     if(cat==='hold'&&n.te==null)n.te=t; // D1〜D4 の一瞬で終わるロング
+    // 歯車（プレイのみ）：譜面の時刻（＋GEAR_SHIFT）に判定の円を通り、後ろのキャラクターの位置に来たとき（gt）に判定する
+    if(cat==='gear'){n.t=t+GEAR_SHIFT;n.gt=n.t+charDelay(n)}
     if(cat!=='hold'&&cat!=='mash')n.te=null;
     notes.push(n);
   }
@@ -2337,23 +2442,27 @@ async function startPlay(song,key,opt={}){
   const tm=makeTiming(chart),from=opt.from||0,notes=buildPlayNotes(chart,tm,from);
   let buf=null;try{buf=await getMusicBuffer(song)}catch{toast('音源をデコードできませんでした。音なしで再生します',3500)}
   const last=notes.reduce((m,n)=>Math.max(m,n.te??n.t),from);
-  Object.assign(P,{song,key,opt,chart,tm,notes,buf,from,auto:!!opt.auto,usedAuto:!!opt.auto,nofail:!!opt.nofail,cursor:0,drawFrom:0,atkFrom:0,hitsPop:null,paused:false,resumeAt:-1,pauseT:0,seekT:0,dualUntil:-9,invUntil:-9,pending:[],score:0,combo:0,maxCombo:0,perfect:0,great:0,miss:0,pass:0,early:0,late:0,notesGot:0,notesAll:0,heartsGot:0,heartsAll:0,gained:0,units:0,hp:G().hp,gauge:0,feverUntil:-1,air:false,airUntil:-1,landT:-9,lastPress:[-9,-9],held:[new Set(),new Set()],pops:[],bursts:[],ghostHits:[],flash:[-9,-9],hurtT:-9,failed:false,running:true,cover:null,ptr:new Map(),
+  Object.assign(P,{song,key,opt,chart,tm,notes,buf,from,auto:!!opt.auto,usedAuto:!!opt.auto,nofail:!!opt.nofail,cursor:0,drawFrom:0,atkFrom:0,hitsPop:null,paused:false,resumeAt:-1,pauseT:0,seekT:0,dualUntil:-9,midUntil:-9,invUntil:-9,pending:[],score:0,combo:0,maxCombo:0,perfect:0,great:0,miss:0,pass:0,early:0,late:0,notesGot:0,notesAll:0,heartsGot:0,heartsAll:0,gained:0,units:0,hp:G().hp,gauge:0,feverUntil:-1,air:false,airUntil:-1,landT:-9,lastPress:[-9,-9],held:[new Set(),new Set()],pops:[],bursts:[],ghostHits:[],flash:[-9,-9],hurtT:-9,failed:false,running:true,cover:null,ptr:new Map(),
     evs:buildEvents(chart,tm),evIdx:0,fx:newFx(song.info.scene),bgPos:0,lastT:null});
   for(const n of notes){P.units+=(n.c.hit?1:n.cat==='hold'?2:['mash','gear','note','heart'].includes(n.cat)?1:0)+(n.heart?1:0);if(n.cat==='note')P.notesAll++;if(n.cat==='heart'||n.heart)P.heartsAll++}
   P.endT=Math.max(last+2,from+2);if(buf){const me=buf.duration+musicT0(chart,tm);if(me>last+.5)P.endT=Math.min(me,last+4)}
   $('#playTitle').textContent=`${song.info.name||''}　${MAP_LABEL[key]||''} ★${song.info['difficulty'+key]||'?'}`;$('#playAuto').checked=P.auto;
   const kn=c=>c?c.replace(/^Key|^Digit/,''):'—';
   $('#playHelp').textContent=`空中：${S.keys.air.filter(Boolean).map(kn).join(' / ')}　地上：${S.keys.ground.filter(Boolean).map(kn).join(' / ')}　（タッチは${touchHelp()}・下のパネル＝FEVER）　Esc でやめる`;
-  showPage('play');sizePlay();
+  showPage('play');sizePlay();updPauseBtn();
   const cf=coverFileOf(song);if(cf){const img=new Image();img.onload=()=>{P.cover=img;URL.revokeObjectURL(img.src)};img.src=URL.createObjectURL(song.files[cf])}
   Transport.start(buf,from-1.5,1,musicT0(chart,tm));
   requestAnimationFrame(playLoop);
 }
 function stopPlay(back){P.running=false;Transport.stop();if(back)showPage(P.opt&&P.opt.returnTo==='editor'?'editor':'library')}
 $('#playQuit').addEventListener('click',()=>stopPlay(true));
+// 一時停止ボタン（スマホ・タブレットでも止められるように）。押したあとはフォーカスを外し、Space キーと二重に動かないようにする
+$('#playPause').addEventListener('click',e=>{e.currentTarget.blur();if(!P.running)return;P.paused?resumePlay():pausePlay()});
+function updPauseBtn(){const b=$('#playPause');if(b)b.textContent=P.paused?'▶ 再開':'⏸ 一時停止'}
 $('#playRetry').addEventListener('click',()=>{stopPlay(false);startPlay(P.song,P.key,P.opt)});
 function keyLane(code){if(S.keys.air.includes(code))return 0;if(S.keys.ground.includes(code))return 1;return null}
 function playKey(e,down){
+  if($('#helpDlg').open)return; // 操作ガイドを開いている間はプレイのキーを受けない（Esc はガイドを閉じるだけ）
   if(down&&e.code==='Escape'){stopPlay(true);return}
   const l=keyLane(e.code);
   // 一時停止：Space で止める／再開。止めている間は ←→ で小節線ごとに移動し、Space でそこから始める
@@ -2393,15 +2502,20 @@ function press(l,src){
   if(best)hitNote(best,t-best.t,l,t);else se(l?'ground':'air');
 }
 function hitNote(n,dt,l,t){
-  const r=Math.abs(dt)<=PERFECT?'P':'G';se(l?'ground':'air');
+  const r=Math.abs(dt)<=PERFECT?'P':'G';se(l?'ground':'air');P.midUntil=-9; // 連打のあと中央に残っている間でも、次のノーツを叩いたらそのレーンへ
   // 叩いた敵（ゴーストも）は、キャラクターの後ろへ放物線を描いて飛んでいく（ボス体当たりはボス本体なので除く）
   // ハンマーは、来た軌道（振り子の弧）に沿って 2 倍の速さで打ち返す
   if(n.cat==='hammer')P.ghostHits.push({ham:true,code:n.code,lane:n.lane,t,heart:n.heart,n:{mv:n.mv,lane:n.lane,spd:n.spd,fromBoss:false}});
   else if(n.c.hit&&n.cat!=='boss'){const ps=notePose(n,playLayout().jx,playLayout());P.ghostHits.push({code:n.code,lane:n.lane,t,heart:n.heart,y0:ps.y,spin:(Math.random()<.5?-1:1)*(4+Math.random()*3),up:.8+Math.random()*.4})}
   if(n.cat==='hold'){n.startRes=r;n.holding=true;n.holdLane=l;n.holdFrom=t;judge(n,r,t,dt);return}
   n.done=true;n.res=r;judge(n,r,t,dt);
+  // 同時押し（空中と地上に同じ時刻の敵）を両方叩き終えたら地上に戻る（空中を後に叩いても跳んだままにしない）
+  if(bothLanesHit(n)){P.air=false;P.landT=-9}
   if(n.heart)gotHeart(n.lane,t); // ハート付きの敵（チャンネル 31〜34）は倒すとハートも取れる
 }
+// n と同じ時刻に反対のレーンにある敵（同時押しの相方など）も叩けているか
+function bothLanesHit(n){const p=n.partner;if(p)return p.done&&(p.res==='P'||p.res==='G');
+  for(let i=Math.max(0,P.cursor-16);i<P.notes.length;i++){const m=P.notes[i];if(m.t>n.t+.003)break;if(m!==n&&m.lane!==n.lane&&m.c.hit&&Math.abs(m.t-n.t)<.003&&m.done&&(m.res==='P'||m.res==='G'))return true}return false}
 function gotHeart(lane,t){
   P.heartsGot++;P.gained+=1;if(P.hp>=G().hp)addScore(300,t,true);P.hp=Math.min(G().hp,P.hp+G().heal);se('heart');pop('HP +',lane,'#f9a8d4',t);
 }
@@ -2427,6 +2541,10 @@ function judge(n,r,t,dt,o={}){
   else{P.miss++;P.combo=0;pop('MISS',n.lane,'#94a3b8',t);damage(o.dmg||0,t)}
 }
 function onLane(l){return l===0?P.air:!P.air}
+// キャラクターがレーンの中央にいるか（連打を叩いている間・叩き終わった直後・空中と地上のロングを両方押している間）
+function charInMiddle(t){if(P.dualHold||t<P.midUntil)return true;for(let i=P.cursor;i<P.notes.length;i++){const n=P.notes[i];if(n.t>t)break;if(n.cat==='mash'&&!n.done&&n.count>0&&t<=n.te)return true}return false}
+// 始まったばかりで、まだ 1 打も叩いていない連打があるか（GREAT の幅だけ手前から）
+function mashWaiting(t){for(let i=P.cursor;i<P.notes.length;i++){const n=P.notes[i];if(n.t>t+GREAT)break;if(n.cat==='mash'&&!n.done&&n.count===0&&t<=n.te)return true}return false}
 // そのレーンのロングノーツを押している最中で、時刻 tt がそのロングの区間内か（ロングの中の音符は、押している間は取れる）
 function holdingAt(l,tt){for(let i=P.cursor;i<P.notes.length;i++){const h=P.notes[i];if(h.t>tt)break;if(h.cat==='hold'&&h.holding&&h.lane===l&&tt<=h.te+1e-6&&P.held[h.holdLane].size)return true}return false}
 // 連打の回数表示：キャラクターの右上に黄色い星形で「○ HITS」
@@ -2436,10 +2554,10 @@ function drawHits(g,count,bx,by,s,t,alpha=1){
   g.font=`900 ${s*.24}px system-ui`;g.fillStyle='#db2777';g.fillText('HITS',bx,by+s*.36);g.restore();
 }
 // 連打の終わり：必要回数に届いていれば PERFECT（20×回数＋200）、届かなければ MISS とダメージ
-// 連打（本家の仕様）：1 打ごとに 20 点。上限（長さ÷0.04 秒）まで叩き切るとその場で終わり、+200 点で PERFECT。
+// 連打（本家の仕様）：1 打ごとに 20 点。上限（長さ÷0.05 秒）まで叩き切るとその場で終わり、+200 点で PERFECT。
 // 上限に届かず区間が終わると GREAT（ボーナスなし・コンボは続く）。1 打もしなければ MISS とダメージ。連打の得点に FEVER の 1.5 倍はかからない
 function mashHit(n,t){if(n.done)return;n.count++;n.started=true;addScore(20,t,false,true);if(n.count>=n.need)finishMash(n,t)}
-function finishMash(n,t){if(n.done)return;n.done=true;if(n.count>0)P.hitsPop={count:n.count,t}; // 倒したあとも少しの間「○ HITS」を残す（1 打で倒したときも出る）
+function finishMash(n,t){if(n.done)return;n.done=true;if(n.count>0){P.hitsPop={count:n.count,t};P.midUntil=t+MASH_STAY}/* 叩き終わってからも少しの間はレーンの中央に残る */ // 倒したあとも少しの間「○ HITS」を残す（1 打で倒したときも出る）
 if(n.count>=n.need){n.res='P';judge(n,'P',t,null,{base:200,gauge:4,nofever:true})}else if(n.count>0){n.res='G';judge(n,'G',t,null,{base:0,gauge:4,nofever:true})}else{n.res='M';judge(n,'M',t,null,{dmg:n.c.dmg})}}
 // プレイ画面の配置（描画と判定で共用）
 // 本家の画面（16:9）から測った比率：判定の円 x=0.21W、空中 y=0.34H・地上 y=0.63H、床 0.725H、キャラクターは判定の 0.075W 後ろ、ボスは右 0.86W
@@ -2509,11 +2627,13 @@ function updatePlay(t){
         }else hl[n.lane]=true;
       }
     }else if(n.cat==='mash'){
-      if(auto&&t>=n.t)while(!n.done&&t>=n.t+.04*n.count){mashHit(n,t);if(!n.done)se('ground')} // オートは 0.04 秒に 1 打
+      if(auto&&t>=n.t)while(!n.done&&t>=n.t+MASH_HIT*n.count){mashHit(n,t);if(!n.done)se('ground')} // オートは MASH_HIT 秒に 1 打
       if(t>=n.te)finishMash(n,t);
     }else if(n.cat==='gear'){
       // 歯車は判定枠ではなく、その後ろにいるキャラクターの位置まで来たときに当たり判定をする
-      if(t>=n.t+charDelay(n)){if(auto){P.air=n.lane===1;P.airUntil=P.air?t+AIR_TIME:-1}n.done=true;if(onLane(n.lane)){n.res='M';judge(n,'M',t,null,{dmg:n.c.dmg})}else{n.res='pass';judge(n,'pass',t)}}
+      // 連打を叩いている間（キャラクターがレーンの中央にいる間）は、上下どちらの歯車にも当たらない（本家の動画：歯車に挟まれた連打）。
+      // 歯車が来たときに連打がもう始まっていてまだ叩いていなければ、1 打目を待ってから判定する
+      if(t>=n.gt){if(auto){P.air=n.lane===1;P.airUntil=P.air?t+AIR_TIME:-1}const mid=charInMiddle(t);if(!auto&&!mid&&mashWaiting(t))continue;n.done=true;if(!mid&&onLane(n.lane)){n.res='M';judge(n,'M',t,null,{dmg:n.c.dmg})}else{n.res='pass';judge(n,'pass',t)}}
     }else{ // 音符・ハート・P アイテム
       // 取得の判定は敵と同じ幅（±GREAT）：その間にそのレーンにいた、またはそのレーンのキーを押していれば取れる。取れるのは判定の時刻から
       if(!n.link&&!auto&&t>=n.t-GREAT&&(onLane(n.lane)||Math.abs(P.lastPress[n.lane]-n.t)<=GREAT||holdingAt(n.lane,n.t)))n.seen=true;
@@ -2536,7 +2656,7 @@ function updatePlay(t){
 // ===== 一時停止 =====
 function pausePlay(){
   if(P.paused||!P.running)return;const t=Transport.now();
-  P.paused=true;P.pauseT=t;P.seekT=Math.max(P.from,t);Transport.stop();P.held=[new Set(),new Set()];P.ptr.clear();P.pvFx=fxAt(P.seekT);
+  P.paused=true;P.pauseT=t;P.seekT=Math.max(P.from,t);Transport.stop();P.held=[new Set(),new Set()];P.ptr.clear();P.pvFx=fxAt(P.seekT);updPauseBtn();
 }
 // その時刻までのイベントを当てはめた演出の状態（一時停止中の表示用）
 function fxAt(T){const fx=newFx(P.song.info.scene);for(const e of P.evs){if(e.t>T)break;applyEvent(fx,e)}fx.flash=null;fx.scrollY=0;return fx}
@@ -2559,7 +2679,7 @@ function resumePlay(){
     const opt={...P.opt,from:P.seekT,chart:P.chart};P.running=false;startPlay(P.song,P.key,opt);return;
   }
   // 動かしていない → 1.5 秒前から巻き戻してカウントダウンし、止めた所から続ける
-  P.paused=false;P.resumeAt=P.pauseT;Transport.start(P.buf,P.pauseT-1.5,1,musicT0(P.chart,P.tm));
+  P.paused=false;updPauseBtn();P.resumeAt=P.pauseT;Transport.start(P.buf,P.pauseT-1.5,1,musicT0(P.chart,P.tm));
 }
 function drawPauseOverlay(){
   const g=pg,W=PW,H=PH,tm=P.tm,b=tm.beatOf(P.seekT),m=tm.measureOf(Math.max(0,b)),moved=Math.abs(P.seekT-P.pauseT)>1e-3;
@@ -2734,8 +2854,7 @@ function drawPlay(t){
   }
   // キャラクター
   // キャラクターが 2 つのレーンの中央に来るのは、空中・地上のロングを同時に押しているときと、連打を叩いている間だけ（同時押しのノーツなどでは来ない）
-  let mashing=false;for(let i=P.cursor;i<P.notes.length;i++){const n=P.notes[i];if(n.t>t)break;if(n.cat==='mash'&&!n.done&&n.count>0&&t<=n.te){mashing=true;break}}
-  const dual=P.dualHold||mashing;
+  const dual=charInMiddle(t); // 連打中・叩き終わったあと MASH_STAY 秒・両方のロングを押している間は中央
   const cy=dual?(Y[0]+Y[1])/2:P.air?Y[0]:Y[1],cx=jx-L.charDx;
   if(t<P.invUntil&&Math.floor(t*14)%2)g.globalAlpha=.25; // 無敵時間中は点滅
   // 足元の輪（床の上）と、身長 0.22H ほどのキャラクター

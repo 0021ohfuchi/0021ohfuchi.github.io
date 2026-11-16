@@ -304,7 +304,9 @@ body.playing{overflow:hidden}
     <section class="card settings-card">
       <p class="eyebrow">KEY ASSIGN</p><h2>キー設定</h2>
       <div id="keyRows"></div>
-      <p class="settings-help">ボタンを押してから割り当てたいキーを押します。Esc で取り消し、Backspace で空欄。FEVER を「手動」にしたときは、ゲージが満タンのときに FEVER キーを押すと発動します。Space（一時停止）は割り当てないでください。スマホ・タブレットは画面の上半分で空中、下半分で地上、画面下の HP・FEVER のパネルを触ると FEVER です。</p>
+      <label class="vol-row"><span>タッチの操作</span><select id="touchLayoutIn"><option value="ud">上下（上＝空中・下＝地上）</option><option value="lr">左右（左＝空中・右＝地上）</option></select><b></b></label>
+      <label class="vol-row"><span>空中と地上を反転</span><select id="touchInvertIn"><option value="0">反転しない</option><option value="1">反転する</option></select><b></b></label>
+      <p class="settings-help">ボタンを押してから割り当てたいキーを押します。Esc で取り消し、Backspace で空欄。FEVER を「手動」にしたときは、ゲージが満タンのときに FEVER キーを押すと発動します。Space（一時停止）は割り当てないでください。スマホ・タブレットは「タッチの操作」で選んだ画面の半分ずつで空中・地上を操作し、画面下の HP・FEVER のパネルを触ると FEVER です。</p>
       <button class="btn" id="keyReset">初期設定に戻す（F・D ／ J・K）</button>
     </section>
     <section class="card settings-card">
@@ -316,10 +318,7 @@ body.playing{overflow:hidden}
       <p class="eyebrow">PLAY</p><h2>プレイ</h2>
       <label class="vol-row"><span>ノーツの速さ</span><input id="speedIn" type="range" min="0.5" max="2.5" step="0.05" /><b id="speedVal"></b></label>
       <label class="vol-row"><span>FEVER の発動</span><select id="feverIn"><option value="auto">自動（ゲージが満タンで発動）</option><option value="manual">手動（FEVER キー・画面下のパネルで発動）</option></select><b></b></label>
-      <label class="vol-row"><span>空中キーの動き</span><select id="jumpModeIn"><option value="jump">ジャンプ（少したつと着地する）</option><option value="float">浮遊（地上キーを押すまで空中のまま）</option></select><b></b></label>
-      <label class="vol-row"><span>タッチの操作</span><select id="touchLayoutIn"><option value="ud">上下（上＝空中・下＝地上）</option><option value="lr">左右（左＝空中・右＝地上）</option></select><b></b></label>
-      <label class="vol-row"><span>空中と地上を反転</span><select id="touchInvertIn"><option value="0">反転しない</option><option value="1">反転する</option></select><b></b></label>
-      <p class="settings-help">譜面の「速度1〜3」イベントに、さらにこの倍率をかけます。</p>
+      <label class="vol-row"><span>空中キーの動き</span><select id="jumpModeIn"><option value="jump">ジャンプ（少したつと着地する）</option><option value="float">浮遊（地上キーを押すまで空中のまま）</option></select><b></b></label>      <p class="settings-help">譜面の「速度1〜3」イベントに、さらにこの倍率をかけます。</p>
     </section>
     <section class="card settings-card">
       <p class="eyebrow">GAME VALUES</p><h2>ゲームの値</h2>
@@ -749,7 +748,7 @@ const I18N_EN={
  'タッチの操作':'Touch controls','上下（上＝空中・下＝地上）':'Top / bottom (top = air, bottom = ground)','左右（左＝空中・右＝地上）':'Left / right (left = air, right = ground)',
  '空中と地上を反転':'Swap air and ground','反転しない':'Off','反転する':'On (swapped)',
  'FEVER の発動':'FEVER activation','自動（ゲージが満タンで発動）':'Automatic (when the gauge is full)','空中キーの動き':'Air key behavior','ジャンプ（少したつと着地する）':'Jump (lands after a moment)','浮遊（地上キーを押すまで空中のまま）':'Float (stay in the air until the ground key)','手動（FEVER キー・画面下のパネルで発動）':'Manual (FEVER key or the bottom panel)','端末を横向きにしてください':'Please rotate your device to landscape',
- 'ボタンを押してから割り当てたいキーを押します。Esc で取り消し、Backspace で空欄。FEVER を「手動」にしたときは、ゲージが満タンのときに FEVER キーを押すと発動します。Space（一時停止）は割り当てないでください。スマホ・タブレットは画面の上半分で空中、下半分で地上、画面下の HP・FEVER のパネルを触ると FEVER です。':'Click a button, then press the key to assign. Esc cancels, Backspace clears. With FEVER set to Manual, press the FEVER key when the gauge is full. Don’t assign Space (pause). On phones and tablets, the top half of the screen is air, the bottom half is ground, and touching the HP/FEVER panel at the bottom triggers FEVER.',
+ 'ボタンを押してから割り当てたいキーを押します。Esc で取り消し、Backspace で空欄。FEVER を「手動」にしたときは、ゲージが満タンのときに FEVER キーを押すと発動します。Space（一時停止）は割り当てないでください。スマホ・タブレットは「タッチの操作」で選んだ画面の半分ずつで空中・地上を操作し、画面下の HP・FEVER のパネルを触ると FEVER です。':'Click a button, then press the key to assign. Esc cancels, Backspace clears. With FEVER set to Manual, press the FEVER key when the gauge is full. Don’t assign Space (pause). On phones and tablets, the screen halves chosen in Touch controls are air and ground, and touching the HP/FEVER panel at the bottom triggers FEVER.',
  'リザルト':'Result','達成率':'Accuracy','PASS（歯車）':'PASS (saws)','最大コンボ':'Max combo','音符':'Notes','最終 HP':'Final HP','リトライ':'Retry','戻る':'Back','途中から':'Partial','金S':'Gold S','銀S':'Silver S',
  '← → 1 小節　↑ ↓ 5 小節（押し続けで連続）　　Space ':'← → 1 measure   ↑ ↓ 5 measures (hold to repeat)   Space: ','この小節から始める':'start from this measure','再開':'resume','　　Esc やめる':'   Esc: quit',
  ' で発動':' to activate','FEVER！（キー設定で FEVER キーを設定）':'FEVER! (set a FEVER key in Key settings)',

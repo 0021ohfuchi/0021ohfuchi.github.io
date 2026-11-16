@@ -667,7 +667,7 @@ const INV_SEC=1.2; // 被弾後の無敵時間（秒・固定）
 const SPEED_W=[0,.69,.82,.94];
 // fever：FEVER を発動するキー（FEVER は手動のみ。ゲージが満タンのときに押すと発動）
 const DEF_KEYS={air:['KeyF','KeyD'],ground:['KeyJ','KeyK'],fever:['Enter','']};
-const DEF_S={musicVol:80,seVol:70,offset:0,speed:1,dark:false,keys:JSON.parse(JSON.stringify(DEF_KEYS)),game:{...DEF_GAME}};
+const DEF_S={hitSound:'drum',/* ヒット音の初期設定はドラム */musicVol:80,seVol:70,offset:0,speed:1,dark:false,keys:JSON.parse(JSON.stringify(DEF_KEYS)),game:{...DEF_GAME}};
 // キーは空中・地上・FEVER それぞれ最大 8 個（空いた枠は ''）
 const KEY_SLOTS=8,padKeys=a=>{const r=[...(a||[])].slice(0,KEY_SLOTS);while(r.length<KEY_SLOTS)r.push('');return r};
 let S=(()=>{try{const o=JSON.parse(localStorage.getItem(SKEY)||'{}'),k=o.keys||{};return {...DEF_S,...o,game:{...DEF_GAME,...(o.game||{})},keys:{air:padKeys(k.air||DEF_KEYS.air),ground:padKeys(k.ground||DEF_KEYS.ground),fever:padKeys(k.fever||DEF_KEYS.fever)}}}catch{const d=JSON.parse(JSON.stringify(DEF_S));for(const kk in d.keys)d.keys[kk]=padKeys(d.keys[kk]);return d}})();
@@ -703,7 +703,7 @@ const I18N_EN={
  'の譜面を削除しますか？（保存すると確定します）':' chart: delete it? (Takes effect when you save)','最後の譜面は削除できません':'The last chart cannot be deleted',
  '＋作成':'+ Create','音源を差し替えました':'Audio replaced',
  '先頭へ（Home）':'To start (Home)','再生／停止（Space）':'Play / stop (Space)','スナップ':'Snap','拡大':'Zoom','再生速度':'Speed',
- '全体と同じ':'Same as global','ヒット音':'Hit sound','選ぶと、空中と地上のヒット音を続けて鳴らします。':'Choosing one plays the air and ground hit sounds.','デフォルト':'Default','クリック':'Click','ドラム':'Drum','ベル':'Bell','電子音':'Synth','分]':'th]','4分（1拍）':'1/4 (1 beat)','8分（1/2拍）':'1/8 (1/2 beat)','12分（3連）':'1/12 (triplet)','16分（1/4拍）':'1/16 (1/4 beat)','24分（6連）':'1/24 (sextuplet)','32分（1/8拍）':'1/32 (1/8 beat)','48分':'1/48','64分':'1/64','96分':'1/96','192分':'1/192',
+ '全体と同じ':'Same as global','ヒット音':'Hit sound','選ぶと、空中と地上のヒット音を続けて鳴らします。':'Choosing one plays the air and ground hit sounds.','デフォルト':'Default','ウッドブロック':'Wood block','クリック':'Click','ドラム':'Drum','ベル':'Bell','電子音':'Synth','分]':'th]','4分（1拍）':'1/4 (1 beat)','8分（1/2拍）':'1/8 (1/2 beat)','12分（3連）':'1/12 (triplet)','16分（1/4拍）':'1/16 (1/4 beat)','24分（6連）':'1/24 (sextuplet)','32分（1/8拍）':'1/32 (1/8 beat)','48分':'1/48','64分':'1/64','96分':'1/96','192分':'1/192',
  '再生中はレーンを流して、再生位置を画面の左寄りに保つ':'Scroll the lanes during playback, keeping the playhead near the left','レーンを流す':'Follow','ヒット音':'Hit sound','メトロノーム':'Metronome',
  '元に戻す（Ctrl+Z）':'Undo (Ctrl+Z)','↶ 戻す':'↶ Undo','やり直す（Ctrl+Y）':'Redo (Ctrl+Y)','↷ やり直す':'↷ Redo','譜面タイムライン':'Chart timeline','再生位置（左上の秒数と連動）':'Playhead (linked to the time at top left)','再生位置':'Playhead',
  'ノーツを置く':'Place notes','ノーツ（':'Notes (',' の見た目）':' style)','選択':'Select','消しゴム':'Eraser',
@@ -850,18 +850,16 @@ function noise(c,when,v,d,hp){if(!NOISE_BUF){NOISE_BUF=c.createBuffer(1,c.sample
   g.gain.setValueAtTime(v,when);g.gain.exponentialRampToValueAtTime(.001,when+d);s.start(when);s.stop(when+d+.02)}
 // ヒット音の種類（設定で選ぶ）。空中・地上それぞれの鳴らし方
 const HIT_SOUNDS={
- default:{name:'デフォルト',
-   air:(c,w)=>tone(c,w,'triangle',880,null,.45,.07),
-   // 地上：低い「ドン」に、小さなスピーカーでも聞こえる高めのアタック音を重ねる
-   ground:(c,w)=>{tone(c,w,'sine',230,80,.9,.11);tone(c,w,'triangle',520,260,.35,.05);noise(c,w,.12,.025,2500)}},
+ drum:{name:'デフォルト',air:(c,w)=>{noise(c,w,.45,.09,1800);tone(c,w,'triangle',330,180,.3,.05)},ground:(c,w)=>{tone(c,w,'sine',160,45,1,.15);noise(c,w,.18,.02,3000)}}, // ドラムの音（初期設定）
  click:{name:'クリック',air:(c,w)=>tone(c,w,'square',2000,null,.16,.02),ground:(c,w)=>{tone(c,w,'square',1100,null,.2,.025);tone(c,w,'sine',300,150,.4,.04)}},
- drum:{name:'ドラム',air:(c,w)=>{noise(c,w,.45,.09,1800);tone(c,w,'triangle',330,180,.3,.05)},ground:(c,w)=>{tone(c,w,'sine',160,45,1,.15);noise(c,w,.18,.02,3000)}},
+ // 木琴のような「コッ」：短い高めの音に、ごく短いアタック。空中は高く、地上は低く
+ wood:{name:'ウッドブロック',air:(c,w)=>{tone(c,w,'sine',1250,900,.55,.06);tone(c,w,'square',2500,null,.05,.01)},ground:(c,w)=>{tone(c,w,'sine',620,420,.7,.08);tone(c,w,'square',1240,null,.06,.012)}},
  bell:{name:'ベル',air:(c,w)=>{tone(c,w,'sine',1568,null,.3,.3);tone(c,w,'sine',3136,null,.08,.15)},ground:(c,w)=>{tone(c,w,'sine',784,null,.4,.3);tone(c,w,'sine',1568,null,.12,.18)}},
  synth:{name:'電子音',air:(c,w)=>tone(c,w,'sawtooth',1046,700,.18,.07),ground:(c,w)=>{tone(c,w,'sawtooth',523,260,.22,.08);tone(c,w,'square',130,null,.12,.06)}},
 };
 function se(kind,when){
   const c=ac();when=Math.max(when||0,c.currentTime);
-  if(kind==='air'||kind==='ground'){const hs=HIT_SOUNDS[S.hitSound]||HIT_SOUNDS.default;hs[kind](c,when);return}
+  if(kind==='air'||kind==='ground'){const hs=HIT_SOUNDS[S.hitSound]||HIT_SOUNDS.drum;hs[kind](c,when);return}
   const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(seGain);
   let f=880,d=.07,type='triangle',v=.45,f2=null;
   if(kind==='item'){f=1320;type='sine';v=.3;d=.12}
@@ -2808,7 +2806,7 @@ function drawPlay(t){
 // ===== 設定画面 =====
 function renderSettings(){
   $('#musicVol').value=S.musicVol;$('#musicVolVal').textContent=S.musicVol;$('#seVol').value=S.seVol;$('#seVolVal').textContent=S.seVol;
-  $('#offsetIn').value=S.offset;$('#offsetVal').textContent=S.offset+'ms';$('#speedIn').value=S.speed;$('#speedVal').textContent='×'+fmtNum(S.speed);$('#darkIn').checked=S.dark;$('#feverIn').value=S.feverAuto===false?'manual':'auto';$('#jumpModeIn').value=S.jumpMode==='float'?'float':'jump';$('#touchLayoutIn').value=S.touchLayout==='lr'?'lr':'ud';$('#touchInvertIn').value=S.touchInvert?'1':'0';$('#hitSoundIn').value=HIT_SOUNDS[S.hitSound]?S.hitSound:'default';
+  $('#offsetIn').value=S.offset;$('#offsetVal').textContent=S.offset+'ms';$('#speedIn').value=S.speed;$('#speedVal').textContent='×'+fmtNum(S.speed);$('#darkIn').checked=S.dark;$('#feverIn').value=S.feverAuto===false?'manual':'auto';$('#jumpModeIn').value=S.jumpMode==='float'?'float':'jump';$('#touchLayoutIn').value=S.touchLayout==='lr'?'lr':'ud';$('#touchInvertIn').value=S.touchInvert?'1':'0';$('#hitSoundIn').value=HIT_SOUNDS[S.hitSound]?S.hitSound:'drum';
   renderGameRows();
   const kn=c=>c?c.replace(/^Key|^Digit/,''):'（なし）';
   $('#keyRows').innerHTML=[['air','空中',0],['ground','地上',1],['fever','FEVER',2]].map(([k,n])=>`<div class="key-row"><span style="color:${k==='air'?'var(--blue-dark)':k==='ground'?'var(--red)':'#d97706'}">${n}</span><span class="key-slots">${[...Array(KEY_SLOTS).keys()].map(i=>`<button class="key-btn${KEYCAP&&KEYCAP.k===k&&KEYCAP.i===i?' wait':''}" data-k="${k}" data-i="${i}">${KEYCAP&&KEYCAP.k===k&&KEYCAP.i===i?'キーを押す…':esc(kn(S.keys[k][i]))}</button>`).join('')}</span></div>`).join('');

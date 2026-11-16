@@ -299,7 +299,7 @@ body.playing{overflow:hidden}
       <label class="vol-row"><span>音源（曲）</span><input id="musicVol" type="range" min="0" max="100" /><b id="musicVolVal"></b></label>
       <label class="vol-row"><span>効果音</span><input id="seVol" type="range" min="0" max="100" /><b id="seVolVal"></b></label>
       <label class="vol-row"><span>ヒット音</span><select id="hitSoundIn"></select><b></b></label>
-      <p class="settings-help">選ぶと、空中と地上のヒット音を続けて鳴らします。</p>
+      <p class="settings-help">選ぶと、ヒット音を試しに鳴らします（空中・地上とも同じ音）。</p>
     </section>
     <section class="card settings-card">
       <p class="eyebrow">KEY ASSIGN</p><h2>キー設定</h2>
@@ -703,7 +703,7 @@ const I18N_EN={
  'の譜面を削除しますか？（保存すると確定します）':' chart: delete it? (Takes effect when you save)','最後の譜面は削除できません':'The last chart cannot be deleted',
  '＋作成':'+ Create','音源を差し替えました':'Audio replaced',
  '先頭へ（Home）':'To start (Home)','再生／停止（Space）':'Play / stop (Space)','スナップ':'Snap','拡大':'Zoom','再生速度':'Speed',
- '全体と同じ':'Same as global','ヒット音':'Hit sound','選ぶと、空中と地上のヒット音を続けて鳴らします。':'Choosing one plays the air and ground hit sounds.','デフォルト':'Default','ウッドブロック':'Wood block','クリック':'Click','ドラム':'Drum','ベル':'Bell','電子音':'Synth','分]':'th]','4分（1拍）':'1/4 (1 beat)','8分（1/2拍）':'1/8 (1/2 beat)','12分（3連）':'1/12 (triplet)','16分（1/4拍）':'1/16 (1/4 beat)','24分（6連）':'1/24 (sextuplet)','32分（1/8拍）':'1/32 (1/8 beat)','48分':'1/48','64分':'1/64','96分':'1/96','192分':'1/192',
+ '全体と同じ':'Same as global','ヒット音':'Hit sound','選ぶと、ヒット音を試しに鳴らします（空中・地上とも同じ音）。':'Choosing one plays a preview (air and ground use the same sound).','デフォルト':'Default','ウッドブロック':'Wood block','クリック':'Click','ドラム':'Drum','ベル':'Bell','電子音':'Synth','分]':'th]','4分（1拍）':'1/4 (1 beat)','8分（1/2拍）':'1/8 (1/2 beat)','12分（3連）':'1/12 (triplet)','16分（1/4拍）':'1/16 (1/4 beat)','24分（6連）':'1/24 (sextuplet)','32分（1/8拍）':'1/32 (1/8 beat)','48分':'1/48','64分':'1/64','96分':'1/96','192分':'1/192',
  '再生中はレーンを流して、再生位置を画面の左寄りに保つ':'Scroll the lanes during playback, keeping the playhead near the left','レーンを流す':'Follow','ヒット音':'Hit sound','メトロノーム':'Metronome',
  '元に戻す（Ctrl+Z）':'Undo (Ctrl+Z)','↶ 戻す':'↶ Undo','やり直す（Ctrl+Y）':'Redo (Ctrl+Y)','↷ やり直す':'↷ Redo','譜面タイムライン':'Chart timeline','再生位置（左上の秒数と連動）':'Playhead (linked to the time at top left)','再生位置':'Playhead',
  'ノーツを置く':'Place notes','ノーツ（':'Notes (',' の見た目）':' style)','選択':'Select','消しゴム':'Eraser',
@@ -859,7 +859,7 @@ const HIT_SOUNDS={
 };
 function se(kind,when){
   const c=ac();when=Math.max(when||0,c.currentTime);
-  if(kind==='air'||kind==='ground'){const hs=HIT_SOUNDS[S.hitSound]||HIT_SOUNDS.drum;hs[kind](c,when);return}
+  if(kind==='air'||kind==='ground'){const hs=HIT_SOUNDS[S.hitSound]||HIT_SOUNDS.drum;hs.air(c,when);return} // 地上も空中と同じ音で鳴らす
   const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(seGain);
   let f=880,d=.07,type='triangle',v=.45,f2=null;
   if(kind==='item'){f=1320;type='sine';v=.3;d=.12}
@@ -2819,7 +2819,7 @@ $('#jumpModeIn').addEventListener('change',e=>{S.jumpMode=e.target.value==='floa
 $('#touchLayoutIn').addEventListener('change',e=>{S.touchLayout=e.target.value==='lr'?'lr':'ud';saveS()});
 $('#touchInvertIn').addEventListener('change',e=>{S.touchInvert=e.target.value==='1';saveS()});
 $('#hitSoundIn').innerHTML=Object.entries(HIT_SOUNDS).map(([k,h])=>`<option value="${k}">${h.name}</option>`).join('');
-$('#hitSoundIn').addEventListener('change',e=>{S.hitSound=e.target.value;saveS();const c=ac();se('air',c.currentTime+.02);se('ground',c.currentTime+.3)}); // 試し聞き
+$('#hitSoundIn').addEventListener('change',e=>{S.hitSound=e.target.value;saveS();const c=ac();se('air',c.currentTime+.02)}); // 試し聞き（空中・地上は同じ音）
 $('#offsetIn').addEventListener('input',e=>{S.offset=+e.target.value;$('#offsetVal').textContent=S.offset+'ms';saveS()});
 $('#speedIn').addEventListener('input',e=>{S.speed=+e.target.value;$('#speedVal').textContent='×'+fmtNum(S.speed);saveS()});
 $('#darkIn').addEventListener('change',e=>{S.dark=e.target.checked;document.documentElement.classList.toggle('dark',S.dark);saveS()});

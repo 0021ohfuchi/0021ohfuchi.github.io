@@ -361,6 +361,8 @@ body.playing{overflow:hidden}
     <section class="card settings-card">
       <p class="eyebrow">DISPLAY</p><h2>表示</h2>
       <label class="switch"><input type="checkbox" id="darkIn" />ダークモード</label>
+      <label class="vol-row" style="margin-top:12px"><span>プレイの画質</span><select id="qualityIn"><option value="high">高画質</option><option value="light">軽量（動きを優先）</option></select><b></b></label>
+      <p class="settings-help">軽量にすると、光のぼかし・背景のジャケット画像を省き、背景の飾りを減らして、画面の解像度を等倍にします。スマホでカクつくときに使います。</p>
     </section>
   </div>
 </section>
@@ -787,7 +789,7 @@ const I18N_EN={
  '。基本スコア':'. Base score','20×連打数（叩き切ると＋200）':'20 × hits (+200 when completed)','200×2＋0.1秒ごとに10':'200 × 2 + 10 per 0.1 s',' ・ FEVER +':' · FEVER +',
  // プレイ
  '難易度を選ぶ':'Choose difficulty','HP が 0 でも続ける':'Keep playing at 0 HP','譜面：':'Chart: ','プレイ画面':'Play screen',
- 'プレイ中でも切り替えられます（使うと自己ベストは記録されません）':'Can be toggled during play (best scores aren’t recorded if used)','↺ やり直す':'↺ Retry','−5 小節':'−5 measures','−1 小節':'−1 measure','+1 小節':'+1 measure','+5 小節':'+5 measures','▶ この小節から始める':'▶ Start from this measure','✕ やめる':'✕ Quit','操作ガイド':'Guide','変更履歴を見る':'View the changelog','変更履歴':'Changelog','最初の公開版です。':'First public release.','⏸ 一時停止':'⏸ Pause','▶ 再開':'▶ Resume','一時停止／再開（Space）':'Pause / resume (Space)','やめる（Esc）':'Quit (Esc)',
+ 'プレイ中でも切り替えられます（使うと自己ベストは記録されません）':'Can be toggled during play (best scores aren’t recorded if used)','↺ やり直す':'↺ Retry','プレイの画質':'Play quality','高画質':'High quality','軽量（動きを優先）':'Light (smoother motion)','軽量にすると、光のぼかし・背景のジャケット画像を省き、背景の飾りを減らして、画面の解像度を等倍にします。スマホでカクつくときに使います。':'Light mode skips glow blur and the cover-art background, reduces background particles and renders at 1× resolution. Use it if play stutters on a phone.','−5 小節':'−5 measures','−1 小節':'−1 measure','+1 小節':'+1 measure','+5 小節':'+5 measures','▶ この小節から始める':'▶ Start from this measure','✕ やめる':'✕ Quit','操作ガイド':'Guide','変更履歴を見る':'View the changelog','変更履歴':'Changelog','最初の公開版です。':'First public release.','⏸ 一時停止':'⏸ Pause','▶ 再開':'▶ Resume','一時停止／再開（Space）':'Pause / resume (Space)','やめる（Esc）':'Quit (Esc)',
  '空中：':'Air: ','地上：':'Ground: ','（タッチは上半分＝空中・下半分＝地上・下のパネル＝FEVER）　Esc でやめる':'  (touch: top half = air, bottom half = ground, bottom panel = FEVER)  Esc to quit',
  '（タッチは上半分＝地上・下半分＝空中・下のパネル＝FEVER）　Esc でやめる':'  (touch: top half = ground, bottom half = air, bottom panel = FEVER)  Esc to quit',
  '（タッチは左半分＝空中・右半分＝地上・下のパネル＝FEVER）　Esc でやめる':'  (touch: left half = air, right half = ground, bottom panel = FEVER)  Esc to quit',
@@ -2376,7 +2378,10 @@ const fxc=document.createElement('canvas'),fxg=fxc.getContext('2d'),mzc=document
 // ウィンドウ全体の大きさ
 // プレイ画面は常に 16:9。ウィンドウの縦横比が違うときは、収まる最大の 16:9 にして余りは黒い帯にする
 function sizePlay(){const ww=window.innerWidth,wh=window.innerHeight;PW=Math.floor(Math.min(ww,wh*16/9));PH=Math.floor(PW*9/16);
-  const dpr=Math.min(2,window.devicePixelRatio||1);/* 高解像度の画面でも 2 倍までに抑える（描く画素数を減らす） */pc.width=Math.round(PW*dpr);pc.height=Math.round(PH*dpr);pc.style.width=PW+'px';pc.style.height=PH+'px';pg.setTransform(dpr,0,0,dpr,0,0);fxc.width=pc.width;fxc.height=pc.height}
+  const light=lightMode(),dpr=light?1:Math.min(2,window.devicePixelRatio||1);/* 高解像度の画面でも 2 倍までに抑える（描く画素数を減らす）。軽量のときは等倍 */
+  // 軽量：プレイ画面のぼかしの光（shadowBlur）を描かない。スマホではいちばん重い処理なので、この canvas だけ設定を無視させる
+  if(light)Object.defineProperty(pg,'shadowBlur',{configurable:true,get(){return 0},set(){}});else delete pg.shadowBlur;
+  BG_CACHE.key='';pc.width=Math.round(PW*dpr);pc.height=Math.round(PH*dpr);pc.style.width=PW+'px';pc.style.height=PH+'px';pg.setTransform(dpr,0,0,dpr,0,0);fxc.width=pc.width;fxc.height=pc.height}
 function buildPlayNotes(chart,tm,from){
   const p0=clampSpeed(chart.player||1),sp=[[{t:-1e9,lv:p0}],[{t:-1e9,lv:p0}]];
   for(const it of chart.items){if(it.k!=='e')continue;const d=DEF[it.v];if(!d||d.sub!=='speed')continue;const t=tm.timeOf(it.b);if(d.lanes!=='low')sp[0].push({t,lv:d.lv});if(d.lanes!=='high')sp[1].push({t,lv:d.lv})}
@@ -2742,15 +2747,23 @@ $('#rBack').addEventListener('click',()=>{$('#resultDlg').close();stopPlay(true)
 const SCENE_BG={scene_01:['#0b1026','#1e1b4b','#93c5fd'],scene_02:['#2e1065','#701a75','#f0abfc'],scene_03:['#1c0a0a','#4c0519','#fca5a5'],scene_04:['#020617','#1e3a5f','#7dd3fc'],
   scene_05:['#831843','#db2777','#fff1f2'],scene_06:['#3f0d0d','#7c2d12','#fcd34d'],scene_07:['#030712','#111827','#22d3ee'],scene_08:['#1e1033','#4c1d95','#e9d5ff'],
   scene_09:['#042f2e','#134e4a','#5eead4'],scene_10:['#1f2937','#374151','#e5e7eb']};
+const BG_CACHE={key:'',cv:null};
+// プレイの画質：高画質（初期設定。スマホ・タブレットも）／軽量。以前の「自動」の設定は高画質として扱う
+function lightMode(){return S.quality==='light'}
 function drawBg(g,W,H,t){
   const fx=P.fx;
   if(fx.hideBg){g.fillStyle='#000';g.fillRect(0,0,W,H);return}
-  const [c1,c2,ac]=SCENE_BG[fx.scene]||SCENE_BG.scene_10;
-  const grd=g.createLinearGradient(0,0,0,H);grd.addColorStop(0,c1);grd.addColorStop(1,c2);g.fillStyle=grd;g.fillRect(0,0,W,H);
-  if(P.cover){const im=P.cover,sc=Math.max(W/im.width,H/im.height);g.globalAlpha=.12;g.drawImage(im,(W-im.width*sc)/2,(H-im.height*sc)/2,im.width*sc,im.height*sc);g.globalAlpha=1}
-  // 流れる飾り（背景停止で止まる・画面スクロールで縦に流れる）
+  const [c1,c2,ac]=SCENE_BG[fx.scene]||SCENE_BG.scene_10,light=lightMode();
+  // グラデーションとジャケット画像は、シーン・大きさが変わったときだけ別の canvas に描いておき、毎フレームは 1 回貼るだけにする
+  const key=fx.scene+'|'+pc.width+'x'+pc.height+'|'+(P.cover&&!light?1:0);
+  if(BG_CACHE.key!==key){const c=BG_CACHE.cv||(BG_CACHE.cv=document.createElement('canvas'));c.width=pc.width;c.height=pc.height;const b=c.getContext('2d'),k=pc.width/W;b.setTransform(k,0,0,k,0,0);
+    const grd=b.createLinearGradient(0,0,0,H);grd.addColorStop(0,c1);grd.addColorStop(1,c2);b.fillStyle=grd;b.fillRect(0,0,W,H);
+    if(P.cover&&!light){const im=P.cover,sc=Math.max(W/im.width,H/im.height);b.globalAlpha=.12;b.drawImage(im,(W-im.width*sc)/2,(H-im.height*sc)/2,im.width*sc,im.height*sc)}
+    BG_CACHE.key=key}
+  g.drawImage(BG_CACHE.cv,0,0,W,H);
+  // 流れる飾り（背景停止で止まる・画面スクロールで縦に流れる）。軽量のときは数を減らす
   const p=P.bgPos,rain=fx.scene==='scene_04';g.fillStyle=ac;g.strokeStyle=ac;
-  for(let i=0;i<46;i++){
+  for(let i=0,N=light?16:46;i<N;i++){
     const r1=(i*9301+49297)%233280/233280,r2=(i*4096+150889)%714025/714025,sp=30+r1*90;
     let x=r1*W,y=r2*H;
     if(fx.scroll==='up')y=((y-p*sp)%H+H)%H;else if(fx.scroll==='down')y=((y+p*sp)%H+H)%H;else x=((x-p*sp*2)%W+W)%W;
@@ -2966,6 +2979,8 @@ $('#hitSoundIn').addEventListener('change',e=>{S.hitSound=e.target.value;saveS()
 $('#offsetIn').addEventListener('input',e=>{S.offset=+e.target.value;$('#offsetVal').textContent=S.offset+'ms';saveS()});
 $('#speedIn').addEventListener('input',e=>{S.speed=+e.target.value;$('#speedVal').textContent='×'+fmtNum(S.speed);saveS()});
 $('#darkIn').addEventListener('change',e=>{S.dark=e.target.checked;document.documentElement.classList.toggle('dark',S.dark);saveS()});
+$('#qualityIn').value=S.quality==='light'?'light':'high';
+$('#qualityIn').addEventListener('change',e=>{S.quality=e.target.value;saveS()});
 $('#keyRows').addEventListener('click',e=>{const b=e.target.closest('.key-btn');if(!b)return;KEYCAP={k:b.dataset.k,i:+b.dataset.i};renderSettings()});
 function captureKey(e){
   const {k,i}=KEYCAP;

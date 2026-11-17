@@ -155,6 +155,14 @@ dialog::backdrop{background:#0f172a99}
 /* プレイ画面はウィンドウ全体に表示（ボタン類は下の中央に小さく重ねる） */
 #playPage{position:fixed;inset:0;z-index:60;background:#000;display:flex;align-items:center;justify-content:center}
 #playPage[hidden]{display:none!important}
+/* 一時停止中のボタン（キャンバスの上に重ねる。位置は JS でキャンバスに合わせる） */
+#pauseBtns{position:absolute;z-index:3;display:flex;flex-direction:column;align-items:center;gap:10px;transform:translateX(-50%)}
+#pauseBtns[hidden]{display:none}
+#pauseBtns .pb-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#pauseBtns button{min-width:84px;min-height:44px;padding:8px 14px;border-radius:12px;border:2px solid #94a3b8;background:#1e293bdd;color:#fff;font-weight:900;font-size:15px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#pauseBtns button:active{transform:translateY(2px)}
+#pauseBtns .pb-main{background:#db2777;border-color:#fbcfe8;min-width:200px}
+#pauseBtns .pb-quit{background:#334155}
 /* 指で操作する端末を縦向きで持っているときは、横向きにするよう案内する（横向きに固定できない端末向け） */
 #rotateHint{display:none;position:absolute;inset:0;z-index:5;background:#0f172af2;color:#fff;font-size:22px;font-weight:900;text-align:center;align-items:center;justify-content:center;line-height:1.8}
 @media (pointer:coarse) and (orientation:portrait){#rotateHint{display:flex}}
@@ -305,6 +313,11 @@ body.playing{overflow:hidden}
     <button class="btn" id="playQuit">やめる（Esc）</button>
   </div>
   <canvas id="playCanvas" aria-label="プレイ画面"></canvas>
+  <!-- 一時停止中のボタン（タッチでも操作できるように）：小節の移動・再開・やめる -->
+  <div id="pauseBtns" hidden>
+    <div class="pb-row"><button data-seek="-5">−5 小節</button><button data-seek="-1">−1 小節</button><button data-seek="1">+1 小節</button><button data-seek="5">+5 小節</button></div>
+    <div class="pb-row"><button class="pb-main" id="pbResume">▶ 再開</button><button class="pb-quit" id="pbQuit">✕ やめる</button></div>
+  </div>
   <div id="rotateHint">📱↻<br>端末を横向きにしてください</div>
   <p class="play-help" id="playHelp"></p>
 </section>
@@ -400,7 +413,7 @@ body.playing{overflow:hidden}
 <dialog id="changelogDlg" aria-label="変更履歴">
   <div class="dlg-head"><h2>変更履歴</h2><button data-close aria-label="閉じる">✕</button></div>
   <div class="dlg-body changelog">
-    <section><h3 data-notr>Ver.1.0.0（2026-11-17）</h3>
+    <section><h3 data-notr>Ver.1.0.0（2026-11-18）</h3>
       <ul><li>最初の公開版です。</li></ul></section>
   </div>
 </dialog>
@@ -774,7 +787,7 @@ const I18N_EN={
  '。基本スコア':'. Base score','20×連打数（叩き切ると＋200）':'20 × hits (+200 when completed)','200×2＋0.1秒ごとに10':'200 × 2 + 10 per 0.1 s',' ・ FEVER +':' · FEVER +',
  // プレイ
  '難易度を選ぶ':'Choose difficulty','HP が 0 でも続ける':'Keep playing at 0 HP','譜面：':'Chart: ','プレイ画面':'Play screen',
- 'プレイ中でも切り替えられます（使うと自己ベストは記録されません）':'Can be toggled during play (best scores aren’t recorded if used)','↺ やり直す':'↺ Retry','操作ガイド':'Guide','変更履歴を見る':'View the changelog','変更履歴':'Changelog','最初の公開版です。':'First public release.','⏸ 一時停止':'⏸ Pause','▶ 再開':'▶ Resume','一時停止／再開（Space）':'Pause / resume (Space)','やめる（Esc）':'Quit (Esc)',
+ 'プレイ中でも切り替えられます（使うと自己ベストは記録されません）':'Can be toggled during play (best scores aren’t recorded if used)','↺ やり直す':'↺ Retry','−5 小節':'−5 measures','−1 小節':'−1 measure','+1 小節':'+1 measure','+5 小節':'+5 measures','▶ この小節から始める':'▶ Start from this measure','✕ やめる':'✕ Quit','操作ガイド':'Guide','変更履歴を見る':'View the changelog','変更履歴':'Changelog','最初の公開版です。':'First public release.','⏸ 一時停止':'⏸ Pause','▶ 再開':'▶ Resume','一時停止／再開（Space）':'Pause / resume (Space)','やめる（Esc）':'Quit (Esc)',
  '空中：':'Air: ','地上：':'Ground: ','（タッチは上半分＝空中・下半分＝地上・下のパネル＝FEVER）　Esc でやめる':'  (touch: top half = air, bottom half = ground, bottom panel = FEVER)  Esc to quit',
  '（タッチは上半分＝地上・下半分＝空中・下のパネル＝FEVER）　Esc でやめる':'  (touch: top half = ground, bottom half = air, bottom panel = FEVER)  Esc to quit',
  '（タッチは左半分＝空中・右半分＝地上・下のパネル＝FEVER）　Esc でやめる':'  (touch: left half = air, right half = ground, bottom panel = FEVER)  Esc to quit',
@@ -2454,11 +2467,21 @@ async function startPlay(song,key,opt={}){
   Transport.start(buf,from-1.5,1,musicT0(chart,tm));
   requestAnimationFrame(playLoop);
 }
-function stopPlay(back){P.running=false;Transport.stop();if(back)showPage(P.opt&&P.opt.returnTo==='editor'?'editor':'library')}
+function stopPlay(back){P.running=false;stopSeekRepeat();$('#pauseBtns').hidden=true;Transport.stop();if(back)showPage(P.opt&&P.opt.returnTo==='editor'?'editor':'library')}
 $('#playQuit').addEventListener('click',()=>stopPlay(true));
 // 一時停止ボタン（スマホ・タブレットでも止められるように）。押したあとはフォーカスを外し、Space キーと二重に動かないようにする
 $('#playPause').addEventListener('click',e=>{e.currentTarget.blur();if(!P.running)return;P.paused?resumePlay():pausePlay()});
-function updPauseBtn(){const b=$('#playPause');if(b)b.textContent=P.paused?'▶ 再開':'⏸ 一時停止'}
+function updPauseBtn(){const b=$('#playPause');if(b)b.textContent=P.paused?'▶ 再開':'⏸ 一時停止';$('#pauseBtns').hidden=!(P.paused&&P.running);if(P.paused)placePauseBtns()}
+// 一時停止中のボタン：キャンバスの下のほう（PAUSE の文字・バーの下）に置く
+function placePauseBtns(){const box=$('#pauseBtns'),r=pc.getBoundingClientRect(),pr=$('#playPage').getBoundingClientRect();if(!r.width)return;
+  const L=(r.left-pr.left+r.width/2)+'px',T=(r.top-pr.top+r.height*.6)+'px';if(box.style.left!==L)box.style.left=L;if(box.style.top!==T)box.style.top=T;
+  const moved=Math.abs(P.seekT-P.pauseT)>1e-3,txt=moved?'▶ この小節から始める':'▶ 再開',rb=$('#pbResume');if(rb.textContent!==txt)rb.textContent=txt}
+// 小節移動のボタン：押すと 1 回動き、押し続けると連続で動く（矢印キーと同じ）
+for(const b of $$('#pauseBtns [data-seek]')){const code='btn'+b.dataset.seek,n=+b.dataset.seek;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();if(!P.paused)return;startSeekRepeat(code,n)});
+  for(const ev of ['pointerup','pointerleave','pointercancel'])b.addEventListener(ev,()=>stopSeekRepeat(code))}
+$('#pbResume').addEventListener('click',e=>{e.currentTarget.blur();resumePlay()});
+$('#pbQuit').addEventListener('click',()=>stopPlay(true));
 $('#playRetry').addEventListener('click',()=>{stopPlay(false);startPlay(P.song,P.key,P.opt)});
 function keyLane(code){if(S.keys.air.includes(code))return 0;if(S.keys.ground.includes(code))return 1;return null}
 function playKey(e,down){
@@ -2688,7 +2711,8 @@ function drawPauseOverlay(){
   const mm=Math.floor(P.seekT/60),ss=(P.seekT%60).toFixed(1).padStart(4,'0');
   g.font=`800 ${H*.045}px system-ui`;g.fillStyle=moved?'#fde047':'#e2e8f0';g.fillText(`小節 ${String(m).padStart(3,'0')}　${mm}:${ss}`,W/2,H*.48);
   const bw=W*.5,bx=(W-bw)/2,by=H*.56,fr=clamp(P.seekT/Math.max(1,P.endT),0,1);g.fillStyle='#ffffff30';g.fillRect(bx,by,bw,H*.012);g.fillStyle=moved?'#fde047':'#f472b6';g.fillRect(bx,by,bw*fr,H*.012);
-  g.font=`700 ${H*.03}px system-ui`;g.fillStyle='#cbd5e1';g.fillText('← → 1 小節　↑ ↓ 5 小節（押し続けで連続）　　Space '+(moved?'この小節から始める':'再開')+'　　Esc やめる',W/2,H*.65);
+  g.font=`700 ${H*.028}px system-ui`;g.fillStyle='#cbd5e1';g.fillText('← → 1 小節　↑ ↓ 5 小節（押し続けで連続）　　Space '+(moved?'この小節から始める':'再開')+'　　Esc やめる',W/2,H*.25);
+  placePauseBtns(); // ボタンの位置と「再開／この小節から始める」の表示を合わせる
 }
 function playLoop(){
   if(!P.running)return;

@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#8fd3ff">
 <title>そらのぼり</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Shippori+Mincho+B1:wght@600;800&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#26232b;--paper:#fffdf6;--sky:#8fd3ff;--orange:#ffb347;--green:#7ee08a;--blue:#8fd3ff;--pink:#ff9fc0;--yellow:#ffe066}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -91,6 +91,59 @@ button{font-family:inherit}
 .howto kbd{display:inline-block;border:2px solid var(--ink);border-radius:6px;padding:0 5px;font-family:inherit;font-weight:800;font-size:12px;background:#fff}
 .setrow{display:flex;justify-content:space-between;align-items:center;width:100%;font-weight:800;gap:10px}
 .note{font-size:12px!important;opacity:.75}
+/* ===== 硬派テーマ（上の指定を上書き） ===== */
+:root{--ink:#0e0e10;--paper:#16161a;--line:#cfc8b8;--blood:#8a2a22}
+html,body{background:#050506;font-family:'Shippori Mincho B1','Hiragino Mincho ProN','Yu Mincho',serif;color:#e4ded0}
+#app{background:#0b0b0d}
+#bgc{filter:saturate(.35) brightness(.62) contrast(1.1)}
+#gl{filter:saturate(.62) contrast(1.1) brightness(.92)}
+.world canvas{filter:saturate(.25) brightness(.5) contrast(1.1)}
+#scr-title{background:radial-gradient(ellipse at 50% 30%,rgba(0,0,0,0) 0,rgba(0,0,0,.55) 70%),linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.6))}
+.logo{animation:none}
+.logo-main{font-size:clamp(46px,15vw,76px);font-weight:800;color:#ece6d8;-webkit-text-stroke:0;text-shadow:0 2px 18px rgba(0,0,0,.8);letter-spacing:.18em}
+.logo-main span{color:inherit}
+.logo-sub{background:none;color:#a39d90;font-size:11px;letter-spacing:.5em;border-top:1px solid #6b665c;border-radius:0;padding:8px 0 0;margin-top:14px}
+.appeal{gap:4px;margin-top:22px}
+.appeal div,.appeal div:nth-child(n){background:none;border:0;transform:none;color:#cfc8b8;font-weight:600;font-size:14px;letter-spacing:.2em;text-shadow:0 1px 6px #000}
+.btn,.btn.orange,.btn.green,.btn.blue,.btn.pink,.btn.gray,.btn.yellow{background:rgba(12,12,14,.82);color:#e8e2d4;border:1px solid #8d877a;border-radius:2px;box-shadow:none;font-weight:600;letter-spacing:.3em}
+.btn.orange,.btn.green{border-color:#e8e2d4}
+.btn.pink{border-color:var(--blood);color:#e9b9b2}
+.btn:active,.btn.small:active{transform:none;background:#2a2824;box-shadow:none}
+.btn.small{border-radius:2px;box-shadow:none;letter-spacing:.15em}
+.modal{background:rgba(0,0,0,.72)}
+.card{background:#121214;border:1px solid #57534b;border-radius:2px;box-shadow:0 20px 60px #000;color:#e4ded0;animation:none}
+.card h2{font-weight:800;letter-spacing:.25em}
+.tag{color:#a39d90;border:1px solid #57534b;border-radius:0;background:none!important;letter-spacing:.2em}
+.mode{background:#18181b;border:1px solid #57534b;border-radius:2px;box-shadow:none;color:#e4ded0}
+.mode.sel{background:#2c2a26;border-color:#e8e2d4;transform:none;box-shadow:none}
+.mode.hard.sel{background:#3a1714;border-color:#c0574c}
+.clear-title{color:#ece6d8;-webkit-text-stroke:0;text-shadow:none;letter-spacing:.4em;font-size:44px}
+.ctime{font-weight:600;letter-spacing:.08em}
+.newrec{background:none;border:1px solid #c9a24a;color:#e3c27a;border-radius:0;animation:none}
+.unlock{background:none;border:1px solid var(--blood);color:#e9b9b2;border-radius:0}
+.ibtn{background:#18181b;border:1px solid #57534b;border-radius:2px;box-shadow:none;color:#e4ded0;font-weight:600}
+.ibtn.go,.ibtn.y{background:#18181b;border-color:#cfc8b8}
+.ibtn:active{transform:none;background:#2a2824;box-shadow:none}
+.ibtn svg path,.ibtn svg rect,.iconbtn svg path,.iconbtn svg rect{fill:#e4ded0;stroke:#e4ded0}
+.ibtn svg path[fill="none"],.iconbtn svg path[fill="none"]{fill:none}
+.iconbtn,#pauseBtn{background:rgba(12,12,14,.7);border:1px solid #8d877a;box-shadow:none}
+.howto h3{border-left:2px solid var(--blood);letter-spacing:.2em}
+.howto kbd{background:#222;color:#e4ded0;border:1px solid #57534b;border-radius:2px}
+#scr-map{background:#000}
+.mapbar{background:linear-gradient(#000,#0000)}
+.maptitle{text-shadow:none;letter-spacing:.3em;font-weight:600}
+.pill{background:none;color:#cfc8b8;border:1px solid #57534b;border-radius:0}
+.wbanner{background:rgba(0,0,0,.6)!important;color:#ece6d8;border:1px solid #6b665c;border-radius:0;box-shadow:none;letter-spacing:.35em;font-weight:600}
+.wbanner small{opacity:.6}
+.node{background:#151517;color:#e4ded0;border:1px solid #cfc8b8;box-shadow:0 0 0 4px rgba(0,0,0,.5);font-weight:600;border-radius:50%}
+.node:active{transform:none;box-shadow:none}
+.node.locked{background:#0c0c0d;color:#55524c;border-color:#3a3833}
+.node.locked svg rect,.node.locked svg path{fill:#55524c;stroke:#55524c}
+.node.locked svg path[fill="none"]{fill:none}
+.node.ex{background:#1e0e0c;color:#e9b9b2;border-color:var(--blood)}
+.node.ex.locked{background:#0c0c0d;color:#55524c;border-color:#3a3833}
+.node.cur{animation:none;box-shadow:0 0 0 4px rgba(0,0,0,.5),0 0 18px rgba(236,230,216,.45)}
+.node .st{color:#3d3a35}.node .st .on{color:#cfc8b8}.node .st .h{color:#c0574c}
 </style>
 </head>
 <body>
@@ -102,23 +155,22 @@ button{font-family:inherit}
 
   <div id="scr-title" class="screen">
     <div>
-      <div class="logo"><div class="logo-main">そら<span>の</span>ぼり</div><div class="logo-sub">SKY CLIMB ACTION</div></div>
+      <div class="logo"><div class="logo-main">空登り</div><div class="logo-sub">S O R A N O B O R I</div></div>
       <div class="appeal">
-        <div>とにかく登れ！落ちないようにゴールを目指そう</div>
-        <div>行く手を阻む 数々の障害物</div>
-        <div>ふたりで 協力 &amp; 対戦！</div>
+        <div>中継地点は、ない。</div>
+        <div>落ちた分は、登りなおせ。</div>
       </div>
     </div>
     <div class="menu">
-      <button class="btn orange big" data-act="solo">ひとりで あそぶ</button>
-      <button class="btn blue" data-act="duo">ふたりで あそぶ</button>
-      <div class="row"><button class="btn small" data-act="howto">あそびかた</button><button class="btn small" data-act="settings">せってい</button></div>
+      <button class="btn orange big" data-act="solo">一人で登る</button>
+      <button class="btn blue" data-act="duo">二人で登る</button>
+      <div class="row"><button class="btn small" data-act="howto">心得</button><button class="btn small" data-act="settings">設定</button></div>
     </div>
   </div>
 
   <div id="scr-map" class="screen hidden">
     <div id="mapScroll"></div>
-    <div class="mapbar"><button class="iconbtn" data-act="home" aria-label="ホーム" id="mapHome"></button><div class="maptitle">ワールドマップ</div><div id="mapMode" class="pill"></div></div>
+    <div class="mapbar"><button class="iconbtn" data-act="home" aria-label="ホーム" id="mapHome"></button><div class="maptitle">山行図</div><div id="mapMode" class="pill"></div></div>
   </div>
 
   <div id="modal" class="modal hidden"><div class="card" id="modalCard"></div></div>
@@ -145,7 +197,7 @@ const BOUNCE_V = Math.sqrt(2 * G * 165);
 const LADDER_V = 125;
 const STEP = 1 / 120;
 const OUT = '#26232b', EDGE = 'rgba(28,24,34,.85)';
-const FONT = '"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif';
+const FONT = '"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif';
 
 // ---------- 汎用 ----------
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -238,12 +290,12 @@ const REACH = (() => {
 
 // ---------- ワールド / ステージ ----------
 const WORLDS = [
-  { name: 'まちなか', en: 'CITY', theme: 'city', col: '#ffb07a', names: ['じてんしゃ通り', '立体駐車場', 'ビルの谷間', '摩天楼のてっぺん'], ex: 'メトロポリス・ハイ' },
-  { name: 'やま', en: 'MOUNTAIN', theme: 'mountain', col: '#8fe07a', names: ['そよかぜ草原', 'ヤギの岩場', '大樹の森', '切り立つ峰'], ex: '魔の絶壁' },
-  { name: 'いせき', en: 'RUINS', theme: 'ruins', col: '#f0cf80', names: ['わすれられた神殿', '石像の回廊', 'まわる石盤', '幻獣の空'], ex: '天空神殿' },
-  { name: 'こおり', en: 'ICE', theme: 'ice', col: '#a8e6ff', names: ['つるつる氷原', 'シロクマの群れ', '氷山の迷路', 'オーロラの頂'], ex: '絶対零度' },
-  { name: 'ゲームのせかい', en: 'GAME', theme: 'game', col: '#d2a8ff', names: ['ブロックワールド', 'くずれる足場', 'ジャンプ台パーク', 'アスレチック城'], ex: 'バグった世界' },
-  { name: 'ぜんぶ', en: 'ALL', theme: 'mix', col: '#ff9fc0', names: ['ふりかえりの道', 'ごちゃまぜ大地', '宇宙エレベーター', 'そらのてっぺん'], ex: 'むげんの塔' },
+  { name: '廃都', en: 'RUINED CITY', theme: 'city', col: '#8a7f74', names: ['瓦礫の路地', '錆びた駐車塔', 'ビルの谷底', '摩天楼の先端'], ex: '鉄骨の墓場' },
+  { name: '岩峰', en: 'CRAGS', theme: 'mountain', col: '#6f7a62', names: ['風の斜面', '山羊の岩棚', '倒木の森', '切り立つ峰'], ex: '魔の絶壁' },
+  { name: '遺跡', en: 'RUINS', theme: 'ruins', col: '#8f7f5e', names: ['忘却の神殿', '石像の回廊', '崩れる石盤', '幻獣の空'], ex: '天空神殿' },
+  { name: '氷壁', en: 'ICE WALL', theme: 'ice', col: '#6f8a9c', names: ['凍てつく原', '白熊の群れ', '氷山の迷宮', '極光の頂'], ex: '絶対零度' },
+  { name: '電脳', en: 'CONSTRUCT', theme: 'game', col: '#6e6585', names: ['ブロックの残骸', '崩落地帯', '跳躍台の墓場', '鉄の城砦'], ex: '壊れた世界' },
+  { name: '終端', en: 'THE END', theme: 'mix', col: '#7d5f66', names: ['回想の道', '混沌の大地', '軌道昇降機', '空の果て'], ex: '無限の塔' },
 ];
 const STAGES = [];
 WORLDS.forEach((W, w) => {
@@ -318,36 +370,36 @@ const CLUSTER_KINDS = ['mesa', 'ramp', 'steps', 'roof', 'pile', 'junk'];
 const WALKER_DIM = { goat: [72, 30], bear: [96, 36], griffin: [90, 24], van: [140, 48], mover: [90, 18], ufo: [100, 22], astronaut: [80, 24] };
 const GROUND_OF = { city: 'city', mountain: 'meadow', ruins: 'sand', ice: 'snow', game: 'blocks', mix: 'meadow' };
 const HINTS = {
-  first: '◀ ▶ でいどう\nJUMP でジャンプ！',
-  double: 'ジャンプ中に もう一度 JUMP\nで 2段ジャンプ！',
-  dash: 'とどかない時は\n2段ジャンプ ＋ 空中DASH！',
-  ladder: 'はしごは JUMP を\n長押しで のぼる',
-  cp: 'チェックポイント！\n落ちても ここから再開',
-  moverH: 'うごく足場に のろう',
-  moverV: 'エレベーターで 上へ！',
-  walker: 'いきものの せなかにも\n乗れるよ！',
-  orbit: 'まわる足場は\nタイミングが だいじ',
-  rotor: 'かたむく足場に\n気をつけて！',
-  spinner: '回転バーに当たると\nはじかれる！',
-  crumble: '乗ると くずれる！\nいそげ！',
-  fall: '乗ると 落ちる足場！',
-  bounce: 'バネで 大ジャンプ！',
-  ice: '氷の上は つるつる\n坂だと すべり落ちる',
+  first: '◀ ▶ 移動　JUMP 跳躍\n落ちた分は、登りなおせ。',
+  double: '空中でもう一度 JUMP\n二段目は半分の高さ',
+  dash: '届かぬ距離は\n二段跳躍の頂点で DASH',
+  ladder: 'JUMP 長押しで登る',
+  moverH: '動く足場',
+  moverV: '昇降機',
+  walker: '獣の背にも立てる',
+  orbit: '回る足場　機を待て',
+  rotor: '傾く足場',
+  spinner: '回転する棒\n触れれば弾かれる',
+  crumble: '乗れば崩れる',
+  fall: '乗れば落ちる',
+  bounce: '跳ね台',
+  ice: '氷は滑る\n坂では止まれない',
 };
-const HINT_STAGES = { '1-1': ['first', 'double', 'dash', 'ladder', 'cp'], '1-2': ['moverV', 'moverH', 'spinner'], '1-4': ['rotor'], '2-1': ['walker', 'crumble', 'rotor'], '3-1': ['orbit', 'spinner', 'walker', 'rotor'], '4-1': ['ice', 'walker'], '5-1': ['crumble', 'fall', 'bounce'] };
+const HINT_STAGES = { '1-1': ['first', 'double', 'dash', 'ladder'], '1-2': ['moverV', 'moverH', 'spinner'], '1-4': ['rotor'], '2-1': ['walker', 'crumble', 'rotor'], '3-1': ['orbit', 'spinner', 'walker', 'rotor'], '4-1': ['ice', 'walker'], '5-1': ['crumble', 'fall', 'bounce'] };
 
 // =========================================================
 //  ステージ生成
 // =========================================================
+function genStageHeight(st) { return st.ex ? 4600 + st.w * 260 : Math.round(2000 + (st.w * 4 + st.s) * 110); }
 function genStage(st) {
   const W = WORLDS[st.w], flav = FLAVOR[st.id] || {};
   const rng = mulberry32(hashStr('sora2-' + st.id));
   const R = (a, b) => a + (b - a) * rng();
   const RI = (a, b) => Math.floor(a + (b - a + 1) * rng());
   const ord = st.w * 4 + st.s;
-  // 1-1 でも以前の最難関(6-EX)程度、そこからさらに上がっていく
-  const d = st.ex ? clamp(0.3 + st.w * 0.14, 0, 1) : clamp(ord / 23 * 0.8, 0, 0.8);
-  const height = st.ex ? 3700 + st.w * 200 : Math.round(1500 + ord * 85);
+  // 無慈悲：1-1 から到達距離ぎりぎり、後半は余裕ゼロ
+  const d = st.ex ? clamp(0.62 + st.w * 0.076, 0, 1) : clamp(0.45 + ord / 23 * 0.5, 0, 0.95);
+  const height = genStageHeight(st);
   const wide = !!flav.wide, bound = wide ? 1400 : 500;
   const theme = W.theme;
   const S = {
@@ -356,7 +408,10 @@ function genStage(st) {
     iceRate: flav.ice != null ? flav.ice : ((theme === 'ice' || theme === 'mix') ? 0.5 : 0),
     groundTheme: GROUND_OF[theme], fallbacks: 0, mc: {},
   };
-  const maxTilt = lerp(0.22, 0.55, d), tiltProb = lerp(0.65, 0.95, d), dashProb = lerp(0.45, 0.75, d), slack = lerp(32, 16, d);
+  // slack: 到達距離からの余裕(px)。キャラの幅ぶん(約20px)の足場ののりしろは別にある
+  const maxTilt = lerp(0.4, 0.62, d), tiltProb = 0.95, dashProb = lerp(0.7, 0.95, d), slack = lerp(12, 3, d);
+  const tight = () => 1 - Math.pow(rng(), lerp(2.5, 5, d));   // 1 に寄った乱数（最大距離ぎりぎりに寄せる）
+  const shrink = lerp(0.82, 0.6, d);
   let weights = Object.assign({}, BASEW[theme], flav.w || {});
   if (st.ex) ['spinner', 'crumble', 'fall', 'orbit', 'rotor'].forEach(k => { if (weights[k]) weights[k] *= 1.4; });
   const bounds = [], corrs = [];
@@ -467,7 +522,8 @@ function genStage(st) {
       if (!list.length) list = TD[th].skins;
       k = list[Math.floor(rng() * list.length)];
     }
-    return { skin: k[0], w: Math.round(R(k[1], k[2])), h: Math.round(R(k[3], k[4])), tiltMul: k[5], ice: !!ICE_SKINS[k[0]] };
+    const sw = Math.max(46, Math.round(R(k[1], k[2]) * (k[0] === 'star' || k[0] === 'bike' ? 1 : shrink)));
+    return { skin: k[0], w: sw, h: Math.round(R(k[3], k[4])), tiltMul: k[5], ice: !!ICE_SKINS[k[0]] };
   }
   // 足場 cur の端から、到達可能な位置に次の足場を置く
   // sk = 単体の足場 {skin,w,h,...} または 複合地形 {cluster}
@@ -490,13 +546,13 @@ function genStage(st) {
     if (o.gap != null) gap = o.gap;
     else if (o.heap) {
       const cb = aabbOf(cur), E = dir > 0 ? cb.x + cb.w : cb.x;
-      gap = Math.abs(E - L.x) + R(2, 14);
+      gap = Math.abs(E - L.x) + R(2, 14) + d * R(10, 40);
       if (gap > REACH.n.at(dy) - slack) return null;
     } else {
-      const gMin = Math.max(needDash ? REACH.n.at(dy) + 14 : 26, o.gapMin || 0);
+      const gMin = Math.max(needDash ? REACH.n.at(dy) + 24 : 40, o.gapMin || 0);
       const gMax = tab.at(dy) - slack;
       if (gMax < gMin) return null;
-      gap = R(gMin, gMax);
+      gap = lerp(gMin, gMax, tight());
     }
     const acx = L.x + dir * (gap + ahw), acy = L.y - dy + ahh;
     let plats, next;
@@ -657,9 +713,9 @@ function genStage(st) {
     heap: { heapC: 6, hop: 0.6 },
     gaps: { gapC: 3, hop: 3 },
     gimmick: gimmickW,
-    climb: { towerC: 3, ladder: 1 + (weights.ladder || 0), bounce: weights.bounce ? 1 : 0, moverV: weights.moverV ? 1 : 0 },
+    climb: { towerC: 3, ladder: 0.3, bounce: weights.bounce ? 1 : 0, moverV: weights.moverV ? 1 : 0 },
   };
-  const SECT = { heap: 3, gaps: 3, gimmick: 2.4, climb: 1.2 };
+  const SECT = { heap: 1.4, gaps: 4, gimmick: 3, climb: 1 };
   let sec = 'heap', secLeft = RI(4, 6);
   S.sections = [];
   const pickType = last => pickFrom(SECW[sec], last);
@@ -744,7 +800,7 @@ function genStage(st) {
     if (hintList.includes('first')) S.signs.push({ x: -dir * 80, y: 0, text: HINTS.first });
     hint('double', cur);
   }
-  const nCp = st.ex ? 0 : Math.max(1, Math.round(height / 800));
+  const nCp = 0;   // チェックポイントはない
   const cpAt = []; for (let i = 0; i < nCp; i++) cpAt.push(height * (i + 1) / (nCp + 1));
   let cpi = 0, step = 0, last = '';
   const addCp = P => { S.cps.push({ x: P.x + P.w / 2, y: P.y, plat: P }); cpi++; };
@@ -759,7 +815,7 @@ function genStage(st) {
       const cb = aabbOf(cur), cx = cb.x + cb.w / 2;
       if (cx > bound && dir > 0) { dir = -1; turning = true; } else if (cx < -bound && dir < 0) { dir = 1; turning = true; } else if (att > 0 && att % 6 === 0) dir = -dir;
       // 折り返しで行き詰まったら はしご・エレベーター・バネで高度を稼ぐ
-      const escT = turning && !wantCp && att >= 4 && rng() < 0.6 ? (rng() < 0.6 ? 'ladder' : ESC_T[1 + Math.floor(rng() * 2)]) : null;
+      const escT = turning && !wantCp && att >= 4 && rng() < 0.6 ? (rng() < 0.25 ? 'ladder' : ESC_T[1 + Math.floor(rng() * 2)]) : null;
       const type = wantCp ? 'cp' : escT || pickType(last);
       const res = escT ? MOVES[escT](cur, dir, th, true) : MOVES[type](cur, dir, th);
       if (!res || !valid(res, cur)) continue;
@@ -830,7 +886,7 @@ function genStage(st) {
 // =========================================================
 //  セーブデータ
 // =========================================================
-const SAVE_KEY = 'soranobori_save_v2';
+const SAVE_KEY = 'soranobori_save_v3';
 let save = { cleared: {}, best: {}, sound: true, unlockAll: false };
 function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s) save = Object.assign(save, s); } catch (e) { } }
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { } }
@@ -838,7 +894,7 @@ const MODEKEY = { normal: 'n', hard: 'h', ex: 'x' };
 const getBest = (id, m) => save.best[id + '|' + m];
 const isCleared = (id, m) => !!(save.cleared[id] && save.cleared[id][m]);
 const anyClear = id => isCleared(id, 'n') || isCleared(id, 'h');
-function exUnlocked(w) { for (let s = 0; s < 4; s++) if (!isCleared(`${w + 1}-${s + 1}`, 'h')) return false; return true; }
+function exUnlocked(w) { for (let s = 0; s < 4; s++) if (!anyClear(`${w + 1}-${s + 1}`)) return false; return true; }
 function isUnlocked(st) {
   if (save.unlockAll) return true;
   if (st.ex) return exUnlocked(st.w);
@@ -862,19 +918,20 @@ const Snd = {
       o.connect(g); g.connect(c.destination); o.start(t + delay); o.stop(t + delay + dur + 0.02);
     };
     switch (type) {
-      case 'jump': tone(380, 760, 0.12, 'square', 0.045); break;
-      case 'jump2': tone(600, 1150, 0.12, 'square', 0.04); break;
-      case 'dash': tone(900, 240, 0.14, 'sawtooth', 0.035); break;
-      case 'land': tone(170, 90, 0.06, 'triangle', 0.09); break;
-      case 'bounce': tone(200, 950, 0.25, 'square', 0.045); break;
-      case 'hit': tone(320, 80, 0.25, 'sawtooth', 0.06); break;
-      case 'cp': [523, 659, 784].forEach((f, i) => tone(f, f, 0.12, 'square', 0.045, i * 0.08)); break;
-      case 'goal': [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, f, 0.2, 'square', 0.045, i * 0.1)); break;
-      case 'warp': tone(700, 150, 0.3, 'sine', 0.08); break;
-      case 'ui': tone(660, 900, 0.05, 'square', 0.035); break;
-      case 'crumble': tone(130, 60, 0.2, 'sawtooth', 0.035); break;
-      case 'go': tone(880, 880, 0.22, 'square', 0.05); break;
-      case 'ready': tone(440, 440, 0.12, 'square', 0.04); break;
+      case 'jump': tone(210, 260, 0.08, 'triangle', 0.07); break;
+      case 'jump2': tone(260, 330, 0.08, 'triangle', 0.06); break;
+      case 'dash': tone(420, 110, 0.13, 'sawtooth', 0.025); break;
+      case 'land': tone(120, 55, 0.07, 'triangle', 0.1); break;
+      case 'bounce': tone(140, 420, 0.2, 'triangle', 0.06); break;
+      case 'hit': tone(180, 50, 0.25, 'sawtooth', 0.06); break;
+      case 'fallen': tone(90, 32, 0.45, 'sine', 0.22); tone(140, 40, 0.3, 'triangle', 0.08); break;
+      case 'cp': tone(330, 330, 0.3, 'sine', 0.05); break;
+      case 'goal': [196, 247, 294, 392].forEach((f, i) => tone(f, f * 0.999, 1.4 - i * 0.2, 'sine', 0.07, i * 0.22)); break;
+      case 'warp': tone(220, 50, 0.6, 'sine', 0.12); break;
+      case 'ui': tone(300, 300, 0.04, 'sine', 0.05); break;
+      case 'crumble': tone(100, 40, 0.25, 'sawtooth', 0.04); break;
+      case 'go': tone(220, 220, 0.5, 'sine', 0.07); break;
+      case 'ready': tone(110, 110, 0.15, 'sine', 0.06); break;
     }
   }
 };
@@ -891,7 +948,8 @@ function newPlayer(i, x, y) {
   return {
     i, x, y, vx: 0, vy: 0, prevY: y, onGround: true, ground: null, groundN: 0, facing: 1, coyote: 0, jumpBuf: 0, jumpCut: false, bounced: false, djAvail: true, djT: 0,
     dashT: 0, dashCD: 0, dashGround: false, airDashUsed: false, ladder: null, ladderCD: 0, stun: 0, inv: 0,
-    warpT: 0, warped: false, cp: { x, y }, cpIdx: -1, finished: false, runPh: 0, climbPh: 0, dxs: 0, dys: 0, ghostT: 0
+    warpT: 0, warped: false, cp: { x, y }, cpIdx: -1, finished: false, runPh: 0, climbPh: 0, dxs: 0, dys: 0, ghostT: 0,
+    lastGroundY: y, bestY: y, falls: 0, lost: 0
   };
 }
 
@@ -979,10 +1037,10 @@ function updatePlats(S, t, dt) {
       p.a = p.mode === 'spin' ? p.ph + p.om * t : p.amp * Math.sin(p.om * t + p.ph);
       p.da = p.a - pa;
     } else if (p.type === 'crumble') {
-      if (p.st === 1) { p.t += dt; if (p.t > 0.55) { p.st = 2; p.t = 0; p.active = false; burst(p.x + p.w / 2, p.y + p.h / 2, 12, '#b8935a'); Snd.play('crumble'); } }
+      if (p.st === 1) { p.t += dt; if (p.t > 0.38) { p.st = 2; p.t = 0; p.active = false; burst(p.x + p.w / 2, p.y + p.h / 2, 12, '#b8935a'); Snd.play('crumble'); } }
       else if (p.st === 2) { p.t += dt; if (p.t > 2.6) { p.st = 0; p.active = true; } }
     } else if (p.type === 'fall') {
-      if (p.st === 1) { p.t += dt; if (p.t > 0.32) { p.st = 2; p.vy = 0; } }
+      if (p.st === 1) { p.t += dt; if (p.t > 0.22) { p.st = 2; p.vy = 0; } }
       else if (p.st === 2) { p.vy += G * 0.55 * dt; p.y += p.vy * dt; if (p.y > p.y0 + 600) { p.st = 3; p.active = false; p.t = 0; } }
       else if (p.st === 3) { p.t += dt; if (p.t > 2) { p.st = 0; p.active = true; p.y = p.y0; p.py = p.y; p.vy = 0; } }
     } else if (p.type === 'bounce') { p.t += dt; }
@@ -1066,8 +1124,8 @@ function landOn(p, q, impact) {
   }
 }
 function knock(p, kx, ky) {
-  p.vx = kx * 380 + (kx >= 0 ? 40 : -40); p.vy = Math.min(-220, ky * 300 - 120);
-  p.stun = 0.35; p.inv = 0.7; p.ladder = null; p.dashT = 0; p.onGround = false; p.ground = null; p.jumpCut = true;
+  p.vx = kx * 520 + (kx >= 0 ? 60 : -60); p.vy = Math.min(-240, ky * 340 - 140);
+  p.stun = 0.5; p.inv = 0.7; p.ladder = null; p.dashT = 0; p.onGround = false; p.ground = null; p.jumpCut = true;
   Snd.play('hit'); burst(p.x + CW / 2, p.y + 10, 8, '#ffd43b', 'star');
 }
 function hitSpinners(p) {
@@ -1121,6 +1179,7 @@ function updatePlayer(p, inp, dt, others) {
       p.x += (L.x + L.w / 2 - CW / 2 - p.x) * Math.min(1, dt * 18);
       p.vx = 0; p.vy = 0;
       if (inp.jump) { p.y -= LADDER_V * dt; p.climbPh += dt * 12; }
+      p.lastGroundY = Math.min(p.lastGroundY, p.y);
       if (p.y + CH <= L.y + 1) { p.ladder = null; p.ladderCD = 0.35; p.vy = -320; p.vx = L.exit * 120; p.facing = L.exit; p.airDashUsed = false; p.djAvail = true; p.jumpBuf = 0; p.jumpCut = true; }
       else if (p.y > L.y + L.h) { p.ladder = null; p.ladderCD = 0.2; }
       p.dxs = p.x - ox; p.dys = p.y - oy;
@@ -1181,8 +1240,8 @@ function updatePlayer(p, inp, dt, others) {
   collide(p, others);
   if (wasG && !p.onGround && !jumped && p.vy >= 0) snapDown(p);
   if (wasG && !p.onGround && p.vy >= 0) p.coyote = (p.dashT > 0 && p.dashGround) ? p.dashT + 0.12 : 0.08;
-  if (!wasG && p.onGround) landOn(p, p.ground, vyB);
-  if (p.onGround) { p.airDashUsed = false; p.bounced = false; p.djAvail = true; }
+  if (!wasG && p.onGround) { landOn(p, p.ground, vyB); fallCheck(p); }
+  if (p.onGround) { p.airDashUsed = false; p.bounced = false; p.djAvail = true; p.lastGroundY = p.y; p.bestY = Math.min(p.bestY, p.y); }
   hitSpinners(p);
   if (p.onGround && Math.abs(p.vx) > 10) p.runPh += dt * Math.abs(p.vx) * 0.085;
   p.dxs = p.x - ox; p.dys = p.y - oy;
@@ -1208,6 +1267,17 @@ function resolvePlayers() {
   fixPen(a); fixPen(b);
 }
 
+const PX_M = 25;   // 25px = 1m（キャラ = 約1.8m）
+const altM = p => Math.max(0, -(p.y + CH) / PX_M);
+// 着地したとき、どれだけ落ちたかを数える。ハードは一定以上落ちたら地上からやりなおし
+function fallCheck(p) {
+  const drop = p.y - p.lastGroundY;
+  if (drop < 150 || !game || game.phase !== 'play') return;
+  p.falls++; p.lost += drop;
+  game.fallMsg = { pi: p.i, t: 2.2, m: drop / PX_M, hard: false };
+  Snd.play('fallen');
+  if (game.mode === 'hard' && p.y < -CH - 2) { game.fallMsg.hard = true; p.cp = { x: game.S.spawn.x + (game.two ? (p.i ? 16 : -16) : 0), y: game.S.spawn.y }; startWarp(p); }
+}
 function startWarp(p) { if (p.warpT > 0) return; p.warpT = 0.5; p.warped = false; Snd.play('warp'); }
 function activateCp(p, k, cp) {
   const pos = { x: cp.x - CW / 2, y: cp.y - CH };
@@ -1221,7 +1291,7 @@ function finish(p) {
   game.phase = 'clear'; game.endT = 0;
   Snd.play('goal');
   const g = game.S.goal;
-  for (let i = 0; i < 60; i++) burst(g.x + 22, g.y + 10, 1, ['#ff5c5c', '#ffd43b', '#5bd16a', '#4dabf7', '#ff9fc0'][i % 5], 'confetti');
+  for (let i = 0; i < 40; i++) burst(g.x + 22, g.y + 10, 1, ['#ece6d8', '#a39d90', '#c9a24a'][i % 3], 'confetti');
   if (game.two && !game.coop) game.winner = p.i;
   game.players.forEach(q => q.finished = true);
   game.newRec = false; game.exNew = false;
@@ -1294,6 +1364,7 @@ function updateGame(dt) {
     const sec = Math.ceil(game.readyT / 0.7);
     if (sec < game.lastBeep) { game.lastBeep = sec; Snd.play('ready'); }
   }
+  if (game.fallMsg) game.fallMsg.t -= dt;
   if (game.phase === 'clear') { game.endT += dt; if (game.endT > 1.2 && !game.shown) { game.shown = true; showClear(); } }
 }
 function viewMetrics(vp) {
@@ -2039,12 +2110,12 @@ function drawSpinner(c, s, t, part) {
 }
 function drawSign(c, sg) {
   const lines = sg.text.split('\n');
-  c.font = `800 9px ${FONT}`;
-  const tw = Math.max(...lines.map(l => c.measureText(l).width)) + 14, th = lines.length * 12 + 8;
+  c.font = `600 9px ${FONT}`;
+  const tw = Math.max(...lines.map(l => c.measureText(l).width)) + 16, th = lines.length * 12 + 9;
   const bx = sg.x - tw / 2, by = sg.y - 40 - th;
-  rrPath(c, sg.x - 2.5, by + th - 2, 5, 42, 1); c.fillStyle = hgr(c, sg.x - 2.5, sg.x + 2.5, [[0, '#5a3a1e'], [0.5, '#9a6a3c'], [1, '#4a2e16']]); c.fill();
-  sbox(c, bx, by, tw, th, '#f3e2bd', 4);
-  c.fillStyle = OUT; c.textAlign = 'center'; c.textBaseline = 'top';
+  c.fillStyle = '#2a2622'; c.fillRect(sg.x - 2, by + th - 2, 4, 42);
+  c.fillStyle = 'rgba(14,13,12,.82)'; c.fillRect(bx, by, tw, th); c.lineWidth = 0.8; c.strokeStyle = 'rgba(207,200,184,.6)'; c.strokeRect(bx + 2.5, by + 2.5, tw - 5, th - 5);
+  c.fillStyle = '#e4ded0'; c.textAlign = 'center'; c.textBaseline = 'top';
   lines.forEach((l, i) => c.fillText(l, sg.x, by + 5 + i * 12));
 }
 function drawFlag(c, cp, active, t) {
@@ -2258,6 +2329,8 @@ function render(now) {
   const c = ctx;
   c.setTransform(1, 0, 0, 1, 0, 0);
   const want = state === 'game' && !!game && use3D();
+  const flt = state === 'title' ? 'saturate(.3) brightness(.55) contrast(1.1)' : (want ? '' : 'saturate(.5) contrast(1.06)');
+  if (canvas._flt !== flt) { canvas._flt = flt; canvas.style.filter = flt; }
   if (want !== R3.on) { R3.on = want; $('#gl').classList.toggle('hidden', !want); $('#bgc').classList.toggle('hidden', !want); }
   if (want) { c.clearRect(0, 0, canvas.width, canvas.height); R3.renderer.setScissorTest(false); R3.renderer.clear(); }
   if (state === 'game' && game) {
@@ -2348,7 +2421,7 @@ function drawOverlay3D(c, vis, pi) {
     if (!vis({ x: px, y: py, w: p.w, h: p.h })) continue;
     c.save(); c.globalAlpha = 0.4; c.setLineDash([5, 5]); rrPath(c, px, py, p.w, p.h, 4); c.lineWidth = 2; c.strokeStyle = '#fff'; c.stroke(); c.restore();
   }
-  { const g = S.goal, x = g.x + g.w / 2, y = g.y + g.h; if (vis({ x: x - 40, y: y - 120, w: 80, h: 120 })) { c.font = `800 13px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle'; otext(c, 'GOAL', x, y - 108 + Math.sin(t * 3) * 3, '#ffd43b', 4); } }
+  { const g = S.goal, x = g.x + g.w / 2, y = g.y + g.h; if (vis({ x: x - 40, y: y - 120, w: 80, h: 120 })) { c.font = `800 14px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle'; stext(c, '頂', x, y - 110 + Math.sin(t * 3) * 3); } }
   for (const q of game.parts) {
     const a = clamp(q.life / q.max, 0, 1);
     c.save();
@@ -2361,52 +2434,73 @@ function drawOverlay3D(c, vis, pi) {
   }
   for (const p of game.players) {
     if (game.two) { c.font = `800 10px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'bottom'; otext(c, 'P' + (p.i + 1), p.x + CW / 2, p.y - 6, p.i ? '#8fb8ff' : '#ff8f8f', 3); }
-    if (p.stun > 0) for (let i = 0; i < 3; i++) { const a = t * 6 + i * 2.1; c.fillStyle = '#ffd43b'; starPath(c, p.x + CW / 2 + Math.cos(a) * 10, p.y - 4 + Math.sin(a) * 3, 3.5, 1.5); c.fill(); c.lineWidth = 1; c.strokeStyle = OUT; c.stroke(); }
+    if (p.stun > 0) for (let i = 0; i < 3; i++) { const a = t * 6 + i * 2.1; c.fillStyle = '#cfc8b8'; starPath(c, p.x + CW / 2 + Math.cos(a) * 10, p.y - 4 + Math.sin(a) * 3, 3, 1.2); c.fill(); }
   }
 }
+// 影つきの細い文字（硬派なHUD用）
+function stext(c, txt, x, y, fill = '#ece6d8') {
+  c.fillStyle = 'rgba(0,0,0,.75)'; c.fillText(txt, x + 1, y + 1.2);
+  c.fillStyle = fill; c.fillText(txt, x, y);
+}
 function drawHUD(c, m, vp) {
-  const S = game.S, lw = m.lw, top = (vp.rot || !game.two ? safeTop / m.s : 0) + 8;
+  const S = game.S, lw = m.lw, ph = m.ph, top = (vp.rot || !game.two ? safeTop / m.s : 0) + 10;
+  const p = game.players[vp.pi];
+  // 周辺を暗く（ビネット）
+  { const g = c.createRadialGradient(lw / 2, ph * 0.45, Math.min(lw, ph) * 0.35, lw / 2, ph * 0.45, Math.max(lw, m.lh) * 0.75); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.55)'); c.fillStyle = g; c.fillRect(0, 0, lw, m.lh); }
   c.textBaseline = 'top';
-  c.font = `800 24px ${FONT}`; c.textAlign = 'center';
-  otext(c, fmt(game.time), lw / 2, top + 2, '#fff', 5);
-  c.font = `800 11px ${FONT}`; c.textAlign = 'left';
-  const tag = game.mode === 'hard' ? ' HARD' : game.mode === 'ex' ? ' EX' : '';
-  otext(c, `${game.stage.id} ${game.stage.name}${tag}`, 10, top + 2, '#fff', 3);
-  if (game.two) otext(c, (game.coop ? 'きょうりょく' : 'たいせん') + ' / P' + (vp.pi + 1), 10, top + 17, vp.pi ? '#8fb8ff' : '#ff8f8f', 3);
-  const bx = 12, by = top + 40, bh = Math.min(200, m.ph * 0.42);
-  box(c, bx, by, 8, bh, 'rgba(255,255,255,.75)', 4, 2);
-  c.fillStyle = '#ffd43b'; starPath(c, bx + 4, by - 6, 6, 2.6); c.fill(); c.lineWidth = 1.6; c.strokeStyle = OUT; c.stroke();
-  if (game.mode === 'normal') for (const cp of S.cps) { const k = clamp(-cp.y / S.goalTop, 0, 1); ln(c, bx - 2, by + bh * (1 - k), bx + 10, by + bh * (1 - k), '#2f9e44', 2.4); }
-  for (const p of game.players) {
-    const k = clamp(-(p.y + CH) / S.goalTop, 0, 1);
-    circ(c, bx + 4, by + bh * (1 - k), 5, game.two ? (p.i ? '#4d8bff' : '#ff4d4d') : '#fff', 2);
+  c.font = `600 21px ${FONT}`; c.textAlign = 'center';
+  stext(c, fmt(game.time), lw / 2, top);
+  c.font = `600 11px ${FONT}`; c.textAlign = 'left';
+  const tag = game.mode === 'hard' ? '　無慈悲' : '';
+  stext(c, `${game.stage.id}　${game.stage.name}${tag}`, 12, top + 2, game.mode === 'hard' ? '#e9b9b2' : '#cfc8b8');
+  if (game.two) stext(c, (game.coop ? '協力' : '競争') + '　P' + (vp.pi + 1), 12, top + 17, vp.pi ? '#9fb6d6' : '#d69f9f');
+  // 高度計：細い目盛り＋現在地・最高到達点
+  const bx = 18, by = top + 44, bh = Math.min(210, ph * 0.42);
+  c.fillStyle = 'rgba(236,230,216,.55)'; c.fillRect(bx, by, 1.2, bh);
+  for (let i = 0; i <= 10; i++) c.fillRect(bx - (i % 5 ? 2 : 4), by + bh * i / 10, i % 5 ? 3 : 6, 1);
+  c.font = `600 9px ${FONT}`; c.textAlign = 'left'; stext(c, '頂', bx - 4, by - 14);
+  for (const q of game.players) {
+    const k = clamp(-(q.y + CH) / S.goalTop, 0, 1), kb = clamp(-(q.bestY + CH) / S.goalTop, 0, 1);
+    const col = game.two ? (q.i ? '#9fb6d6' : '#d69f9f') : '#ece6d8';
+    c.fillStyle = 'rgba(236,230,216,.35)'; c.fillRect(bx + 3, by + bh * (1 - kb) - 0.5, 7, 1);
+    c.fillStyle = col; c.beginPath(); c.moveTo(bx + 3, by + bh * (1 - k)); c.lineTo(bx + 10, by + bh * (1 - k) - 4); c.lineTo(bx + 10, by + bh * (1 - k) + 4); c.closePath(); c.fill();
   }
-  const ph = m.ph;
+  c.font = `600 13px ${FONT}`; stext(c, altM(p).toFixed(1) + 'm', bx + 14, by + bh * (1 - clamp(-(p.y + CH) / S.goalTop, 0, 1)) - 7);
+  c.textAlign = 'center'; c.textBaseline = 'middle';
   if (game.phase === 'ready') {
-    c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = `800 38px ${FONT}`;
-    otext(c, Math.ceil(game.readyT / 0.7) >= 2 ? 'READY?' : 'READY…', lw / 2, ph * 0.38, '#fff', 7);
-  } else if (game.phase === 'play' && game.time < 0.7) {
-    c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = `800 ${46 + game.time * 20}px ${FONT}`;
-    c.save(); c.globalAlpha = clamp(1 - game.time / 0.7, 0, 1); otext(c, 'GO!', lw / 2, ph * 0.38, '#ffd43b', 8); c.restore();
+    const a = clamp(game.readyT / 0.4, 0, 1);
+    c.save(); c.globalAlpha = a;
+    c.font = `800 30px ${FONT}`; stext(c, game.stage.name, lw / 2, ph * 0.34);
+    c.font = `600 12px ${FONT}`; stext(c, `標高 ${Math.round(S.goalTop / PX_M)}m`, lw / 2, ph * 0.34 + 30, '#a39d90');
+    c.restore();
+  }
+  // 転落した高さ
+  if (game.fallMsg && game.fallMsg.pi === vp.pi && game.fallMsg.t > 0) {
+    const f = game.fallMsg, a = clamp(f.t / 0.6, 0, 1);
+    c.save(); c.globalAlpha = a;
+    c.font = `800 34px ${FONT}`; stext(c, `−${f.m.toFixed(1)}m`, lw / 2, ph * 0.26, '#d9796e');
+    if (f.hard) { c.font = `600 13px ${FONT}`; stext(c, '地上へ', lw / 2, ph * 0.26 + 30, '#a39d90'); }
+    c.restore();
   }
   if (game.phase === 'clear') {
-    c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = `800 40px ${FONT}`;
-    let txt = 'GOAL!';
-    if (game.two && !game.coop) txt = game.winner === vp.pi ? 'WIN!' : 'LOSE…';
-    otext(c, txt, lw / 2, ph * 0.3, '#ffd43b', 7);
+    c.font = `800 40px ${FONT}`;
+    let txt = '登頂';
+    if (game.two && !game.coop) txt = game.winner === vp.pi ? '勝利' : '敗北';
+    stext(c, txt, lw / 2, ph * 0.3);
   }
-  const p = game.players[vp.pi];
-  if (p.warpT > 0) { c.fillStyle = `rgba(255,255,255,${0.7 * Math.sin(clamp(p.warpT / 0.5, 0, 1) * Math.PI)})`; c.fillRect(0, 0, lw, m.lh); }
+  if (p.warpT > 0) { c.fillStyle = `rgba(0,0,0,${0.85 * Math.sin(clamp(p.warpT / 0.5, 0, 1) * Math.PI)})`; c.fillRect(0, 0, lw, m.lh); }
 }
 function drawControls(c, W, H, ch, pi) {
   const y = H - ch / 2 - (game.two ? 0 : safeBottom / 2), r = Math.min(ch * 0.34, W * 0.1);
   const st = touchState(pi), p = game.players[pi];
+  let IC = '#ece6d8';
   const btn = (x, yy, rad, on, draw, dim) => {
     c.save();
-    c.globalAlpha = dim ? 0.45 : 1;
-    c.beginPath(); c.arc(x, yy, rad, 0, 7); c.fillStyle = on ? 'rgba(255,212,59,.92)' : 'rgba(255,255,255,.55)'; c.fill();
-    c.lineWidth = 3; c.strokeStyle = 'rgba(38,35,43,.85)'; c.stroke();
-    c.translate(x, yy); c.fillStyle = OUT; draw(rad);
+    c.globalAlpha = dim ? 0.35 : 0.9;
+    c.beginPath(); c.arc(x, yy, rad, 0, 7); c.fillStyle = on ? 'rgba(236,230,216,.85)' : 'rgba(8,8,10,.45)'; c.fill();
+    c.lineWidth = 1.2; c.strokeStyle = 'rgba(236,230,216,.7)'; c.stroke();
+    IC = on ? '#111' : '#ece6d8';
+    c.translate(x, yy); c.fillStyle = IC; draw(rad);
     c.restore();
   };
   const tri = (dir) => rad => { c.beginPath(); c.moveTo(dir * rad * 0.42, 0); c.lineTo(-dir * rad * 0.28, -rad * 0.4); c.lineTo(-dir * rad * 0.28, rad * 0.4); c.closePath(); c.fill(); };
@@ -2415,14 +2509,14 @@ function drawControls(c, W, H, ch, pi) {
   const canDash = p.onGround ? p.dashCD <= 0 : !p.airDashUsed;
   btn(W * 0.635, y + r * 0.1, r * 0.92, st.dash, rad => {
     c.beginPath(); for (const o of [-0.3, 0.12]) { c.moveTo(o * rad - rad * 0.12, -rad * 0.32); c.lineTo(o * rad + rad * 0.18, 0); c.lineTo(o * rad - rad * 0.12, rad * 0.32); }
-    c.lineWidth = 3.4; c.strokeStyle = OUT; c.lineCap = 'round'; c.lineJoin = 'round'; c.stroke();
-    c.font = `800 ${rad * 0.26}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('DASH', 0, rad * 0.62);
+    c.lineWidth = 2; c.strokeStyle = IC; c.lineCap = 'butt'; c.lineJoin = 'miter'; c.stroke();
+    c.font = `600 ${rad * 0.24}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('DASH', 0, rad * 0.62);
   }, !canDash);
   const canJump = p.onGround || p.coyote > 0 || p.djAvail || p.ladder;
   btn(W * 0.87, y - r * 0.18, r * 1.1, st.jump, rad => {
     c.beginPath(); c.moveTo(0, -rad * 0.42); c.lineTo(rad * 0.34, 0); c.lineTo(-rad * 0.34, 0); c.closePath(); c.fill();
     c.fillRect(-rad * 0.12, -rad * 0.02, rad * 0.24, rad * 0.22);
-    c.font = `800 ${rad * 0.25}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('JUMP', 0, rad * 0.58);
+    c.font = `600 ${rad * 0.23}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('JUMP', 0, rad * 0.58);
   }, !canJump);
 }
 
@@ -2679,8 +2773,8 @@ function build3D() {
   dispose3D();
   const S = game.S, sc = new THREE.Scene(); R3.scene = sc; R3.S = S;
   R3.dyn = []; R3.flags = []; R3.spins = []; R3.orbs = []; R3.chars = []; R3.goal = null;
-  sc.add(new THREE.AmbientLight(0xffffff, 0.62));
-  const light = new THREE.DirectionalLight(0xffffff, 0.62); light.castShadow = true;
+  sc.add(new THREE.HemisphereLight(0xb8c0cc, 0x2a2622, 0.42));
+  const light = new THREE.DirectionalLight(0xfff1dc, 1.0); light.castShadow = true;
   const big = Math.max(appW, appH) * DPR > 1500;
   light.shadow.mapSize.set(big ? 2048 : 1024, big ? 4096 : 2048); light.shadow.bias = -0.0006; light.shadow.normalBias = 0.6;
   sc.add(light); sc.add(light.target); R3.light = light;
@@ -2892,10 +2986,10 @@ function buildMap() {
     let d = (w > 0 ? `M ${W * 0.5} ${SEC_H + 2} L ` : 'M ') + pts.map(p => p.join(' ')).join(' L ');
     if (w < 5) d += ` L ${W * 0.5} -2`;
     const ex = [EX_POS[0] * W, EX_POS[1] * SEC_H];
-    sec.insertAdjacentHTML('beforeend', `<svg width="${W}" height="${SEC_H}"><path d="${d}" fill="none" stroke="#26232b" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#fff" stroke-width="7" stroke-dasharray="1 13" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M ${pts[3].join(' ')} L ${ex.join(' ')}" fill="none" stroke="#26232b" stroke-width="9" stroke-dasharray="2 10" stroke-linecap="round"/></svg>`);
+    sec.insertAdjacentHTML('beforeend', `<svg width="${W}" height="${SEC_H}"><path d="${d}" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#d8d2c4" stroke-width="1.5" stroke-dasharray="6 6" stroke-linejoin="round"/>
+      <path d="M ${pts[3].join(' ')} L ${ex.join(' ')}" fill="none" stroke="#8a2a22" stroke-width="1.5" stroke-dasharray="3 5"/></svg>`);
     const Wd = WORLDS[w];
-    sec.insertAdjacentHTML('beforeend', `<div class="wbanner" style="background:${Wd.col}"><small>WORLD ${w + 1}</small>${Wd.name}</div>`);
+    sec.insertAdjacentHTML('beforeend', `<div class="wbanner"><small>${['壱', '弐', '参', '肆', '伍', '陸'][w]}</small>${Wd.name}</div>`);
     for (let s = 0; s <= 4; s++) {
       const st = BYID[s < 4 ? `${w + 1}-${s + 1}` : `${w + 1}-EX`];
       const un = isUnlocked(st);
@@ -2914,7 +3008,7 @@ function buildMap() {
   }
   const target = curNode ? curNode.w : 5;
   requestAnimationFrame(() => { sc.scrollTop = (5 - target) * SEC_H + (curNode ? NODE_POS[curNode.s][1] * SEC_H : 0) - sc.clientHeight * 0.55; });
-  $('#mapMode').textContent = session.two ? (session.coop ? 'ふたりで：きょうりょく' : 'ふたりで：たいせん') : 'ひとりで';
+  $('#mapMode').textContent = session.two ? (session.coop ? '二人・協力' : '二人・競争') : '一人';
 }
 
 // =========================================================
@@ -2935,27 +3029,29 @@ function showMap() {
 function openStagePanel(id) {
   const st = BYID[id];
   if (!isUnlocked(st)) {
-    openModal(`<h2>${ICON.lock.replace('<svg', '<svg width="22" height="22" style="vertical-align:-3px"')} ロック中</h2><p>${st.ex ? `ハードモードで <b>${st.w + 1}-1〜${st.w + 1}-4</b> を<br>すべてクリアすると 解放されます！` : 'ひとつ前のステージを クリアしよう！'}</p><div class="col"><button class="btn small gray" data-act="close">とじる</button></div>`);
+    openModal(`<h2>封鎖</h2><p>${st.ex ? `<b>${st.w + 1}-1〜${st.w + 1}-4</b> をすべて踏破せよ。` : '前の山を越えよ。'}</p><div class="col"><button class="btn small gray" data-act="close">戻る</button></div>`);
     return;
   }
   session.sel = id;
   if (st.ex) session.mode = 'ex'; else if (session.mode === 'ex') session.mode = 'normal';
   const W = WORLDS[st.w];
   let body;
-  if (st.ex) body = `<p><b>チェックポイントなし</b>の 高難易度ステージ！</p><div class="rec">ベスト ${fmt(getBest(id, 'x'))}</div>`;
-  else body = `<div class="modes">
-      <button class="mode ${session.mode === 'normal' ? 'sel' : ''}" data-act="mode" data-m="normal"><b>ノーマル</b><small>チェックポイントあり</small><span>${fmt(getBest(id, 'n'))}</span></button>
-      <button class="mode hard ${session.mode === 'hard' ? 'sel' : ''}" data-act="mode" data-m="hard"><b>ハード</b><small>チェックポイントなし</small><span>${fmt(getBest(id, 'h'))}</span></button></div>
-      <p class="note">ハードで ${st.w + 1}-1〜${st.w + 1}-4 を全クリアすると EXステージ解放</p>`;
-  openModal(`<span class="tag" style="background:${W.col}">WORLD ${st.w + 1} ${W.name}</span><h2>${st.ex ? `${st.w + 1}-EX` : id}　${st.name}</h2>${body}
-    ${session.two ? '<p class="note">※ ふたりプレイの記録は保存されません</p>' : ''}
-    <div class="col"><button class="btn orange big" data-act="start">▶ スタート</button><button class="btn small gray" data-act="close">もどる</button></div>`);
+  const hm = Math.round(genStageHeight(st) / PX_M);
+  if (st.ex) body = `<p>標高 ${hm}m。落ちれば、落ちた所から。</p><div class="rec">最速 ${fmt(getBest(id, 'x'))}</div>`;
+  else body = `<p class="note">標高 ${hm}m</p><div class="modes">
+      <button class="mode ${session.mode === 'normal' ? 'sel' : ''}" data-act="mode" data-m="normal"><b>通常</b><small>落ちた所から登りなおす</small><span>${fmt(getBest(id, 'n'))}</span></button>
+      <button class="mode hard ${session.mode === 'hard' ? 'sel' : ''}" data-act="mode" data-m="hard"><b>無慈悲</b><small>一度でも落ちれば地上へ</small><span>${fmt(getBest(id, 'h'))}</span></button></div>
+      <p class="note">${st.w + 1}-1〜${st.w + 1}-4 を踏破すると EX が開く</p>`;
+  openModal(`<span class="tag">${['壱', '弐', '参', '肆', '伍', '陸'][st.w]}　${W.name}</span><h2>${st.ex ? `${st.w + 1}-EX` : id}　${st.name}</h2>${body}
+    ${session.two ? '<p class="note">二人の記録は残らない</p>' : ''}
+    <div class="col"><button class="btn orange big" data-act="start">登る</button><button class="btn small gray" data-act="close">戻る</button></div>`);
 }
 function pauseGame() {
   if (!game || game.paused || game.phase === 'clear') return;
   game.paused = true; touches.clear();
-  openModal(`<h2>ポーズ</h2><p>${game.stage.id} ${game.stage.name}　<b>${fmt(game.time)}</b></p>
-    <div class="iconrow"><button class="ibtn go" data-act="resume">${ICON.play}さいかい</button><button class="ibtn y" data-act="retry">${ICON.retry}リトライ</button><button class="ibtn" data-act="map">${ICON.map}ステージ選択</button><button class="ibtn" data-act="home">${ICON.home}ホーム</button></div>`);
+  const p0 = game.players[0];
+  openModal(`<h2>中断</h2><p>${game.stage.id} ${game.stage.name}　<b>${fmt(game.time)}</b></p><p class="note">現在 ${altM(p0).toFixed(1)}m ／ 最高 ${Math.max(0, -(p0.bestY + CH) / PX_M).toFixed(1)}m ／ 転落 ${p0.falls}回</p>
+    <div class="iconrow"><button class="ibtn go" data-act="resume">${ICON.play}続ける</button><button class="ibtn y" data-act="retry">${ICON.retry}最初から</button><button class="ibtn" data-act="map">${ICON.map}山を選ぶ</button><button class="ibtn" data-act="home">${ICON.home}表紙</button></div>`);
 }
 function resumeGame() { if (!game) return; closeModal(); game.paused = false; last = performance.now(); }
 function nextStage() {
@@ -2965,51 +3061,52 @@ function nextStage() {
 function showClear() {
   const nx = nextStage();
   let head;
-  if (game.two && !game.coop) head = `<div class="clear-title" style="color:${game.winner ? '#8fb8ff' : '#ff8f8f'}">P${game.winner + 1} の かち！</div><div class="ctime">${fmt(game.time)}</div>`;
+  const falls = game.players.reduce((a, p) => a + p.falls, 0), lost = game.players.reduce((a, p) => a + p.lost, 0) / PX_M;
+  const stat = `<p class="note">転落 ${falls}回 ／ 失った高さ 計${lost.toFixed(0)}m</p>`;
+  if (game.two && !game.coop) head = `<div class="clear-title">P${game.winner + 1} 登頂</div><div class="ctime">${fmt(game.time)}</div>${stat}`;
   else {
-    head = `<div class="clear-title">CLEAR!</div><div class="ctime">${fmt(game.time)}</div>`;
-    if (!game.two) head += game.newRec ? '<div class="newrec">NEW RECORD!</div>' : `<div class="best">BEST ${fmt(game.prevBest)}</div>`;
-    if (game.exNew) head += `<div class="unlock">★ EXステージ「${WORLDS[game.stage.w].ex}」が解放された！</div>`;
+    head = `<div class="clear-title">登頂</div><div class="ctime">${fmt(game.time)}</div>${stat}`;
+    if (!game.two) head += game.newRec ? '<div class="newrec">最速更新</div>' : `<div class="best">最速 ${fmt(game.prevBest)}</div>`;
+    if (game.exNew) head += `<div class="unlock">EX「${WORLDS[game.stage.w].ex}」が開いた</div>`;
   }
   openModal(`${head}<div class="iconrow">
-    ${nx ? `<button class="ibtn go" data-act="next">${ICON.next}つぎへ</button>` : ''}
-    <button class="ibtn y" data-act="retry">${ICON.retry}もういちど</button>
-    <button class="ibtn" data-act="map">${ICON.map}ステージ選択</button>
-    <button class="ibtn" data-act="home">${ICON.home}ホーム</button></div>`);
+    ${nx ? `<button class="ibtn go" data-act="next">${ICON.next}次の山</button>` : ''}
+    <button class="ibtn y" data-act="retry">${ICON.retry}もう一度</button>
+    <button class="ibtn" data-act="map">${ICON.map}山を選ぶ</button>
+    <button class="ibtn" data-act="home">${ICON.home}表紙</button></div>`);
 }
 function open2P() {
-  openModal(`<h2>ふたりで あそぶ</h2>
-    <p class="note">1台の スマホ/タブレットを 向かい合わせで、または キーボード・コントローラー2台で あそべます</p>
+  openModal(`<h2>二人で登る</h2>
+    <p class="note">一台の端末を向かい合わせで、またはキーボード・コントローラー二台で。</p>
     <div class="col">
-      <button class="btn green" data-act="coop">きょうりょく</button><p class="note" style="margin:-6px 0 0">どちらかが チェックポイント・ゴールに ふれればOK！<br>おたがいを 押したり 頭に乗ったりできる</p>
-      <button class="btn pink" data-act="vs">たいせん</button><p class="note" style="margin:-6px 0 0">先に ゴールした方の かち！</p>
-      <button class="btn small" data-act="face">画面のむき：${session.face ? '向かい合わせ' : '同じ向き'}</button>
-      <button class="btn small gray" data-act="close">もどる</button>
+      <button class="btn green" data-act="coop">協力</button><p class="note" style="margin:-6px 0 0">どちらかが頂に触れれば登頂。互いを押し、頭に乗れる。</p>
+      <button class="btn pink" data-act="vs">競争</button><p class="note" style="margin:-6px 0 0">先に頂へ着いた方が勝ち。</p>
+      <button class="btn small" data-act="face">画面の向き：${session.face ? '向かい合わせ' : '同じ向き'}</button>
+      <button class="btn small gray" data-act="close">戻る</button>
     </div>`);
 }
 function openHowto() {
-  openModal(`<h2>あそびかた</h2><div class="howto">
-    <p>空中に浮かぶ 家具や建物、岩や氷を 飛びうつって、はるか上空の <b>ゴール</b> を目指そう！ タイムアタックで 最速記録を ねらえ！</p>
-    <h3>そうさ</h3>
-    <p>画面下の <b>◀ ▶</b> でいどう、<b>JUMP</b> でジャンプ、<b>DASH</b> でダッシュ。<br>
+  openModal(`<h2>心得</h2><div class="howto">
+    <p>宙に積み上がった瓦礫を、ただ登れ。頂に旗がある。<br><b>中継地点はない。</b>落ちれば、落ちた所から登りなおすしかない。</p>
+    <h3>操作</h3>
+    <p>画面下の <b>◀ ▶</b> で移動、<b>JUMP</b> で跳躍、<b>DASH</b> で突進。<br>
     キーボード：<kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> いどう、<kbd>Space</kbd><kbd>↑</kbd><kbd>Z</kbd> ジャンプ、<kbd>Shift</kbd><kbd>X</kbd><kbd>↓</kbd> ダッシュ、<kbd>Esc</kbd> ポーズ<br>
     コントローラー：スティック/十字キー、Ⓐ ジャンプ、Ⓑ Ⓧ ダッシュ、START ポーズ</p>
-    <h3>アクション</h3>
-    <p>・ジャンプは キャラ1人分の高さまで<br>
-    ・空中で もう一度 JUMP で <b>2段ジャンプ</b>（高さは1段目の半分）<br>
-    ・ダッシュは 地上だと 0.5秒のクールタイム、空中では 1回だけ<br>
-    ・<b>とどかない足場</b>は「ジャンプ → 2段ジャンプ → 空中ダッシュ」で！<br>
-    ・地上ダッシュで足場から飛び出しても、空中でジャンプできる<br>
-    ・足場は ななめに傾いていることも。氷の坂は すべり落ちる<br>
-    ・はしごは JUMP を 長押しで のぼる（◀▶で はなれる）</p>
-    <h3>モード</h3>
-    <p>・<b>ノーマル</b>：大きな足場の チェックポイントあり。落ちても すぐに戻れる<br>
-    ・<b>ハード</b>：チェックポイントなし。落ちたら 落ちたところから…<br>
-    ・ワールドの4ステージを ハードで全クリアすると <b>EXステージ</b> が解放！</p>
-    <h3>ふたりで</h3>
-    <p>・P1：<kbd>A</kbd><kbd>D</kbd> いどう <kbd>W</kbd> ジャンプ <kbd>S</kbd> ダッシュ ／ P2：<kbd>←</kbd><kbd>→</kbd> いどう <kbd>↑</kbd> ジャンプ <kbd>↓</kbd> ダッシュ<br>
-    ・タッチ操作は 画面の 下半分が P1、上半分が P2</p>
-    </div><div class="col"><button class="btn small gray" data-act="close">とじる</button></div>`);
+    <h3>動き</h3>
+    <p>・跳躍は背丈ひとつ分。空中でもう一度 JUMP で二段目（半分の高さ）<br>
+    ・突進は地上で0.5秒に一度、空中では一度きり<br>
+    ・足場の多くは<b>全力でなければ届かない</b>。助走、跳躍、二段目の頂点で突進<br>
+    ・地上の突進で足場から飛び出しても、跳躍はまだ残っている<br>
+    ・足場は傾いている。氷の坂では止まれない。回転する棒は弾き飛ばす<br>
+    ・はしごは JUMP 長押しで登る（◀▶で離れる）</p>
+    <h3>山の掟</h3>
+    <p>・<b>通常</b>：落ちれば、着地した所から登りなおす<br>
+    ・<b>無慈悲</b>：一度でも落ちれば地上へ戻される<br>
+    ・ワールドの4つの山を踏破すると <b>EX</b> が開く</p>
+    <h3>二人で</h3>
+    <p>・P1：<kbd>A</kbd><kbd>D</kbd> 移動 <kbd>W</kbd> 跳躍 <kbd>S</kbd> 突進 ／ P2：<kbd>←</kbd><kbd>→</kbd> 移動 <kbd>↑</kbd> 跳躍 <kbd>↓</kbd> 突進<br>
+    ・タッチ操作は画面の下半分が P1、上半分が P2</p>
+    </div><div class="col"><button class="btn small gray" data-act="close">閉じる</button></div>`);
 }
 function openSettings() {
   openModal(`<h2>せってい</h2><div class="col">

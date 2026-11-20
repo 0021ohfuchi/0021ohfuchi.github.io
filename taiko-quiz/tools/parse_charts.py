@@ -52,7 +52,7 @@ def download(url, path):
         except urllib.error.HTTPError as e:
             if e.code == 404:
                 return False
-            if e.code != 429 or wait > 1200:
+            if e.code not in (429, 500, 502, 503, 504) or wait > 1200:
                 raise
             print('429, wait', wait, flush=True)
             time.sleep(wait)

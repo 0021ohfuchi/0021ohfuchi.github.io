@@ -23,7 +23,7 @@ def fetch_page(name, path):
                 t = r.read().decode('utf-8')
             break
         except urllib.error.HTTPError as e:
-            if e.code != 429 or wait > 1200:
+            if e.code not in (429, 500, 502, 503, 504) or wait > 1200:
                 raise
             print('429, wait', wait, flush=True)
             time.sleep(wait)

@@ -37,7 +37,7 @@ def fetch(href, force=False):
             if e.code == 404:
                 t = ''
                 break
-            if e.code != 429 or wait > 1200:
+            if e.code not in (429, 500, 502, 503, 504) or wait > 1200:
                 raise
             print('429, wait', wait, flush=True)
             time.sleep(wait)

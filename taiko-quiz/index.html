@@ -26,7 +26,10 @@ body{margin:0;color:var(--text);
     radial-gradient(circle at 50% 100%, var(--sgl) 10%, var(--sg) 10%, var(--sg) 23%, var(--sgl) 23%, var(--sgl) 30%, var(--sg) 30%, var(--sg) 43%, var(--sgl) 43%, var(--sgl) 50%, var(--sg) 50%, var(--sg) 63%, var(--sgl) 63%, var(--sgl) 71%, transparent 71%, transparent),
     radial-gradient(circle at 100% 50%, var(--sgl) 5%, var(--sg) 5%, var(--sg) 15%, var(--sgl) 15%, var(--sgl) 20%, var(--sg) 20%, var(--sg) 29%, var(--sgl) 29%, var(--sgl) 34%, var(--sg) 34%, var(--sg) 44%, var(--sgl) 44%, var(--sgl) 49%, transparent 49%, transparent),
     radial-gradient(circle at 0 50%, var(--sgl) 5%, var(--sg) 5%, var(--sg) 15%, var(--sgl) 15%, var(--sgl) 20%, var(--sg) 20%, var(--sg) 29%, var(--sgl) 29%, var(--sgl) 34%, var(--sg) 34%, var(--sg) 44%, var(--sgl) 44%, var(--sgl) 49%, transparent 49%, transparent);
-  background-size:100px 50px;background-attachment:fixed;min-height:100vh}
+  background-size:100px 50px;background-attachment:fixed;
+  /* スマホの 100vh はアドレスバーのぶん実際より高く、中身が収まっていてもスクロールできてしまうので、見えている高さ（dvh）を使う */
+  min-height:100vh;min-height:100dvh;overflow-x:hidden}
+html,body{overscroll-behavior-y:none} /* 端で引っ張ってもページが動かないようにする */
 header{background:linear-gradient(90deg,var(--don),#ff7a3d);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;
   position:relative;box-shadow:0 4px 0 rgba(0,0,0,.08)}
 /* ヘッダーの下に、太鼓の胴の鋲（びょう）が並んだような帯 */

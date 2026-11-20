@@ -69,6 +69,10 @@ wp = os.path.join(HERE, 'works.json')
 works_raw = json.load(open(wp, encoding='utf-8')) if os.path.exists(wp) else {}
 WORKS_TOTAL = (works_raw.pop('_meta', None) or {}).get('total', 75)
 WORKS_DONE = sum(1 for v in works_raw.values() if v.get('done'))  # 取得済みの作品数（下で作品をまとめ直す前に数える）
+# 表示名の変更（取得のときの名前は scrape_works.py・update.py の ACTIVE_WORKS と合わせて元のまま）
+for old, new in [('ニジイロ（現行）', 'ニジイロ2026')]:
+    if old in works_raw:
+        works_raw[new] = works_raw.pop(old)
 # 新AC中国版（AC16中）は「ニジイロ（中国版限定）」として、中国版にしか無い曲だけを入れる（ユーザー指定。国内版と共通の曲は入れない）
 CN_ONLY = ['拔蘿蔔', '捕魚歌', '兩隻老虎', '郷下老鼠', '小毛驢', '王老先生有塊地', '技神闇鬼', '技神闇鬼(裏譜面)', 'LUMINΔ']
 if 'AC16中' in works_raw:

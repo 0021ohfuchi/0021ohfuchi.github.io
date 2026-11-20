@@ -69,7 +69,7 @@ wp = os.path.join(HERE, 'works.json')
 works_raw = json.load(open(wp, encoding='utf-8')) if os.path.exists(wp) else {}
 WORKS_TOTAL = (works_raw.pop('_meta', None) or {}).get('total', 75)
 # 新AC中国版（AC16中）は「ニジイロ（中国版限定）」として、中国版にしか無い曲だけを入れる（ユーザー指定。国内版と共通の曲は入れない）
-CN_ONLY = ['拔蘿蔔', '捕魚歌', '兩隻老虎', '郷下老鼠', '小毛驢', '王老先生有塊地', '技神闇鬼', 'LUMINΔ']
+CN_ONLY = ['拔蘿蔔', '捕魚歌', '兩隻老虎', '郷下老鼠', '小毛驢', '王老先生有塊地', '技神闇鬼', '技神闇鬼(裏譜面)', 'LUMINΔ']
 if 'AC16中' in works_raw:
     cn = works_raw.pop('AC16中')
     cn['songs'] = [p for p in cn['songs'] if p in CN_ONLY]

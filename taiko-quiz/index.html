@@ -524,8 +524,13 @@ function toggleIn(arr, v, on){const i=arr.indexOf(v); if(on&&i<0)arr.push(v); if
 // 家庭用作品のハード。1 つの作品が複数のハードで出ていることがある（w.hw はハードの一覧。
 // 例: The Drum Master! は Xbox One・Xbox Series X|S・Windows）。その作品はそれぞれのハードの中に出し、選択は共通
 const hwsOf = w => Array.isArray(w.hw) ? w.hw : [w.hw || 'その他'];
-const HW_ORDER = ['PlayStation 2', 'PlayStation Portable', 'ニンテンドーDS', 'Wii', 'ニンテンドー3DS', 'Wii U', 'PlayStation Vita', 'PlayStation 4',
-  'ニンテンドースイッチ', 'PlayStation 5', 'Xbox One', 'Xbox Series X|S', 'Windows', 'Steam', 'スマートフォン', 'その他'];
+// ハードの並び（ユーザー指定）。行ごと: PlayStation 系 / 任天堂系 / それ以外
+const HW_ROWS = [
+  ['PlayStation 2', 'PlayStation 4', 'PlayStation 5', 'PlayStation Portable', 'PlayStation Vita'],
+  ['ニンテンドーDS', 'ニンテンドー3DS', 'Wii', 'Wii U', 'ニンテンドースイッチ'],
+  ['Xbox One', 'Xbox Series X|S', 'Windows', 'Steam', 'スマートフォン', 'その他'],
+];
+const HW_ORDER = HW_ROWS.flat();
 // 収録曲のある家庭用作品のハード（HW_ORDER の順。一覧に無いハードは最後）
 function csHardwares(){
   const hws = new Set(WORKS.filter(w=>w.n>0 && w.kind==='CS').flatMap(hwsOf));
@@ -567,8 +572,13 @@ function renderSetup(){
     container.innerHTML='';
     container.insertAdjacentHTML('beforeend', `<div class="muted" style="margin:10px 0 4px">${label}</div>`);
     const gRow=document.createElement('div'); gRow.className='row'; container.append(gRow);
+    let rowNo = -1;
     for(const g of groups){
       const ws = groupWorks(g), n = ws.reduce((a,w)=>a+w.n,0);
+      // ハードは PlayStation 系・任天堂系・それ以外で行を分ける
+      const r = HW_ROWS.findIndex(x=>x.includes(g));
+      if(r >= 0 && rowNo >= 0 && r !== rowNo) gRow.insertAdjacentHTML('beforeend', '<span style="flex-basis:100%;height:0"></span>');
+      if(r >= 0) rowNo = r;
       gRow.append(chip(g, open.includes(g), on=>{
         toggleIn(open, g, on);
         for(const w of ws){

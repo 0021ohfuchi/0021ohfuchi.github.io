@@ -197,7 +197,7 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 .modal-box{background:#fff;border:3px solid var(--line);border-radius:22px;box-shadow:0 6px 0 var(--line);padding:20px 24px;max-width:620px;width:100%;max-height:90vh;overflow-y:auto}
 .modal-box ul{margin:0 0 14px;padding-left:1.2em;font-size:15px;line-height:1.8}
 .search-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.slist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:40vh;overflow-y:auto}
+.slist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:40vh;overflow-y:auto;padding-bottom:6px} /* 一番下のボタンの影が切れないように */
 .slist button{font-size:13px;padding:4px 14px;box-shadow:inset 0 0 0 2px #fff,0 3px 0 #3a2a1e} /* 曲の一覧は .sm と同じ大きさ */
 .slist button small{color:var(--sub);margin-left:6px;font-weight:500}
 .slist .muted{padding:6px 2px}
@@ -548,7 +548,7 @@ const HW_ALIAS = []; // 使っていない（複数のハードの作品は w.hw
 // アーケード（AC）の作品のまとまり（ユーザー指定）。作品名で振り分ける
 const AC_GROUPS = [
   ['AC1～AC14（旧筐体）', n => /^AC\d+/.test(n)],
-  ['AC15（新筐体）', n => /^(新筐体|KATSU-DON|ソライロ|モモイロ|キミドリ|ムラサキ|ホワイト|レッド|イエロー|ブルー|グリーン|ブラジル版限定)/.test(n)],
+  ['AC15（新筐体）', n => /^(新筐体|無印|KATSU-DON|ソライロ|モモイロ|キミドリ|ムラサキ|ホワイト|レッド|イエロー|ブルー|グリーン|ブラジル版限定)/.test(n)],
   ['AC16（ニジイロ）', n => /^(ニジイロ|中国版限定)/.test(n)],
 ];
 function acGroupOf(w){ const g = AC_GROUPS.find(([, f])=>f(w.name)); return g ? g[0] : 'AC その他'; }

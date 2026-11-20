@@ -70,7 +70,7 @@ works_raw = json.load(open(wp, encoding='utf-8')) if os.path.exists(wp) else {}
 WORKS_TOTAL = (works_raw.pop('_meta', None) or {}).get('total', 75)
 WORKS_DONE = sum(1 for v in works_raw.values() if v.get('done'))  # 取得済みの作品数（下で作品をまとめ直す前に数える）
 # 表示名の変更（取得のときの名前は scrape_works.py・update.py の ACTIVE_WORKS と合わせて元のまま）
-for old, new in [('ニジイロ（現行）', 'ニジイロ2026')]:
+for old, new in [('ニジイロ（現行）', 'ニジイロ2026'), ('新筐体 無印', '無印')]:
     if old in works_raw:
         works_raw[new] = works_raw.pop(old)
 # 作品の統合（ユーザー指定）: 米TDM は TDM に、太鼓ミュージックパスは本体（NS2・DF）にまとめる。
@@ -243,6 +243,8 @@ for s in lists:
             r['ch'] = cid
     if r.get('w') in CS_LABEL:
         r['w'] = CS_LABEL[r['w']]  # 初出作品も家庭用は正式名称で出す
+    elif r.get('w') == '新筐体 無印':
+        r['w'] = '無印'
     out.append(r)
 
 js = '// 自動生成: tools/build_data.py\n// 出典: 太鼓の達人 譜面とか Wiki (https://wikiwiki.jp/taiko-fumen/)\n'

@@ -73,7 +73,17 @@ CN_ONLY = ['拔蘿蔔', '捕魚歌', '兩隻老虎', '郷下老鼠', '小毛驢'
 if 'AC16中' in works_raw:
     cn = works_raw.pop('AC16中')
     cn['songs'] = [p for p in cn['songs'] if p in CN_ONLY]
-    works_raw['ニジイロ（中国版限定）'] = cn
+    works_raw['中国版限定'] = cn
+    # AC11亜・AC12亜（亜洲版）にしか収録されていない曲も「中国版限定」に移す（ユーザー指定）
+    ASIA = {'AC11亜', 'AC12亜'}
+    in_works = {}
+    for name, v in works_raw.items():
+        for p in v['songs']:
+            in_works.setdefault(p, set()).add(name)
+    move = sorted(p for p, ws in in_works.items() if ws and ws <= ASIA)
+    for name in ASIA & set(works_raw):
+        works_raw[name]['songs'] = [p for p in works_raw[name]['songs'] if p not in move]
+    cn['songs'] = sorted(set(cn['songs']) | set(move))
 # 新ACブラジル版（WM）も「ブラジル版限定」として、ブラジル版にしか無い2曲だけを入れる（ユーザー指定）
 BR_ONLY = ['Escatumbararibê', 'Hoje é Domingo']
 if 'WM' in works_raw:

@@ -501,10 +501,12 @@ if(!cfg.osInit){ cfg.osInit=true; if(!cfg.worksOff.includes('海外の曲')) cfg
 /* ---------- 作品（収録）: 各譜面は収録されている作品の番号 r.ws を持つ ---------- */
 const WORKS = (window.QUIZ_WORKS||[]).map((w,i)=>Object.assign({i, n:0}, w));
 for(const r of ALL){ if(r.ws) for(const i of r.ws) WORKS[i].n++; }
+// 作品の選択を覚えておくときの名前: 家庭用は略称（正式名称が同じ作品があるため。例: ドンダフルフェスティバルの Switch 版と PS5 など版）
+function wkey(w){ return w.short || w.name; }
 function inWorks(r){
   // 収録作品が分からない譜面は、作品をすべて選んでいるときだけ出題する
-  if(!r.ws || !r.ws.length) return !WORKS.some(w=>cfg.worksOff.includes(w.name));
-  return r.ws.some(i=>!cfg.worksOff.includes(WORKS[i].name));
+  if(!r.ws || !r.ws.length) return !WORKS.some(w=>cfg.worksOff.includes(wkey(w)));
+  return r.ws.some(i=>!cfg.worksOff.includes(wkey(WORKS[i])));
 }
 
 function chip(label, on, onChange, title){
@@ -520,7 +522,7 @@ function toggleIn(arr, v, on){const i=arr.indexOf(v); if(on&&i<0)arr.push(v); if
 
 // 同じ作品を別のハードの見出しにも出す（ドンダフルフェスティバルは Switch 版と PS5 などの版が同じ収録曲なので 1 つの作品にまとめ、
 // 両方の見出しにボタンを出す。どちらを押しても同じ作品の選択が切り替わる）
-const HW_ALIAS = [{hw: 'PlayStation 5 / Xbox Series X|S / Windows PC / Steam', short: 'NS2', after: 'Xbox One / Xbox Series X|S / Windows'}];
+const HW_ALIAS = []; // 例: {hw: '見出し', short: '略称', after: 'この見出しの後ろ'}（今は使っていない）
 // 収録曲のある家庭用作品のハード（作品の並び順のまま。別名の見出しは指定の見出しの後ろ）
 function csHardwares(){
   const hws = [...new Set(WORKS.filter(w=>w.n>0 && w.kind==='CS').map(w=>w.hw || 'その他'))];
@@ -543,7 +545,7 @@ function renderSetup(){
   const gBox=$('genreBox'); gBox.innerHTML='';
   for(const [g] of GENRES) gBox.append(chip(g, cfg.genre.includes(g), on=>{toggleIn(cfg.genre,g,on);saveCfg();}));
   // 同じ作品のボタンが 2 か所にあるとき（HW_ALIAS）は、押したら両方の表示をそろえるために描き直す
-  const workChip = w => chip(w.name, !cfg.worksOff.includes(w.name), on=>{toggleIn(cfg.worksOff,w.name,!on);saveCfg(); if(HW_ALIAS.some(a=>a.short===w.short)) renderSetup();}, `${w.short ? w.short + '　' : ''}おに ${w.n}譜面`);
+  const workChip = w => chip(w.name, !cfg.worksOff.includes(wkey(w)), on=>{toggleIn(cfg.worksOff,wkey(w),!on);saveCfg(); if(HW_ALIAS.some(a=>a.short===w.short)) renderSetup();}, `${w.short ? w.short + '　' : ''}おに ${w.n}譜面`);
   for(const [kind,boxId] of [['AC','workAC'],['OS','workOS']]){
     const box=$(boxId); box.innerHTML='';
     for(const w of WORKS.filter(w=>w.n>0 && w.kind===kind)) box.append(workChip(w));
@@ -583,9 +585,9 @@ function pool(){
 $('gAll').onclick=()=>{cfg.genre=GENRES.map(g=>g[0]);saveCfg();renderSetup();};
 $('gNone').onclick=()=>{cfg.genre=[];saveCfg();renderSetup();};
 $('wAll').onclick=()=>{cfg.worksOff=[];saveCfg();renderSetup();};
-$('wAC').onclick=()=>{cfg.worksOff=WORKS.filter(w=>w.kind!=='AC').map(w=>w.name);saveCfg();renderSetup();};
-$('wCS').onclick=()=>{cfg.worksOff=WORKS.filter(w=>w.kind!=='CS').map(w=>w.name);saveCfg();renderSetup();};
-$('wNone').onclick=()=>{cfg.worksOff=WORKS.map(w=>w.name);saveCfg();renderSetup();};
+$('wAC').onclick=()=>{cfg.worksOff=WORKS.filter(w=>w.kind!=='AC').map(wkey);saveCfg();renderSetup();};
+$('wCS').onclick=()=>{cfg.worksOff=WORKS.filter(w=>w.kind!=='CS').map(wkey);saveCfg();renderSetup();};
+$('wNone').onclick=()=>{cfg.worksOff=WORKS.map(wkey);saveCfg();renderSetup();};
 function updatePool(){
   const n = pool().length;
   $('poolInfo').textContent = `出題候補: ${n} 譜面`;

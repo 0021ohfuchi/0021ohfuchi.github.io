@@ -73,8 +73,9 @@ WORKS_DONE = sum(1 for v in works_raw.values() if v.get('done'))  # 取得済み
 for old, new in [('ニジイロ（現行）', 'ニジイロ2026')]:
     if old in works_raw:
         works_raw[new] = works_raw.pop(old)
-# 作品の統合（ユーザー指定）: 米TDM は TDM に、太鼓ミュージックパスは本体（NS2・DF）に、さらに DF は NS2 にまとめる
-for src, dst in [('米TDM', 'TDM'), ('NS2MP', 'NS2'), ('DFMP', 'DF'), ('DF', 'NS2')]:
+# 作品の統合（ユーザー指定）: 米TDM は TDM に、太鼓ミュージックパスは本体（NS2・DF）にまとめる。
+# NS2（Switch 版）と DF（PS5 などの版）は別の作品のまま
+for src, dst in [('米TDM', 'TDM'), ('NS2MP', 'NS2'), ('DFMP', 'DF')]:
     if src in works_raw and dst in works_raw:
         works_raw[dst]['songs'] = sorted(set(works_raw[dst]['songs']) | set(works_raw.pop(src)['songs']))
 # 新AC中国版（AC16中）は「ニジイロ（中国版限定）」として、中国版にしか無い曲だけを入れる（ユーザー指定。国内版と共通の曲は入れない）
@@ -141,7 +142,6 @@ CS_INFO = [  # (略称, 正式名称, ハード)
     ('NS RPG', '太鼓の達人 ドコどんRPGパック！', 'ニンテンドースイッチ'),
     ('NS2', '太鼓の達人 ドンダフルフェスティバル', 'ニンテンドースイッチ'),
     ('Xbox1', '太鼓の達人 The Drum Master!', 'Xbox One / Xbox Series X|S / Windows'),
-    # DF は NS2 にまとめてある。画面では「PlayStation 5 / …」の見出しにも NS2 と連動するボタンを出す（index.html の HW_ALIAS）
     ('DF', '太鼓の達人 ドンダフルフェスティバル', 'PlayStation 5 / Xbox Series X|S / Windows PC / Steam'),
     ('iOS', '太鼓の達人プラス', 'スマートフォン'),
     ('RC', '太鼓の達人 RHYTHM CONNECT', 'スマートフォン'),

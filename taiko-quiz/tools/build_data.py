@@ -153,7 +153,8 @@ for s in lists:
             r['yg'] = 1  # 推定値
     # 譜面データ（parse_charts.py で作成済みのもの）。画像の URL は data.js に入れない（直接参照しないため）
     if d.get('imgs'):
-        cid = hashlib.md5(d['imgs'][0].encode()).hexdigest()[:12]
+        k = int((fx or {}).get('img', 1)) - 1  # 使う譜面画像（chart_fixes.json の img。parse_charts.py と同じ）
+        cid = hashlib.md5(d['imgs'][k if 0 <= k < len(d['imgs']) else 0].encode()).hexdigest()[:12]
         if charts_index.get(cid, {}).get('ok'):
             r['ch'] = cid
     out.append(r)

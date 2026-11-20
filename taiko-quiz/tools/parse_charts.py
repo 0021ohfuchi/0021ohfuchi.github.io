@@ -98,11 +98,16 @@ def find_jobs(index):
     page_of = {s['href']: s['page'].split('/', 2)[-1] for s in lists}
     # 同じ画像を使う譜面ページが複数ある（例: 【双打】のページが表の譜面画像を載せている）ので、
     # 画像ごとに、それを使うページ全部の正しいコンボ数・手直しをまとめる
+    # 使う譜面画像: ふつうは1枚目。chart_fixes.json の img で何枚目かを指定できる（例: 2 = 「見やすさ重視」の画像）
+    def img_url(href, d):
+        fx = fixes.get(page_of.get(href, '')) or {}
+        k = int(fx.get('img', 1)) - 1
+        return d['imgs'][k] if 0 <= k < len(d['imgs']) else d['imgs'][0]
     by_img = {}
     for href, d in details.items():
         if not d.get('imgs'):
             continue
-        e = by_img.setdefault(chart_id(d['imgs'][0]), {'combos': set(), 'fix': None})
+        e = by_img.setdefault(chart_id(img_url(href, d)), {'combos': set(), 'fix': None})
         fix = fixes.get(page_of.get(href, ''))
         if fix and fix.get('combo'):
             e['combos'].add(str(fix['combo']))  # 一覧の誤りの手直し
@@ -114,7 +119,7 @@ def find_jobs(index):
     for href, d in details.items():
         if not d.get('imgs'):
             continue
-        url = d['imgs'][0]
+        url = img_url(href, d)
         cid = chart_id(url)
         # 読み取り済み（成功・失敗とも。画像が変わればIDも変わる）。RETRY_FAILED=1 なら、失敗したものは読み直す
         # （読み取り処理を直したとき用。画像はキャッシュにあるので Wiki にはアクセスしない）

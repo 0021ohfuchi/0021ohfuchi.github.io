@@ -73,6 +73,10 @@ WORKS_DONE = sum(1 for v in works_raw.values() if v.get('done'))  # 取得済み
 for old, new in [('ニジイロ（現行）', 'ニジイロ2026')]:
     if old in works_raw:
         works_raw[new] = works_raw.pop(old)
+# 作品の統合（ユーザー指定）: 米TDM は TDM にまとめる
+for src, dst in [('米TDM', 'TDM')]:
+    if src in works_raw and dst in works_raw:
+        works_raw[dst]['songs'] = sorted(set(works_raw[dst]['songs']) | set(works_raw.pop(src)['songs']))
 # 新AC中国版（AC16中）は「ニジイロ（中国版限定）」として、中国版にしか無い曲だけを入れる（ユーザー指定。国内版と共通の曲は入れない）
 CN_ONLY = ['拔蘿蔔', '捕魚歌', '兩隻老虎', '郷下老鼠', '小毛驢', '王老先生有塊地', '技神闇鬼', '技神闇鬼(裏譜面)', 'LUMINΔ']
 if 'AC16中' in works_raw:

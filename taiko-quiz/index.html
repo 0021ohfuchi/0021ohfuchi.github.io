@@ -312,7 +312,7 @@ a{color:var(--ka-d);font-weight:700}
       <div class="row" style="margin-bottom:6px"><button class="blue sm" id="gAll">すべて</button><button class="blue sm" id="gNone">クリア</button></div>
       <div class="row" id="genreBox"></div>
     </div></div>
-    <div class="setrow"><span class="lbl">作品<br><span class="muted" style="font-weight:500">（収録）</span></span><div style="flex:1;min-width:0">
+    <div class="setrow"><span class="lbl">収録作品</span><div style="flex:1;min-width:0">
       <div class="row" style="margin-bottom:6px"><button class="blue sm" id="wAll">すべて</button><button class="blue sm" id="wAC">ACのみ</button><button class="blue sm" id="wCS">CSのみ</button><button class="blue sm" id="wNone">クリア</button></div>
       <div class="muted" style="margin:2px 0 4px">AC</div><div class="row" id="workAC"></div>
       <div class="muted" style="margin:10px 0 4px">CS</div><div class="row" id="workCS"></div>
@@ -527,7 +527,8 @@ function renderSetup(){
     for(const w of WORKS.filter(w=>w.n>0 && w.kind===kind)) box.append(chip(w.name, !cfg.worksOff.includes(w.name), on=>{toggleIn(cfg.worksOff,w.name,!on);saveCfg();}, `おに ${w.n}譜面`));
   }
   $('workOSWrap').classList.toggle('hidden', !$('workOS').children.length); // 海外の曲が無いときは見出しごと隠す
-  const wDone = WORKS.length, wTotal = window.QUIZ_WORKS_TOTAL || wDone;
+  // 取得済みの作品数と、取得する作品の数（画面に出る作品は、まとめ直したり消したりしているので数が違う）
+  const wTotal = window.QUIZ_WORKS_TOTAL || 0, wDone = window.QUIZ_WORKS_DONE != null ? window.QUIZ_WORKS_DONE : wTotal;
   $('workNote').textContent = wDone < wTotal ? `（作品ごとの収録曲を取得中です: ${wDone}/${wTotal} 作品。まだ表示されていない作品は、取得が終わると追加されます）` : '';
   $('qCount').value = String(cfg.count);
   const fBox=$('sfxBox'); fBox.innerHTML='';

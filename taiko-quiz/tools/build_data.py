@@ -68,6 +68,7 @@ def work_label(info):
 wp = os.path.join(HERE, 'works.json')
 works_raw = json.load(open(wp, encoding='utf-8')) if os.path.exists(wp) else {}
 WORKS_TOTAL = (works_raw.pop('_meta', None) or {}).get('total', 75)
+WORKS_DONE = sum(1 for v in works_raw.values() if v.get('done'))  # 取得済みの作品数（下で作品をまとめ直す前に数える）
 # 新AC中国版（AC16中）は「ニジイロ（中国版限定）」として、中国版にしか無い曲だけを入れる（ユーザー指定。国内版と共通の曲は入れない）
 CN_ONLY = ['拔蘿蔔', '捕魚歌', '兩隻老虎', '郷下老鼠', '小毛驢', '王老先生有塊地', '技神闇鬼', '技神闇鬼(裏譜面)', 'LUMINΔ']
 if 'AC16中' in works_raw:
@@ -194,6 +195,7 @@ for s in lists:
 js = '// 自動生成: tools/build_data.py\n// 出典: 太鼓の達人 譜面とか Wiki (https://wikiwiki.jp/taiko-fumen/)\n'
 js += 'window.QUIZ_WORKS=' + json.dumps([{'name': w['name'], 'kind': w['kind']} for w in WORK_LIST], ensure_ascii=False) + ';\n'
 js += 'window.QUIZ_WORKS_TOTAL=' + str(WORKS_TOTAL) + ';\n'
+js += 'window.QUIZ_WORKS_DONE=' + str(WORKS_DONE) + ';\n'
 js += 'window.QUIZ_DATA=' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + ';\n'
 open(os.path.join(HERE, '..', 'data.js'), 'w', encoding='utf-8').write(js)
 # 設定画面の BGM: taiko-quiz フォルダ直下の mp3 の一覧（ブラウザはフォルダの中身を調べられないため）

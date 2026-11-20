@@ -521,32 +521,26 @@ function chip(label, on, onChange, title){
 }
 function toggleIn(arr, v, on){const i=arr.indexOf(v); if(on&&i<0)arr.push(v); if(!on&&i>=0)arr.splice(i,1);}
 
-// 同じ作品を別のハードの見出しにも出す（ドンダフルフェスティバルは Switch 版と PS5 などの版が同じ収録曲なので 1 つの作品にまとめ、
-// 両方の見出しにボタンを出す。どちらを押しても同じ作品の選択が切り替わる）
-const HW_ALIAS = []; // 例: {hw: '見出し', short: '略称', after: 'この見出しの後ろ'}（今は使っていない）
-// 収録曲のある家庭用作品のハード（作品の並び順のまま。別名の見出しは指定の見出しの後ろ）
+// 家庭用作品のハード。1 つの作品が複数のハードで出ていることがある（w.hw はハードの一覧。
+// 例: The Drum Master! は Xbox One・Xbox Series X|S・Windows）。その作品はそれぞれのハードの中に出し、選択は共通
+const hwsOf = w => Array.isArray(w.hw) ? w.hw : [w.hw || 'その他'];
+const HW_ORDER = ['PlayStation 2', 'PlayStation Portable', 'ニンテンドーDS', 'Wii', 'ニンテンドー3DS', 'Wii U', 'PlayStation Vita', 'PlayStation 4',
+  'ニンテンドースイッチ', 'PlayStation 5', 'Xbox One', 'Xbox Series X|S', 'Windows', 'Steam', 'スマートフォン', 'その他'];
+// 収録曲のある家庭用作品のハード（HW_ORDER の順。一覧に無いハードは最後）
 function csHardwares(){
-  const hws = [...new Set(WORKS.filter(w=>w.n>0 && w.kind==='CS').map(w=>w.hw || 'その他'))];
-  for(const a of HW_ALIAS){
-    if(!WORKS.some(w=>w.short===a.short && w.n>0) || hws.includes(a.hw)) continue;
-    const i = hws.indexOf(a.after);
-    hws.splice(i < 0 ? hws.length : i + 1, 0, a.hw);
-  }
-  return hws;
+  const hws = new Set(WORKS.filter(w=>w.n>0 && w.kind==='CS').flatMap(hwsOf));
+  return HW_ORDER.filter(h=>hws.has(h)).concat([...hws].filter(h=>!HW_ORDER.includes(h)));
 }
-// そのハードの見出しに出す作品（別名で出す作品も含む）
-function csWorksOf(hw){
-  const ws = WORKS.filter(w=>w.n>0 && w.kind==='CS' && w.hw===hw);
-  for(const a of HW_ALIAS) if(a.hw===hw) ws.push(...WORKS.filter(w=>w.short===a.short && w.n>0));
-  return ws;
-}
+// そのハードで出ている作品
+function csWorksOf(hw){ return WORKS.filter(w=>w.n>0 && w.kind==='CS' && hwsOf(w).includes(hw)); }
+const HW_ALIAS = []; // 使っていない（複数のハードの作品は w.hw の一覧で扱う）
 function renderSetup(){
   const lvBox=$('lvBox'); lvBox.innerHTML='';
   for(let lv=1;lv<=10;lv++) lvBox.append(chip('★'+lv, cfg.lv.includes(lv), on=>{toggleIn(cfg.lv,lv,on);saveCfg();}));
   const gBox=$('genreBox'); gBox.innerHTML='';
   for(const [g] of GENRES) gBox.append(chip(g, cfg.genre.includes(g), on=>{toggleIn(cfg.genre,g,on);saveCfg();}));
-  // 同じ作品のボタンが 2 か所にあるとき（HW_ALIAS）は、押したら両方の表示をそろえるために描き直す
-  const workChip = w => chip(w.name, !cfg.worksOff.includes(wkey(w)), on=>{toggleIn(cfg.worksOff,wkey(w),!on);saveCfg(); if(HW_ALIAS.some(a=>a.short===w.short)) renderSetup();}, `${w.short ? w.short + '　' : ''}おに ${w.n}譜面`);
+  // 複数のハードに出る作品は、押したらほかのハードの中のボタンもそろえるために描き直す
+  const workChip = w => chip(w.name, !cfg.worksOff.includes(wkey(w)), on=>{toggleIn(cfg.worksOff,wkey(w),!on);saveCfg(); if(hwsOf(w).length>1) renderSetup();}, `${w.short ? w.short + '　' : ''}おに ${w.n}譜面`);
   for(const [kind,boxId] of [['AC','workAC'],['OS','workOS']]){
     const box=$(boxId); box.innerHTML='';
     for(const w of WORKS.filter(w=>w.n>0 && w.kind===kind)) box.append(workChip(w));

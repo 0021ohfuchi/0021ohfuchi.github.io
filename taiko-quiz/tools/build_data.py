@@ -141,8 +141,9 @@ CS_INFO = [  # (略称, 正式名称, ハード)
     ('NS1', '太鼓の達人 Nintendo Switchば〜じょん！', 'ニンテンドースイッチ'),
     ('NS RPG', '太鼓の達人 ドコどんRPGパック！', 'ニンテンドースイッチ'),
     ('NS2', '太鼓の達人 ドンダフルフェスティバル', 'ニンテンドースイッチ'),
-    ('Xbox1', '太鼓の達人 The Drum Master!', 'Xbox One / Xbox Series X|S / Windows'),
-    ('DF', '太鼓の達人 ドンダフルフェスティバル', 'PlayStation 5 / Xbox Series X|S / Windows PC / Steam'),
+    # 複数のハードで出ている作品は、ハードを並べて書く（画面ではそれぞれのハードの中に出る）
+    ('Xbox1', '太鼓の達人 The Drum Master!', ['Xbox One', 'Xbox Series X|S', 'Windows']),
+    ('DF', '太鼓の達人 ドンダフルフェスティバル', ['PlayStation 5', 'Xbox Series X|S', 'Windows', 'Steam']),
     ('iOS', '太鼓の達人プラス', 'スマートフォン'),
     ('RC', '太鼓の達人 RHYTHM CONNECT', 'スマートフォン'),
     ('PTB', '太鼓の達人 Pop Tap Beat', 'スマートフォン'),
@@ -151,7 +152,7 @@ CS_INFO = [  # (略称, 正式名称, ハード)
 ]
 CS_ORDER = [c[0] for c in CS_INFO]
 CS_LABEL = {c[0]: c[1] for c in CS_INFO}
-CS_HW = {c[0]: c[2] for c in CS_INFO}
+CS_HW = {c[0]: (c[2] if isinstance(c[2], list) else [c[2]]) for c in CS_INFO}  # 作品 → ハードの一覧
 for i, name in enumerate(CS_ORDER):
     if name in works_raw:
         works_raw[name]['kind'] = 'CS'
@@ -247,7 +248,7 @@ for s in lists:
 js = '// 自動生成: tools/build_data.py\n// 出典: 太鼓の達人 譜面とか Wiki (https://wikiwiki.jp/taiko-fumen/)\n'
 # 作品: name=画面に出す名前（CS は正式名称）、short=略称（検索で略称でも探せるように）、hw=ハード（CS をハードごとに分けて並べる）
 js += 'window.QUIZ_WORKS=' + json.dumps([dict({'name': CS_LABEL.get(w['name'], w['name']), 'kind': w['kind']},
-                                              **({'short': w['name'], 'hw': CS_HW.get(w['name'], 'その他')} if w['kind'] == 'CS' else {}))
+                                              **({'short': w['name'], 'hw': CS_HW.get(w['name'], ['その他'])} if w['kind'] == 'CS' else {}))
                                          for w in WORK_LIST], ensure_ascii=False) + ';\n'
 js += 'window.QUIZ_WORKS_TOTAL=' + str(WORKS_TOTAL) + ';\n'
 js += 'window.QUIZ_WORKS_DONE=' + str(WORKS_DONE) + ';\n'

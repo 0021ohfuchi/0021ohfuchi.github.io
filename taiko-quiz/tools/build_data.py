@@ -74,6 +74,12 @@ if 'AC16中' in works_raw:
     cn = works_raw.pop('AC16中')
     cn['songs'] = [p for p in cn['songs'] if p in CN_ONLY]
     works_raw['ニジイロ（中国版限定）'] = cn
+# 新ACブラジル版（WM）も「ブラジル版限定」として、ブラジル版にしか無い2曲だけを入れる（ユーザー指定）
+BR_ONLY = ['Escatumbararibê', 'Hoje é Domingo']
+if 'WM' in works_raw:
+    br = works_raw.pop('WM')
+    br['songs'] = [p for p in br['songs'] if p in BR_ONLY]
+    works_raw['ブラジル版限定'] = br
 # 家庭用（CS）の作品の並び順（scrape_works.py の一覧と同じ）。古い works.json でもこの順に並べる。
 # アニメ祭り・アニメスペシャルは家庭用として扱う
 CS_ORDER = ['CS1', 'CS2', 'CS3', 'CS4', 'CS5', 'CS6', 'CS7', 'アニメ祭り', 'アニメスペシャル', 'TDM', '米TDM',

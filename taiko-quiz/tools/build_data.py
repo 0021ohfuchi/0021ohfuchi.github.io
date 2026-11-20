@@ -97,6 +97,8 @@ NEW_STD_PAGES = set(s['page'] for s in lists if s['section'] != '旧基準')
 
 # 曲を流す YouTube 動画（裏譜面ページに無ければ表譜面のものを使う）
 # 流すのは曲だけの音源（0=自動生成音源, 1=公式音源/MV）のみ。オート動画・プレイ動画（2, 3）は使わない
+fxp = os.path.join(HERE, 'chart_fixes.json')
+CHART_FIXES = json.load(open(fxp, encoding='utf-8')) if os.path.exists(fxp) else {}
 yt_by_page = {}
 for s in lists:
     d = details.get(s['href'], {})
@@ -117,6 +119,9 @@ for s in lists:
         'bpm': s['bpm'],
         'c': s['combo'].replace('/', '・'),
     }
+    fx = CHART_FIXES.get(r['p'])
+    if fx and fx.get('combo'):
+        r['c'] = str(fx['combo'])  # 一覧の最大コンボ数の誤りを手直し（chart_fixes.json）
     if s['section'] == '旧基準' and s['page'] not in NEW_STD_PAGES:
         r['o1'] = 1  # 旧基準にしか無い譜面（出題する）
     for k_src, k_dst in (('yomi', 'y'), ('ver', 'v'), ('year', 'yr'), ('density', 'd'), ('roll', 'r')):

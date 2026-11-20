@@ -112,7 +112,9 @@ def find_jobs(index):
         if done or cid in seen:
             continue
         seen.add(cid)
-        jobs.append({'id': cid, 'url': url, 'combos': sorted(combos.get(href, [])), 'fix': fixes.get(page_of.get(href, ''))})
+        fix = fixes.get(page_of.get(href, ''))
+        cs = [str(fix['combo'])] if fix and fix.get('combo') else sorted(combos.get(href, []))  # 一覧の誤りの手直し
+        jobs.append({'id': cid, 'url': url, 'combos': cs, 'fix': fix})
     return jobs
 
 

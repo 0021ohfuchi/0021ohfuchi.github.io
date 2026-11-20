@@ -304,7 +304,7 @@ a{color:var(--ka-d);font-weight:700}
   <div class="card">
     <h2>出題設定</h2>
     <div class="setup-cols"><div class="setup-col">
-    <div class="setrow"><span class="lbl">★の数</span><div style="flex:1;min-width:0">
+    <div class="setrow"><span class="lbl">難易度</span><div style="flex:1;min-width:0">
       <div class="row" style="margin-bottom:6px"><button class="blue sm" id="lvAll">すべて</button><button class="blue sm" id="lvNone">クリア</button></div>
       <div class="row" id="lvBox"></div>
     </div></div>
@@ -952,7 +952,7 @@ function fmtBpm(b){
 function infoHTML(r, hide, withWorks){
   const cell = (key, inner)=> hide && hide.has(key)
     ? `<div class="hid" data-k="${key}" title="タップで表示">${inner}<span class="mask">タップで表示</span></div>` : `<div>${inner}</div>`;
-  return cell('lv', `<div class="k">難易度</div><div class="v">★×${r.lv}</div>${r.s===3?'<div class="k">旧基準</div>':''}`)+
+  return cell('lv', `<div class="k">難易度</div><div class="v">★×${r.lv}</div>`)+ /* 旧基準かどうかは出さない（出題される旧基準の譜面は、旧基準にしか無い曲だけ） */
     cell('bpm', `<div class="k">BPM</div><div class="v">${esc(fmtBpm(r.bpm))}</div>`)+
     cell('combo', `<div class="k">最大コンボ数</div><div class="v">${esc(r.c||'?')}</div>`)+
     cell('genre', `<div class="k">ジャンル</div><div class="v"><span class="gchip" style="background:${GENRE_COLOR[r.g]||'#eee'}">${esc(r.g)}</span></div>`)+
@@ -1115,8 +1115,9 @@ function backToList(){
   $('sList').scrollTop = search.scroll;
 }
 // 譜面の切り替えタブの名前。裏譜面が無い曲は「表譜面」と書かず ★×6 のように★だけにする
-function chartLabel(r, hasUra){
-  const old = r.s===3 ? '（旧基準）' : '';
+// onlyOld: その曲の譜面が旧基準しか無いとき（そのときは「（旧基準）」と書かない）
+function chartLabel(r, hasUra, onlyOld){
+  const old = r.s===3 && !onlyOld ? '（旧基準）' : '';
   if(/^【双打】/.test(r.n)) return `双打 ★×${r.lv}${old}`;
   if(!hasUra) return `★×${r.lv}${old}`;
   return `${/裏譜面/.test(r.n) ? '裏譜面' : '表譜面'} ★×${r.lv}${old}`;
@@ -1127,7 +1128,7 @@ function showSong(){
   $('sList').classList.add('hidden'); // 譜面を1画面に収めるため、候補一覧は閉じる（「検索結果に戻る」でまた開く）
   const works = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
   d.innerHTML = `<div class="sd-head"><button class="sd-back" id="sdBack" title="検索結果の一覧に戻る（Esc）">← 検索結果に戻る</button><span class="title">${esc(s.name)}</span>${s.yomi?`<span class="muted">${esc(s.yomi)}</span>`:''}
-      <div class="sd-tabs">${s.charts.map((c,i)=>`<button data-i="${i}" class="sm${i===search.idx?' on':''}">${chartLabel(c, s.charts.some(x=>/裏譜面/.test(x.n)))}</button>`).join('')}</div>
+      <div class="sd-tabs">${s.charts.map((c,i)=>`<button data-i="${i}" class="sm${i===search.idx?' on':''}">${chartLabel(c, s.charts.some(x=>/裏譜面/.test(x.n)), s.charts.every(x=>x.s===3))}</button>`).join('')}</div>
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a></div>
     <div class="info">${infoHTML(r)}</div>
     <div class="sd-works"><span style="border:none;background:none;padding-left:0">収録作品:</span>${works.length?works.map(w=>`<span>${esc(w)}</span>`).join(''):'<span class="muted" style="border:none">不明（取得中の可能性があります）</span>'}</div>

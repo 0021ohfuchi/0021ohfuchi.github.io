@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -182,7 +182,7 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 .wgroup{margin-top:12px}
 .wlabel{font-size:14px;font-weight:800;color:var(--sub);margin-bottom:8px}
 /* 曲のプレーヤー: YouTube の規約に合わせて映像部分は 200×200px 以上で表示する。見出しをドラッグして動かせる */
-.player{position:fixed;left:16px;top:84px;width:206px;z-index:90;background:#fff;border:3px solid var(--line);border-radius:16px;box-shadow:0 6px 0 var(--line);overflow:hidden}
+.player{position:fixed;left:16px;bottom:16px;width:206px;z-index:90;background:#fff;border:3px solid var(--line);border-radius:16px;box-shadow:0 6px 0 var(--line);overflow:hidden}
 .player-head{display:flex;align-items:center;gap:6px;padding:5px 8px;font-size:12px;font-weight:800;cursor:move;user-select:none;touch-action:none;flex-wrap:wrap}
 .player-head #plLabel{flex:1 1 100%;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .player-head .sp{flex:1}
@@ -227,6 +227,11 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 table.sum{width:100%;border-collapse:collapse;font-size:14px}
 table.sum td,table.sum th{padding:7px 6px;border-bottom:2px dotted var(--line);text-align:left}
 table.sum td.num{text-align:right;white-space:nowrap;font-weight:800}
+table.sum th.num{text-align:right}
+/* 結果発表: 表示したヒント（色つき）・表示しなかったヒント（薄い） */
+table.sum td.hints{white-space:normal}
+.hint{display:inline-block;margin:1px 2px;padding:0 6px;border-radius:999px;font-size:11px;font-weight:700;background:#f2ece4;color:#c4b5a5}
+.hint.on{background:#ffd36b;color:#3a2a1e}
 a{color:var(--ka-d);font-weight:700}
 .share{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin:4px 0 14px}
 .share button{display:inline-flex;align-items:center;gap:6px}
@@ -406,13 +411,12 @@ a{color:var(--ka-d);font-weight:700}
       <button class="sh-th" id="shareTh" title="Threads でシェア"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.3 11.1c-.1 0-.2-.1-.3-.1-.2-3.1-1.9-4.9-4.7-4.9h-.1c-1.7 0-3.1.7-3.9 2l1.5 1c.6-.9 1.6-1.1 2.4-1.1 1 0 1.7.3 2.2.9.3.4.6 1 .7 1.7-.8-.1-1.6-.2-2.5-.1-2.5.1-4.1 1.6-4 3.6.1 1 .6 1.9 1.4 2.5.7.5 1.7.7 2.7.7 1.3-.1 2.3-.6 3-1.5.5-.7.9-1.6 1-2.7.6.4 1.1.9 1.3 1.5.5 1 .5 2.7-.9 4.1-1.2 1.2-2.7 1.8-4.9 1.8-2.4 0-4.3-.8-5.5-2.3-1.1-1.4-1.7-3.5-1.7-6.1s.6-4.7 1.7-6.1C6.9 4.4 8.7 3.6 11.1 3.6c2.5 0 4.3.8 5.6 2.3.6.8 1.1 1.7 1.4 2.8l1.8-.5c-.4-1.4-1-2.6-1.8-3.6C16.5 2.7 14.1 1.7 11.1 1.7 8.1 1.7 5.8 2.7 4.3 4.6 2.9 6.4 2.2 8.9 2.2 12s.7 5.6 2.1 7.4c1.5 1.9 3.8 2.9 6.8 2.9 2.7 0 4.6-.7 6.2-2.3 2.1-2.1 2-4.7 1.3-6.3-.5-1.1-1.4-2-2.6-2.6h1.3zm-4.6 4.4c-1.1.1-2.2-.4-2.3-1.4 0-.8.5-1.6 2.3-1.7h.6c.6 0 1.2.1 1.8.2-.2 2.4-1.3 2.9-2.4 2.9z"/></svg>Threads</button>
       <button class="sh-ig" id="shareIg" title="Instagram でシェア"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.8.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2zm0 2c-3.1 0-3.5 0-4.7.1-1.1.1-1.7.2-2.1.4-.5.2-.9.4-1.3.8-.4.4-.6.8-.8 1.3-.2.4-.3 1-.4 2.1-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c.1 1.1.2 1.7.4 2.1.2.5.4.9.8 1.3.4.4.8.6 1.3.8.4.2 1 .3 2.1.4 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1.1-.1 1.7-.2 2.1-.4.5-.2.9-.4 1.3-.8.4-.4.6-.8.8-1.3.2-.4.3-1 .4-2.1.1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c-.1-1.1-.2-1.7-.4-2.1-.2-.5-.4-.9-.8-1.3-.4-.4-.8-.6-1.3-.8-.4-.2-1-.3-2.1-.4-1.2-.1-1.6-.1-4.7-.1zm0 3.4a4.4 4.4 0 1 1 0 8.8 4.4 4.4 0 0 1 0-8.8zm0 7.2a2.8 2.8 0 1 0 0-5.6 2.8 2.8 0 0 0 0 5.6zm5.6-7.4a1 1 0 1 1-2.1 0 1 1 0 0 1 2.1 0z"/></svg>Instagram</button>
       <button id="shareMore" class="hidden" title="ほかのアプリでシェア">その他</button>
-      <button id="shareSave" title="結果画面の画像を保存">画像を保存</button>
       <div class="muted" id="shareMsg" style="flex-basis:100%;text-align:center;min-height:1.4em"></div>
     </div>
     <table class="sum" id="endTable"></table>
     <div class="row" style="justify-content:center;margin-top:16px" data-html2canvas-ignore>
       <button class="primary big" id="againBtn">同じ設定でもう一度</button>
-      <button class="big" id="backBtn">設定にもどる</button>
+      <button class="big" id="backBtn">トップに戻る</button>
     </div>
   </div>
 </section>
@@ -781,7 +785,9 @@ function nextQ(){
   game.pos++;
   if(game.pos >= game.list.length){ endGame(); return; }
   const r = game.list[game.pos];
-  game.q = {r, wrong:[], done:false};
+  // t0: 問題を出した時刻（回答にかかった時間用）。shown: 表示したヒント（初めから表示しているものも含む）
+  const hidden = quizHidden();
+  game.q = {r, wrong:[], done:false, t0: performance.now(), shown: new Set(HINT_KEYS.map(h=>h[0]).filter(k=>!hidden.has(k)))};
   // 次の問題の譜面を先に読み取っておく
   const nx = game.list[game.pos+1]; if(nx) getFumen(nx);
   const no = game.history.length+1;
@@ -900,7 +906,7 @@ function wikiUrl(r){return WIKI+encodeURIComponent('収録曲/おに/'+r.p).repl
 function finishQ(ok){
   const q=game.q;
   q.done=true;
-  game.history.push({r:q.r, ok});
+  game.history.push({r:q.r, ok, ms: performance.now() - q.t0, shown: [...q.shown]}); // 回答にかかった時間と、表示したヒント
   if(ok) playSE(true); // あきらめたときは効果音なし
   playSong(q.r); // 正解・あきらめたとき、その曲を流す
   revealInfo();  // 答えが出たら、伏せていた情報も全部見せる
@@ -928,9 +934,12 @@ function endGame(){
   game.ended=true;
   const h=game.history, n=h.length, okN=correctCount();
   $('endTotal').textContent = `${okN} / ${n} 問正解`;
-  $('endSub').textContent = n ? `正解率 ${Math.round(okN/n*100)}%` : '';
-  $('endTable').innerHTML = '<tr><th>#</th><th>曲名</th><th>★</th><th class="num">結果</th></tr>' + h.map((x,i)=>
-    `<tr><td>${i+1}</td><td><a href="${wikiUrl(x.r)}" target="_blank" rel="noopener">${esc(x.r.n)}</a></td><td>${x.r.lv}</td><td class="num">${x.ok?'⭕':'❌'}</td></tr>`).join('');
+  const total = h.reduce((a,x)=>a+(x.ms||0),0);
+  $('endSub').textContent = n ? `正解率 ${Math.round(okN/n*100)}% ／ 合計時間 ${fmtTime(total)}` : '';
+  // 問題ごと: 曲名・見たヒント（表示した項目は色つき、見なかった項目は薄い）・回答にかかった時間・結果
+  const hintCells = x => HINT_KEYS.map(([k, label])=>`<span class="hint${(x.shown||[]).includes(k)?' on':''}" title="${label}${(x.shown||[]).includes(k)?'：表示した':'：表示しなかった'}">${label}</span>`).join('');
+  $('endTable').innerHTML = '<tr><th>#</th><th>曲名</th><th>表示したヒント</th><th class="num">時間</th><th class="num">結果</th></tr>' + h.map((x,i)=>
+    `<tr><td>${i+1}</td><td><a href="${wikiUrl(x.r)}" target="_blank" rel="noopener">${esc(x.r.n)}</a></td><td class="hints">${hintCells(x)}</td><td class="num">${x.ms!=null?fmtTime(x.ms):'-'}</td><td class="num">${x.ok?'⭕':'❌'}</td></tr>`).join('');
   $('shareBox').classList.toggle('hidden', !n);
   show('scEnd');
   shareMsg('');
@@ -983,52 +992,50 @@ function saveShot(s){
   const a = document.createElement('a'); a.href = URL.createObjectURL(s.blob); a.download = s.name;
   document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
 }
-// スマホ（画像の共有ができる端末）: 共有メニューから X・Threads などを選ぶ
 function canShareFile(s){ return !!(s && s.file && navigator.canShare && navigator.canShare({files:[s.file]})); }
-async function shareWithImage(intentUrl){
-  const s = await getShot(), u = shareUrl();
-  if(canShareFile(s)){
-    try{ await navigator.share({files:[s.file], text: shareText() + (u?'\n'+u:'')}); shareMsg(''); }
-    catch(e){ if(e.name!=='AbortError') shareMsg('共有できませんでした。「画像を保存」してから投稿してください'); }
-    return;
-  }
-  // パソコン: 画像をクリップボードに入れてから投稿画面を開く（投稿画面で貼り付ける）。
-  // 新しいタブを先に開くとこの画面がフォーカスを失いコピーできないので、コピーが先
-  if(s){
-    try{
-      await navigator.clipboard.write([new ClipboardItem({'image/png': s.blob})]);
-      shareMsg('結果の画像をコピーしました。投稿画面で貼り付け（Ctrl+V）してください');
-    }catch(e){
-      saveShot(s);
-      shareMsg('結果の画像を保存しました。投稿画面で画像を添付してください');
-    }
-  } else shareMsg('');
-  window.open(intentUrl, '_blank', 'noopener');
+// 結果の画像をクリップボードに入れる（投稿画面で貼り付けられるように）。できなければ false
+async function copyShot(s){
+  if(!s) return false;
+  try{ await navigator.clipboard.write([new ClipboardItem({'image/png': s.blob})]); return true; }catch(e){ return false; }
 }
-function intentX(){ const u=shareUrl(), q=new URLSearchParams({text: shareText()}); if(u) q.set('url', u); return 'https://x.com/intent/post?' + q; }
-function intentTh(){ const u=shareUrl(); return 'https://www.threads.net/intent/post?' + new URLSearchParams({text: shareText() + (u?'\n'+u:'')}); } // Threads は url 引数が無いので本文に付ける
-$('shareX').onclick=()=>shareWithImage(intentX());
-$('shareTh').onclick=()=>shareWithImage(intentTh());
-if(navigator.share){ // スマホなど: LINE・Instagram などほかのアプリにも送れる
+// スマホ: アプリを直接起動する（アプリのリンク）。アプリが無くて画面がそのままなら、ブラウザで投稿画面を開く
+function launchApp(appUrl, webUrl){
+  let left = false;
+  const onHide = ()=>{ if(document.hidden) left = true; };
+  document.addEventListener('visibilitychange', onHide);
+  location.href = appUrl;
+  setTimeout(()=>{ document.removeEventListener('visibilitychange', onHide); if(!left && !document.hidden && webUrl) window.open(webUrl, '_blank', 'noopener'); }, 1500);
+}
+// 各 SNS: スマホはアプリを起動、パソコンはブラウザで投稿画面を開く。どちらも先に結果の画像をコピーしておく
+// （新しいタブ・アプリに移るとこの画面がフォーカスを失いコピーできないので、コピーが先）
+async function shareTo(app){
+  const s = await getShot(), u = shareUrl(), text = shareText() + (u ? '\n' + u : '');
+  const copied = await copyShot(s);
+  if(IS_TOUCH){
+    if(app.name === 'Instagram' && !copied && s) saveShot(s); // Instagram は文章を渡せないので、画像を用意しておく
+    shareMsg(copied ? `結果の画像をコピーしました。${app.name} で貼り付けてください` : app.name === 'Instagram' ? '結果の画像を保存しました。Instagram で画像を選んでください' : '');
+    launchApp(app.appUrl(text), app.webUrl(text));
+  } else {
+    if(!copied && s) saveShot(s);
+    shareMsg(copied ? '結果の画像をコピーしました。投稿画面で貼り付け（Ctrl+V）してください' : s ? '結果の画像を保存しました。投稿画面で画像を添付してください' : '');
+    window.open(app.webUrl(text), '_blank', 'noopener');
+  }
+}
+const SNS = {
+  x:  {name:'X', appUrl: t=>'twitter://post?message=' + encodeURIComponent(t), webUrl: t=>'https://x.com/intent/post?' + new URLSearchParams({text: t})},
+  th: {name:'Threads', appUrl: t=>'barcelona://create?text=' + encodeURIComponent(t), webUrl: t=>'https://www.threads.net/intent/post?' + new URLSearchParams({text: t})},
+  ig: {name:'Instagram', appUrl: ()=>'instagram://library', webUrl: ()=>'https://www.instagram.com/'}, // Instagram は文章を渡すリンクが無い
+};
+$('shareX').onclick=()=>shareTo(SNS.x);
+$('shareTh').onclick=()=>shareTo(SNS.th);
+$('shareIg').onclick=()=>shareTo(SNS.ig);
+if(navigator.share){ // スマホなど: LINE などほかのアプリにも送れる
   $('shareMore').classList.remove('hidden');
   $('shareMore').onclick=async()=>{
     const s = await getShot(), u = shareUrl(), t = {text: shareText() + (u?'\n'+u:'')};
     navigator.share(canShareFile(s) ? Object.assign(t,{files:[s.file]}) : t).catch(()=>{});
   };
 }
-$('shareSave').onclick=async()=>{ const s = await getShot(); if(s){ saveShot(s); shareMsg(''); } else shareMsg('画像を作れませんでした'); };
-// Instagram には投稿画面を開くリンクが無いので、スマホは共有メニュー（Instagram を選ぶ）、
-// パソコンは結果の画像を保存してから Instagram を開く（画像は自分で添付する）
-$('shareIg').onclick=async()=>{
-  const s = await getShot(), u = shareUrl();
-  if(canShareFile(s)){
-    try{ await navigator.share({files:[s.file], text: shareText() + (u?'\n'+u:'')}); shareMsg('共有メニューから Instagram を選んでください'); }
-    catch(e){ if(e.name!=='AbortError') shareMsg('共有できませんでした。「画像を保存」してから投稿してください'); }
-    return;
-  }
-  if(s){ saveShot(s); shareMsg('結果の画像を保存しました。Instagram の投稿画面で画像を選んでください'); }
-  window.open('https://www.instagram.com/', '_blank', 'noopener');
-};
 
 // ★・BPM・最大コンボ数・ジャンル・初出作品（出題画面と検索画面で共通）
 // BPM の「※」（Wiki で概算の値に付く印）は「約」にする。例: 112※ → 約112、79※-101 → 約79-101、72-165※ → 72-約165
@@ -1062,7 +1069,11 @@ function quizHidden(){
   return h;
 }
 // 伏せた項目をタップ（クリック）で表示する
-$('info').addEventListener('click', e=>{ const d = e.target.closest('.hid'); if(d){ d.classList.remove('hid'); if(d.dataset.k==='bpm') redrawQuizChart(); } });
+$('info').addEventListener('click', e=>{ const d = e.target.closest('.hid'); if(d){ d.classList.remove('hid'); if(game && game.q && !game.q.done) game.q.shown.add(d.dataset.k); if(d.dataset.k==='bpm') redrawQuizChart(); } });
+// ヒントの項目（結果発表で、どれを表示したかを出す）
+const HINT_KEYS = [['lv','難易度'], ['bpm','BPM'], ['combo','コンボ'], ['genre','ジャンル'], ['work','初出'], ['ws','収録']];
+// 時間の表示: 59.9秒 / 2分05秒
+function fmtTime(ms){ const s = ms/1000; if(s < 60) return s.toFixed(1) + '秒'; const m = Math.floor(s/60); return `${m}分${String(Math.floor(s%60)).padStart(2,'0')}秒`; }
 function revealInfo(){
   const hadBpm = !!$('info').querySelector('.hid[data-k="bpm"]');
   $('info').querySelectorAll('.hid').forEach(d=>d.classList.remove('hid'));
@@ -1379,7 +1390,7 @@ $('plClose').onclick=stopSong; // 閉じたら、その問題ではもう流さ�
     return [Math.min(Math.max(0, x), innerWidth - w), Math.min(Math.max(0, y), innerHeight - h)];
   };
   const place = (x, y)=>{ [x, y] = clamp(x, y); pl.style.left = x+'px'; pl.style.top = y+'px'; pl.style.right='auto'; pl.style.bottom='auto'; };
-  const saved = store.get('playerPos2', null); // 既定の位置を左上に変えたので、前の位置（右下）は使わない
+  const saved = store.get('playerPos3', null); // 既定の位置を左下に変えたので、前の位置は使わない
   if(saved) place(saved[0], saved[1]);
   let drag = null;
   head.addEventListener('pointerdown', e=>{
@@ -1393,7 +1404,7 @@ $('plClose').onclick=stopSong; // 閉じたら、その問題ではもう流さ�
   const end = ()=>{
     if(!drag) return;
     drag = null; pl.style.pointerEvents='';
-    const r = pl.getBoundingClientRect(); store.set('playerPos2', [r.left, r.top]);
+    const r = pl.getBoundingClientRect(); store.set('playerPos3', [r.left, r.top]);
   };
   head.addEventListener('pointerup', end); head.addEventListener('pointercancel', end);
   addEventListener('resize', ()=>{ if(pl.style.left){ const r = pl.getBoundingClientRect(); place(r.left, r.top); } });

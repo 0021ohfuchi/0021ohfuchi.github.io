@@ -518,14 +518,32 @@ function chip(label, on, onChange, title){
 }
 function toggleIn(arr, v, on){const i=arr.indexOf(v); if(on&&i<0)arr.push(v); if(!on&&i>=0)arr.splice(i,1);}
 
-// 収録曲のある家庭用作品のハード（作品の並び順のまま）
-function csHardwares(){ return [...new Set(WORKS.filter(w=>w.n>0 && w.kind==='CS').map(w=>w.hw || 'その他'))]; }
+// 同じ作品を別のハードの見出しにも出す（ドンダフルフェスティバルは Switch 版と PS5 などの版が同じ収録曲なので 1 つの作品にまとめ、
+// 両方の見出しにボタンを出す。どちらを押しても同じ作品の選択が切り替わる）
+const HW_ALIAS = [{hw: 'PlayStation 5 / Xbox Series X|S / Windows PC / Steam', short: 'NS2', after: 'Xbox One / Xbox Series X|S / Windows'}];
+// 収録曲のある家庭用作品のハード（作品の並び順のまま。別名の見出しは指定の見出しの後ろ）
+function csHardwares(){
+  const hws = [...new Set(WORKS.filter(w=>w.n>0 && w.kind==='CS').map(w=>w.hw || 'その他'))];
+  for(const a of HW_ALIAS){
+    if(!WORKS.some(w=>w.short===a.short && w.n>0) || hws.includes(a.hw)) continue;
+    const i = hws.indexOf(a.after);
+    hws.splice(i < 0 ? hws.length : i + 1, 0, a.hw);
+  }
+  return hws;
+}
+// そのハードの見出しに出す作品（別名で出す作品も含む）
+function csWorksOf(hw){
+  const ws = WORKS.filter(w=>w.n>0 && w.kind==='CS' && w.hw===hw);
+  for(const a of HW_ALIAS) if(a.hw===hw) ws.push(...WORKS.filter(w=>w.short===a.short && w.n>0));
+  return ws;
+}
 function renderSetup(){
   const lvBox=$('lvBox'); lvBox.innerHTML='';
   for(let lv=1;lv<=10;lv++) lvBox.append(chip('★'+lv, cfg.lv.includes(lv), on=>{toggleIn(cfg.lv,lv,on);saveCfg();}));
   const gBox=$('genreBox'); gBox.innerHTML='';
   for(const [g] of GENRES) gBox.append(chip(g, cfg.genre.includes(g), on=>{toggleIn(cfg.genre,g,on);saveCfg();}));
-  const workChip = w => chip(w.name, !cfg.worksOff.includes(w.name), on=>{toggleIn(cfg.worksOff,w.name,!on);saveCfg();}, `${w.short ? w.short + '　' : ''}おに ${w.n}譜面`);
+  // 同じ作品のボタンが 2 か所にあるとき（HW_ALIAS）は、押したら両方の表示をそろえるために描き直す
+  const workChip = w => chip(w.name, !cfg.worksOff.includes(w.name), on=>{toggleIn(cfg.worksOff,w.name,!on);saveCfg(); if(HW_ALIAS.some(a=>a.short===w.short)) renderSetup();}, `${w.short ? w.short + '　' : ''}おに ${w.n}譜面`);
   for(const [kind,boxId] of [['AC','workAC'],['OS','workOS']]){
     const box=$(boxId); box.innerHTML='';
     for(const w of WORKS.filter(w=>w.n>0 && w.kind===kind)) box.append(workChip(w));
@@ -535,7 +553,7 @@ function renderSetup(){
   for(const hw of csHardwares()){
     cs.insertAdjacentHTML('beforeend', `<div class="muted" style="margin:10px 0 4px">${esc(hw)}</div>`);
     const row=document.createElement('div'); row.className='row';
-    for(const w of WORKS.filter(w=>w.n>0 && w.kind==='CS' && w.hw===hw)) row.append(workChip(w));
+    for(const w of csWorksOf(hw)) row.append(workChip(w));
     cs.append(row);
   }
   $('workOSWrap').classList.toggle('hidden', !$('workOS').children.length); // 海外の曲が無いときは見出しごと隠す
@@ -1052,9 +1070,9 @@ const sf = Object.assign({}, SF_DEFAULT, store.get('sf',{}));
   $('sfLv').innerHTML = opt('','すべて') + [10,9,8,7,6,5,4,3,2,1].map(v=>opt(v,'★'+v)).join('');
   $('sfGenre').innerHTML = opt('','すべて') + GENRES.map(g=>opt(g[0],g[0])).join('');
   // 作品の選択肢: AC、家庭用はハードごと、海外
-  const groups = [['AC', w=>w.kind==='AC']].concat(csHardwares().map(hw=>[hw, w=>w.kind==='CS' && w.hw===hw]), [['海外', w=>w.kind==='OS']]);
+  const groups = [['AC', ()=>WORKS.filter(w=>w.n>0 && w.kind==='AC')]].concat(csHardwares().map(hw=>[hw, ()=>csWorksOf(hw)]), [['海外', ()=>WORKS.filter(w=>w.n>0 && w.kind==='OS')]]);
   $('sfWork').innerHTML = opt('','すべて') + groups.map(([label, f])=>{
-    const ws = WORKS.filter(w=>w.n>0 && f(w));
+    const ws = f();
     return ws.length ? `<optgroup label="${esc(label)}">${ws.map(w=>opt(w.i,w.name)).join('')}</optgroup>` : '';
   }).join('');
   const ids = {lv:'sfLv', genre:'sfGenre', work:'sfWork', sort:'sfSort'};

@@ -140,8 +140,9 @@ CS_INFO = [  # (略称, 正式名称, ハード)
     ('NS1', '太鼓の達人 Nintendo Switchば〜じょん！', 'ニンテンドースイッチ'),
     ('NS RPG', '太鼓の達人 ドコどんRPGパック！', 'ニンテンドースイッチ'),
     ('NS2', '太鼓の達人 ドンダフルフェスティバル', 'ニンテンドースイッチ'),
-    ('Xbox1', '太鼓の達人 The Drum Master!', 'PlayStation 5 / Xbox One / Xbox Series X|S / Windows / Steam'),
-    ('DF', '太鼓の達人 ドンダフルフェスティバル', 'PlayStation 5 / Xbox One / Xbox Series X|S / Windows / Steam'),
+    ('Xbox1', '太鼓の達人 The Drum Master!', 'Xbox One / Xbox Series X|S / Windows'),
+    # DF は NS2 にまとめてある。画面では「PlayStation 5 / …」の見出しにも NS2 と連動するボタンを出す（index.html の HW_ALIAS）
+    ('DF', '太鼓の達人 ドンダフルフェスティバル', 'PlayStation 5 / Xbox Series X|S / Windows PC / Steam'),
     ('iOS', '太鼓の達人プラス', 'スマートフォン'),
     ('RC', '太鼓の達人 RHYTHM CONNECT', 'スマートフォン'),
     ('PTB', '太鼓の達人 Pop Tap Beat', 'スマートフォン'),

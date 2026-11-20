@@ -68,6 +68,12 @@ def work_label(info):
 wp = os.path.join(HERE, 'works.json')
 works_raw = json.load(open(wp, encoding='utf-8')) if os.path.exists(wp) else {}
 WORKS_TOTAL = (works_raw.pop('_meta', None) or {}).get('total', 75)
+# 新AC中国版（AC16中）は「ニジイロ（中国版限定）」として、中国版にしか無い曲だけを入れる（ユーザー指定。国内版と共通の曲は入れない）
+CN_ONLY = ['拔蘿蔔', '捕魚歌', '兩隻老虎', '郷下老鼠', '小毛驢', '王老先生有塊地', '技神闇鬼', 'LUMINΔ']
+if 'AC16中' in works_raw:
+    cn = works_raw.pop('AC16中')
+    cn['songs'] = [p for p in cn['songs'] if p in CN_ONLY]
+    works_raw['ニジイロ（中国版限定）'] = cn
 # 家庭用（CS）の作品の並び順（scrape_works.py の一覧と同じ）。古い works.json でもこの順に並べる。
 # アニメ祭り・アニメスペシャルは家庭用として扱う
 CS_ORDER = ['CS1', 'CS2', 'CS3', 'CS4', 'CS5', 'CS6', 'CS7', 'アニメ祭り', 'アニメスペシャル', 'TDM', '米TDM',

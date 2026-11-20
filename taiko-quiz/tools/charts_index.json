@@ -552,9 +552,8 @@
 "combo": 797
 },
 "7e4487885dc1": {
-"ok": false,
-"combo": 356,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 356
 },
 "7961022aaabb": {
 "ok": true,
@@ -569,9 +568,8 @@
 "combo": 998
 },
 "32363b71a496": {
-"ok": false,
-"combo": 1346,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 1346
 },
 "c3392be52ee8": {
 "ok": true,
@@ -2446,9 +2444,8 @@
 "combo": 765
 },
 "4e5c54afbff5": {
-"ok": false,
-"combo": 336,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 336
 },
 "9eb6c3dede57": {
 "ok": true,
@@ -5261,9 +5258,8 @@
 "combo": 521
 },
 "40bdfaf7562f": {
-"ok": false,
-"combo": 208,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 208
 },
 "51caf0ffb1c6": {
 "ok": true,
@@ -8091,9 +8087,8 @@
 "combo": 340
 },
 "c6d6318eb5da": {
-"ok": false,
-"combo": 285,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 285
 },
 "2eb4021b80a8": {
 "ok": true,
@@ -8872,9 +8867,8 @@
 "combo": 331
 },
 "219c20896d91": {
-"ok": false,
-"combo": 330,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 330
 },
 "6e808de34c7d": {
 "ok": true,
@@ -9441,9 +9435,8 @@
 "combo": 364
 },
 "2982e01bd431": {
-"ok": false,
-"combo": 215,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 215
 },
 "631cab9db14d": {
 "ok": true,
@@ -9822,9 +9815,8 @@
 "combo": 395
 },
 "73c3fd9c4458": {
-"ok": false,
-"combo": 158,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 158
 },
 "af4fc5e3c863": {
 "ok": true,
@@ -10567,9 +10559,8 @@
 "combo": 361
 },
 "26b995912e98": {
-"ok": false,
-"combo": 288,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 288
 },
 "bd22f565bb6c": {
 "ok": true,
@@ -10889,9 +10880,8 @@
 "combo": 412
 },
 "7b084b6a97d9": {
-"ok": false,
-"combo": 495,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 495
 },
 "b86956d0a308": {
 "ok": true,
@@ -11847,9 +11837,8 @@
 "combo": 209
 },
 "13b74ada8dca": {
-"ok": false,
-"combo": 253,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 253
 },
 "c58b5ac4135d": {
 "ok": true,
@@ -12100,9 +12089,8 @@
 "combo": 390
 },
 "05d2a013159f": {
-"ok": false,
-"combo": 364,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 364
 },
 "6e6330780e57": {
 "ok": true,

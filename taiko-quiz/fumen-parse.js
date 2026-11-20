@@ -346,8 +346,9 @@
       }
       return cols;
     };
+    // opt.cols: 列数を固定する（スマホの縦画面では 1 列で幅いっぱいに描き、縦にスクロールして見る）
     let best = null;
-    for (let c = 1; c <= 4; c++) {
+    for (let c = opt.cols || 1; c <= (opt.cols || 4); c++) {
       const cols = split(c);
       const colH = Math.max(...cols.map(col => col.reduce((a, b) => a + b.h, 0)));
       const wTot = cols.length * W + (cols.length - 1) * GAP;

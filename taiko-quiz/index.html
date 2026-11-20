@@ -728,16 +728,27 @@ function renderChart(){
     const below = Math.max(64, $('answerArea').classList.contains('hidden') ? $('resultArea').offsetHeight : $('answerArea').offsetHeight);
     let maxH = Math.max(260, window.innerHeight - wrap.getBoundingClientRect().top - window.scrollY*0 - below - 28);
     sc.style.maxHeight = maxH + 'px';
-    FumenParse.renderFumen(cv, f, {maxW: wrap.clientWidth - 2, maxH});
-    // それでもページが画面からはみ出す（スマホで見出しが折り返すときなど）なら、はみ出したぶんだけ譜面を小さくして
+    FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH));
+    // それでもページが画面からはみ出す（スマホで見出しが折り返すときなど）なら、はみ出したぶんだけ譜面の枠を小さくして
     // ページがスクロールしないようにする
     const over = document.documentElement.scrollHeight - window.innerHeight;
     if(over > 0 && maxH - over - 2 >= 200){
       maxH -= over + 2;
       sc.style.maxHeight = maxH + 'px';
-      FumenParse.renderFumen(cv, f, {maxW: wrap.clientWidth - 2, maxH});
+      FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH));
     }
+    fitWidth(cv, f, sc, chartOpts(wrap, maxH));
   });
+}
+// スマホの縦画面: 譜面を段組みせず 1 列で、枠の幅いっぱいに描く（枠の中を縦にスクロールして見る）
+const PHONE_PORTRAIT = matchMedia('(orientation: portrait) and (max-width: 700px)');
+function chartOpts(wrap, maxH){
+  const maxW = wrap.clientWidth - 2;
+  return PHONE_PORTRAIT.matches ? {maxW, cols: 1} : {maxW, maxH};
+}
+// 描いた結果、縦スクロールバーのぶん横にはみ出したら、その幅に合わせて描き直す
+function fitWidth(cv, f, sc, opts){
+  if(sc.scrollWidth > sc.clientWidth + 1) FumenParse.renderFumen(cv, f, Object.assign({}, opts, {maxW: sc.clientWidth - 1}));
 }
 let resizeTimer=0;
 window.addEventListener('resize',()=>{ clearTimeout(resizeTimer); resizeTimer=setTimeout(()=>{ if(game && game.q && !$('scQuiz').classList.contains('hidden')) renderChart(); },200); });
@@ -1086,7 +1097,8 @@ function drawSearchChart(r){
     sc.append(cv); wrap.append(sc); area.append(wrap);
     const maxH = Math.max(300, window.innerHeight - wrap.getBoundingClientRect().top - 24);
     sc.style.maxHeight = maxH + 'px';
-    FumenParse.renderFumen(cv, f, {maxW: wrap.clientWidth - 2, maxH});
+    FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH));
+    fitWidth(cv, f, sc, chartOpts(wrap, maxH));
   });
 }
 document.addEventListener('keydown', e=>{

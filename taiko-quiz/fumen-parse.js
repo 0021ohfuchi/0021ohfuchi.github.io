@@ -159,6 +159,17 @@
           cur.x1 = x; gap = 0; cur[c]++;
         } else if (cur && (c === 'd' || c === 'k' || ++gap > 4)) { cur = null; gap = 0; }
       }
+      // 連打・風船が切れ目なく続いている（前の連打の終わりに次の連打の頭が重なっている）所は、1 本の帯に見える。
+      // 帯の中に終わりが 2 つ以上あれば、終わりと終わりの間に頭が無いものには、前の終わりのすぐ後ろに頭を足す
+      for (const rn of runs) {
+        const ends = rowNotes.filter(n => n.kind === 'end' && n.x >= rn.x0 && n.x <= rn.x1 + 12).sort((a, b) => a.x - b.x);
+        for (let i = 0; i + 1 < ends.length; i++) {
+          const a = ends[i].x, b = ends[i + 1].x;
+          if (rowNotes.some(n => n.kind === 'roll' && n.x > a - 2 && n.x < b)) continue;
+          const c = cls(P(Math.min(W - 1, Math.round(a + 6)), y));
+          rowNotes.push({ x: a + 4, c: c === 'o' ? 'o' : 'y', big: false, kind: 'roll' });
+        }
+      }
       for (const rn of runs) {
         if (rn.x1 - rn.x0 < 10) continue; // 段の初めの黄色い線など
         const orange = rn.o > rn.y;
@@ -170,10 +181,22 @@
         if (rn.x0 <= 26 && !num) continue; // 前の段から続く連打・風船
         // 音符が上に重なって帯が途切れただけの所に頭を足さないよう、風船は数字があるとき、
         // 連打は帯の終わりがあるか段の右端まで続くときだけ頭を足す
-        if (orange ? !num : !(end || rn.x1 >= W - 30)) continue;
+        // 風船の数字が直前の音符に隠れて読めなくても、段の途中から始まって終わりがある（または段の右端まで続く）帯は風船の頭とする
+        if (orange ? !(num || end || rn.x1 >= W - 30) : !(end || rn.x1 >= W - 30)) continue;
         // 風船は中の数字の位置を頭の中心にする（左側が他の音符に隠れていても位置がずれない）
         const hx = num ? num.cx : rn.x0 + (orange ? 11.5 : 9);
         rowNotes.push({ x: hx, c: orange ? 'o' : 'y', big: false, kind: 'roll', count: num ? num.value : undefined });
+      }
+      // 終わりが見つからない連打・風船: 帯が段の右端まで続いていなければ（＝次の段に続かない）、帯の終わりを連打の終わりにする。
+      // 終わりが無いと、次の段の音符の下まで連打が続いて描かれてしまうため
+      let laneRight = W - 1;
+      while (laneRight > 0 && isBg(P(laneRight, y))) laneRight--;
+      for (const rn of runs) {
+        // 音符のすぐ後ろの短い連打は、見えている帯が数 px しかないことがあるので、頭があれば短くても調べる
+        if (rn.x1 - rn.x0 < 3 || rn.x1 >= laneRight - 12) continue;
+        const hasHead = rn.x0 <= 26 || rowNotes.some(n => n.kind === 'roll' && n.x >= rn.x0 - 14 && n.x <= rn.x1);
+        const hasEnd = rowNotes.some(n => n.kind === 'end' && n.x >= rn.x0 && n.x <= rn.x1 + 12);
+        if (hasHead && !hasEnd) rowNotes.push({ x: rn.x1 - 4, c: rn.o > rn.y ? 'o' : 'y', big: false, kind: 'end' });
       }
       // 風船の連打数（頭の中の黒い数字）
       for (const n of rowNotes) {
@@ -311,6 +334,35 @@
       }
     }
 
+    // 頭の無い連打の終わり（前の段から続いてもいない）は読み違いなので消す（残すと段の初めから音符の下に連打が描かれる）
+    // また、段の右端で終わりが見つからなかった連打が、次の段では音符から始まっている（＝続いていない）なら、前の段の右端で終わらせる
+    {
+      const open = {}, last = {};
+      for (const r of rows) for (const l of r.lanes) {
+        let o = !!open[l.type];
+        // ごく短い連打は頭と終わりが同じ位置になることがあるので、同じ位置なら 頭 → 音符 → 終わり の順にする
+        const kr = n => n.kind === 'roll' ? 0 : n.kind === 'note' ? 1 : 2;
+        l.notes.sort((a, b) => (Math.abs(a.x - b.x) < 1 ? 0 : a.x - b.x) || kr(a) - kr(b));
+        const first =l.notes.find(n => n.kind !== 'roll' || n.x > 26);
+        if (o && last[l.type] && (!first || first.kind === 'note' || first.kind === 'roll')) {
+          const [pl, pr] = last[l.type];
+          const pc = [...pl.notes].reverse().find(n => n.kind === 'roll');
+          pl.notes.push({ x: pr.laneEnd - 8, c: pc ? pc.c : 'y', big: false, kind: 'end', row: rows.indexOf(pr) });
+          o = false;
+        }
+        l.notes = l.notes.filter(n => {
+          if (n.kind === 'roll') { o = true; return true; }
+          if (n.kind === 'end') { if (!o) return false; o = false; }
+          return true;
+        });
+        open[l.type] = o; last[l.type] = [l, r];
+      }
+      // 最後の段の終わりで閉じていない連打も、その段の右端で終わらせる
+      for (const t in open) if (open[t] && last[t]) {
+        const [pl, pr] = last[t]; const pc = [...pl.notes].reverse().find(n => n.kind === 'roll');
+        pl.notes.push({ x: pr.laneEnd - 8, c: pc ? pc.c : 'y', big: false, kind: 'end', row: rows.indexOf(pr) });
+      }
+    }
     // 達人譜面のレーン: 赤いレーン（なければ音符が一番多いレーン）
     const masterLane = r => r.lanes.find(l => l.type === 'm') ||
       r.lanes.reduce((a, b) => (b.notes.filter(n => n.kind === 'note').length > a.notes.filter(n => n.kind === 'note').length ? b : a));

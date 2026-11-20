@@ -1,0 +1,52 @@
+{
+ "Timing ～タイミング～": {
+  "level": 8,
+  "section": "新筐体未収録曲",
+  "genre": "ポップス",
+  "name": "Timing ～タイミング～",
+  "href": "/taiko-fumen/%E5%8F%8E%E9%8C%B2%E6%9B%B2/%E3%81%8A%E3%81%AB/Timing%20%EF%BD%9E%E3%82%BF%E3%82%A4%E3%83%9F%E3%83%B3%E3%82%B0%EF%BD%9E",
+  "page": "収録曲/おに/Timing ～タイミング～",
+  "bpm": "126",
+  "combo": "394"
+ },
+ "ガッチャマンの歌": {
+  "level": 9,
+  "section": "新筐体未収録曲",
+  "genre": "アニメ",
+  "name": "ガッチャマンの歌",
+  "href": "/taiko-fumen/%E5%8F%8E%E9%8C%B2%E6%9B%B2/%E3%81%8A%E3%81%AB/%E3%82%AC%E3%83%83%E3%83%81%E3%83%A3%E3%83%9E%E3%83%B3%E3%81%AE%E6%AD%8C",
+  "page": "収録曲/おに/ガッチャマンの歌",
+  "bpm": "140",
+  "combo": "339"
+ },
+ "DiSCOVER THE FUTURE": {
+  "level": 5,
+  "section": "新筐体未収録曲",
+  "genre": "アニメ",
+  "name": "DiSCOVER THE FUTURE",
+  "href": "/taiko-fumen/%E5%8F%8E%E9%8C%B2%E6%9B%B2/%E3%81%8A%E3%81%AB/DiSCOVER%20THE%20FUTURE",
+  "page": "収録曲/おに/DiSCOVER THE FUTURE",
+  "bpm": "180",
+  "combo": "293"
+ },
+ "たのしい太鼓道場(裏譜面)": {
+  "level": 7,
+  "section": "新筐体未収録曲",
+  "genre": "ゲームミュージック",
+  "name": "たのしい太鼓道場(裏譜面)",
+  "href": "/taiko-fumen/%E5%8F%8E%E9%8C%B2%E6%9B%B2/%E3%81%8A%E3%81%AB/%E3%81%9F%E3%81%AE%E3%81%97%E3%81%84%E5%A4%AA%E9%BC%93%E9%81%93%E5%A0%B4%28%E8%A3%8F%E8%AD%9C%E9%9D%A2%29",
+  "page": "収録曲/おに/たのしい太鼓道場(裏譜面)",
+  "bpm": "150-190",
+  "combo": "360"
+ },
+ "ルパン三世": {
+  "level": 9,
+  "section": "新筐体未収録曲",
+  "genre": "バラエティ",
+  "name": "ルパン三世",
+  "href": "/taiko-fumen/%E5%8F%8E%E9%8C%B2%E6%9B%B2/%E3%81%8A%E3%81%AB/%E3%83%AB%E3%83%91%E3%83%B3%E4%B8%89%E4%B8%96",
+  "page": "収録曲/おに/ルパン三世",
+  "bpm": "143",
+  "combo": "484"
+ }
+}

@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>太鼓の達人 曲名当てクイズ</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 4 44 44'%3E%3Ccircle cx='22' cy='26' r='20' fill='%233a2a1e'/%3E%3Ccircle cx='22' cy='26' r='17.5' fill='%23fff'/%3E%3Ccircle cx='22' cy='26' r='15' fill='%23ff4b3e'/%3E%3Cpath d='M18.5 18.5 L28.5 16 V30.2 M18.5 18.5 V32.5' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linejoin='round' stroke-linecap='round'/%3E%3Cellipse cx='15.6' cy='33' rx='3.6' ry='2.8' fill='%23fff' transform='rotate(-20 15.6 33)'/%3E%3Cellipse cx='25.6' cy='30.7' rx='3.6' ry='2.8' fill='%23fff' transform='rotate(-20 25.6 30.7)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff6d6; --dot:#ffe49a; --card:#ffffff; --text:#3a2a1e; --sub:#8a7564; --line:#ffd36b;
+  --don:#ff4b3e; --don-d:#d6301f; --ka:#2fb8e8; --ka-d:#1a8fbb; --gold:#ffb400; --pink:#ff6fae; --green:#3cc46a;
+  --ok:#22a855; --ng:#ff4b3e; --chip:#fff3c4;
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--text);
+  font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;font-weight:500;line-height:1.6;
+  /* お祭りっぽい背景: 山吹色の地に青海波（せいがいは）の模様 */
+  --sg:#ffb43a; --sgl:#ffcf6e;
+  background-color:var(--sg);
+  background-image:
+    radial-gradient(circle at 100% 150%, var(--sg) 24%, var(--sgl) 24%, var(--sgl) 28%, var(--sg) 28%, var(--sg) 36%, var(--sgl) 36%, var(--sgl) 40%, transparent 40%, transparent),
+    radial-gradient(circle at 0 150%, var(--sg) 24%, var(--sgl) 24%, var(--sgl) 28%, var(--sg) 28%, var(--sg) 36%, var(--sgl) 36%, var(--sgl) 40%, transparent 40%, transparent),
+    radial-gradient(circle at 50% 100%, var(--sgl) 10%, var(--sg) 10%, var(--sg) 23%, var(--sgl) 23%, var(--sgl) 30%, var(--sg) 30%, var(--sg) 43%, var(--sgl) 43%, var(--sgl) 50%, var(--sg) 50%, var(--sg) 63%, var(--sgl) 63%, var(--sgl) 71%, transparent 71%, transparent),
+    radial-gradient(circle at 100% 50%, var(--sgl) 5%, var(--sg) 5%, var(--sg) 15%, var(--sgl) 15%, var(--sgl) 20%, var(--sg) 20%, var(--sg) 29%, var(--sgl) 29%, var(--sgl) 34%, var(--sg) 34%, var(--sg) 44%, var(--sgl) 44%, var(--sgl) 49%, transparent 49%, transparent),
+    radial-gradient(circle at 0 50%, var(--sgl) 5%, var(--sg) 5%, var(--sg) 15%, var(--sgl) 15%, var(--sgl) 20%, var(--sg) 20%, var(--sg) 29%, var(--sgl) 29%, var(--sgl) 34%, var(--sg) 34%, var(--sg) 44%, var(--sgl) 44%, var(--sgl) 49%, transparent 49%, transparent);
+  background-size:100px 50px;background-attachment:fixed;min-height:100vh}
+header{background:linear-gradient(90deg,var(--don),#ff7a3d);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;
+  position:relative;box-shadow:0 4px 0 rgba(0,0,0,.08)}
+/* ヘッダーの下に、太鼓の胴の鋲（びょう）が並んだような帯 */
+header::after{content:"";position:absolute;left:0;right:0;bottom:-12px;height:12px;
+  background:#5a2e16 radial-gradient(circle,#ffd25e 0 3px,#b8860b 3.5px 4px,transparent 4.5px) 0 50%/22px 12px repeat-x;
+  box-shadow:0 3px 0 rgba(0,0,0,.12)}
+main{padding-top:30px!important}
+header h1{font-size:22px;margin:0;letter-spacing:.04em;cursor:pointer;font-weight:800;text-shadow:2px 2px 0 rgba(0,0,0,.18)}
+header .sp{flex:1}
+header .stat{font-size:15px;font-weight:800;background:#fff;color:var(--don);border-radius:999px;padding:3px 14px}
+header .stat:empty{display:none}
+/* アイコン: 太鼓の面（ドン）に音符、右上に「？」の吹き出し＝曲名当て */
+.logo-icon{width:46px;height:46px;flex:none;display:block;filter:drop-shadow(0 2px 0 rgba(0,0,0,.18))}
+main{max-width:860px;margin:0 auto;padding:18px 16px}
+body.wide main{max-width:none;padding:10px 16px}
+body.wide #qCard{padding:12px 14px;margin-bottom:0}
+body.nofoot .foot{display:none}
+body.wide .foot{margin:8px 0}
+.card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:0 6px 0 var(--line)}
+h2{font-size:20px;margin:0 0 10px;font-weight:800;display:flex;align-items:center;gap:8px}
+h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--don);box-shadow:18px 0 0 var(--ka);margin-right:20px}
+.muted{color:var(--sub);font-size:13px}
+button{font:inherit;font-weight:700;border:none;border-radius:999px;padding:9px 18px;cursor:pointer;background:var(--chip);color:var(--text);
+  box-shadow:0 4px 0 var(--line);transition:transform .08s,box-shadow .08s}
+button:hover{transform:translateY(-1px)}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+button.primary{background:var(--don);color:#fff;box-shadow:0 4px 0 var(--don-d)}
+button.primary:active{box-shadow:0 1px 0 var(--don-d)}
+button.blue{background:var(--ka);color:#fff;box-shadow:0 4px 0 var(--ka-d)}
+button.blue:active{box-shadow:0 1px 0 var(--ka-d)}
+button:disabled{opacity:.45;cursor:default;transform:none}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:4px;padding:5px 13px;border-radius:999px;background:#fff;border:2px solid var(--line);font-size:14px;font-weight:700;cursor:pointer;user-select:none;transition:.1s}
+.chk input{display:none}
+.chk.on{background:var(--don);color:#fff;border-color:var(--don)}
+.chk.on.blue{background:var(--ka);border-color:var(--ka)}
+.lbl{font-weight:800;font-size:15px;min-width:6em;padding-top:5px}
+
+/* ===== 出題設定の画面を太鼓らしく ===== */
+/* カード: 太鼓の胴のようなこげ茶の太い枠と、上に赤い見出しの帯＋鋲の帯 */
+#scSetup .card{background:#fffaf0;border:4px solid #5a2e16;border-radius:22px;box-shadow:0 7px 0 #3a1c0c;padding:0 22px 22px;overflow:hidden}
+#scSetup h2{margin:0 -22px 22px;padding:12px 22px 22px;color:#fff;font-size:21px;letter-spacing:.06em;text-shadow:2px 2px 0 rgba(0,0,0,.25);
+  background:
+    radial-gradient(circle,#ffd25e 0 3px,#b8860b 3.5px 4px,transparent 4.5px) 0 100%/22px 12px repeat-x,
+    linear-gradient(#5a2e16,#5a2e16) 0 100%/100% 12px no-repeat,
+    linear-gradient(90deg,#e8402a,#ff7a3d)}
+#scSetup .card:nth-of-type(2) h2{background:
+    radial-gradient(circle,#ffd25e 0 3px,#b8860b 3.5px 4px,transparent 4.5px) 0 100%/22px 12px repeat-x,
+    linear-gradient(#5a2e16,#5a2e16) 0 100%/100% 12px no-repeat,
+    linear-gradient(90deg,#1a8fbb,#2fb8e8)}
+/* 見出しの前の飾り: 小さな太鼓の面 */
+#scSetup h2::before{width:22px;height:22px;margin-right:2px;box-shadow:none;
+  background:radial-gradient(circle,#ff4b3e 0 52%,#fff 53% 70%,#3a2a1e 71%)}
+#scSetup .card:nth-of-type(2) h2::before{background:radial-gradient(circle,#2fb8e8 0 52%,#fff 53% 70%,#3a2a1e 71%)}
+/* 項目名: こげ茶の札 */
+#scSetup .lbl{min-width:0;width:6.2em;padding:4px 0;text-align:center;background:#5a2e16;color:#ffd25e;border-radius:10px;font-size:14px;letter-spacing:.05em;align-self:flex-start}
+#scSetup .lbl .muted{color:#f3c98a!important}
+/* 選択肢: 音符のように、濃い縁＋白い縁。選んだものは赤（ドン） */
+#scSetup .chk{background:#fff;border:2.5px solid #3a2a1e;color:#3a2a1e;box-shadow:inset 0 0 0 2px #fff}
+#scSetup .chk.on{background:#ff4b3e;color:#fff;border-color:#3a2a1e;box-shadow:inset 0 0 0 2px #fff;text-shadow:1px 1px 0 rgba(0,0,0,.2)}
+/* すべて・クリアなどのボタン: 青（カッ） */
+#scSetup .setrow .row > button{background:#2fb8e8;color:#fff;border:2.5px solid #3a2a1e;box-shadow:inset 0 0 0 2px #fff,0 3px 0 #3a2a1e;padding:5px 16px;font-size:14px}
+#scSetup .setrow .row > button:active{box-shadow:inset 0 0 0 2px #fff,0 0 0 #3a2a1e;transform:translateY(3px)}
+#scSetup select{border:2.5px solid #3a2a1e}
+/* スタート: 大きな太鼓の面のようなボタン */
+#scSetup #startBtn{width:100%;max-width:420px;height:68px;border-radius:999px;padding:0 24px;font-size:26px;letter-spacing:.12em;
+  background:#ff4b3e;color:#fff;border:3px solid #3a2a1e;
+  box-shadow:inset 0 0 0 3px #fff,0 7px 0 #3a1c0c;text-shadow:2px 2px 0 rgba(0,0,0,.25)}
+#scSetup #startBtn:disabled{background:#c9b8a8}
+#scSetup #startBtn:active{box-shadow:inset 0 0 0 3px #fff,0 2px 0 #3a1c0c;transform:translateY(5px)}
+.setrow{display:flex;gap:10px;align-items:flex-start;margin:12px 0;flex-wrap:wrap}
+.setrow + .setrow{margin-top:34px} /* ★の数・ジャンル・作品・問題数の間を1行ぶんあける */
+.setrow .row{flex:1;min-width:0}
+select{font:inherit;font-weight:700;padding:7px 12px;border-radius:999px;border:2px solid var(--line);background:#fff;color:var(--text)}
+.big{font-size:19px;padding:13px 34px}
+.title-card{text-align:center;background:linear-gradient(135deg,#fff 0 60%,#ffeef6)}
+.title-card .logo{font-size:30px;font-weight:800;color:var(--don);text-shadow:3px 3px 0 #ffd36b;margin:4px 0}
+.title-card p{margin:6px 0}
+/* 問題 */
+.qtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.qno{font-weight:800;font-size:15px;background:var(--text);color:#fff;border-radius:999px;padding:2px 12px}
+.score-now{margin-left:auto;font-weight:800;color:#fff;background:var(--pink);border-radius:999px;padding:2px 12px}
+.score-now:empty{display:none}
+/* 問題の情報は1行に並べる（譜面に高さを使うため） */
+.info{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
+.gchip{border-radius:8px;padding:0 8px;font-size:15px}
+.info>div{background:var(--chip);border-radius:999px;padding:3px 14px;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+.info .k{font-size:11px;color:var(--sub);font-weight:700}
+.info .v{font-size:17px;font-weight:800;line-height:1.3}
+.chart-wrap{border-radius:14px;overflow:hidden;border:3px solid var(--text);background:#cfcfcf;position:relative}
+.chart-wrap.gen{background:#fffaf0;border-color:var(--line)}
+.chart-wrap.gen .chart-scroll{overflow:auto}
+.chart-scroll{overflow:auto}
+.chart-tabs{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
+.chart-tabs button{padding:3px 12px;font-size:13px}
+.chart-tabs button.on{background:var(--ka);color:#fff;box-shadow:0 3px 0 var(--ka-d)}
+.answer-row{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.answer-box{position:relative;flex:1;min-width:220px}
+.answer-box input{width:100%;font:inherit;font-weight:700;font-size:18px;padding:9px 18px;border-radius:999px;border:3px solid var(--line);background:#fff;color:var(--text);outline:none}
+.answer-box input:focus{border-color:var(--ka);box-shadow:0 0 0 4px rgba(47,184,232,.2)}
+.sugg{position:absolute;left:0;right:0;bottom:100%;z-index:10;background:#fff;border:3px solid var(--ka);border-radius:16px;margin-bottom:6px;max-height:300px;overflow-y:auto;box-shadow:0 6px 0 rgba(26,143,187,.25)}
+.sugg div{padding:8px 14px;cursor:pointer;border-bottom:1px solid #e6f6fc;font-weight:700}
+.sugg div:last-child{border-bottom:none}
+.sugg div.sel,.sugg div:hover{background:#e6f6fc}
+.sugg small{color:var(--sub);margin-left:6px;font-weight:500}
+.wrongs{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.wrongs span{background:#ffe3e0;color:var(--ng);border-radius:999px;padding:1px 10px;font-size:13px;font-weight:700;text-decoration:line-through}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+/* 出題設定: 広い画面では「★の数〜作品」を左、「問題数〜スタート」を右の2列に並べる */
+body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで広げる */
+@media (min-width:1000px){
+  .setup-cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:0 36px;align-items:start}
+  .setup-cols > .setup-col + .setup-col{border-left:3px dashed #e8cfa8;padding-left:32px}
+  .setup-cols > .setup-col > .setrow:first-child{margin-top:0}
+}
+/* 曲を検索（出題設定の中、スタートの下） */
+.setup-search{margin-top:18px;padding-top:18px;border-top:3px dashed #e8cfa8;display:flex;justify-content:center}
+#scSetup #searchBtn{width:100%;max-width:420px;border:2.5px solid #3a2a1e;box-shadow:inset 0 0 0 2px #fff,0 4px 0 #3a2a1e}
+/* 出題設定: 1画面に収まるよう、広い画面では左右2段に並べる */
+.setup-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.setup-grid .card{margin-bottom:0;padding:18px 22px}
+.setup-grid .setrow{margin:12px 0}
+.setup-grid .row{gap:10px}
+.setup-grid .chk{padding:6px 15px;font-size:15px}
+.setup-grid .lbl{min-width:6em;font-size:16px;padding-top:6px}
+.row.mini button{padding:5px 15px;font-size:14px;box-shadow:0 3px 0 var(--line)}
+/* 広い画面: 左右2列にして、画面の高さいっぱいに使い、項目の間を均等にあける */
+@media (min-width:1000px){
+  .setup-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);min-height:calc(100vh - 128px)}
+  .setup-main{display:flex;flex-direction:column;justify-content:space-between}
+  .setup-main .setrow{margin:0}
+  .setup-works{display:flex;flex-direction:column;justify-content:space-evenly;gap:12px}
+  .setup-works .muted{margin:0!important}
+}
+.lead{margin-bottom:4px}
+.lead .logo{font-size:24px;font-weight:800;color:var(--don);text-shadow:2px 2px 0 #ffd36b}
+.lead p{margin:2px 0 0;font-size:14px}
+.start-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px}
+.start-row .sp{flex:1}
+.howto{margin-top:10px;font-size:13px}
+.howto summary{cursor:pointer}
+.howto ul{margin:6px 0;padding-left:1.2em}
+.works-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wgroup{margin-top:12px}
+.wlabel{font-size:14px;font-weight:800;color:var(--sub);margin-bottom:8px}
+/* 曲のプレーヤー: YouTube の規約に合わせて映像部分は 200×200px 以上で表示する。見出しをドラッグして動かせる */
+.player{position:fixed;right:16px;bottom:16px;width:206px;z-index:90;background:#fff;border:3px solid var(--line);border-radius:16px;box-shadow:0 6px 0 var(--line);overflow:hidden}
+.player-head{display:flex;align-items:center;gap:6px;padding:5px 8px;font-size:12px;font-weight:800;cursor:move;user-select:none;touch-action:none;flex-wrap:wrap}
+.player-head #plLabel{flex:1 1 100%;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.player-head .sp{flex:1}
+.player-head button{padding:1px 8px;font-size:11px;box-shadow:0 2px 0 var(--line);white-space:nowrap;cursor:pointer}
+.player-head a{font-size:11px;white-space:nowrap;cursor:pointer}
+.player-body{width:200px;height:200px;background:#000}
+.player-body iframe{width:100%;height:100%;border:0;display:block}
+.player-body .msg{color:#fff;font-size:13px;padding:14px;line-height:1.7}
+.player-body .msg code{background:#333;padding:0 4px;border-radius:4px}
+.help-btn{width:34px;height:34px;padding:0;border-radius:50%;background:#fff;color:var(--don);font-size:20px;font-weight:800;box-shadow:0 3px 0 rgba(0,0,0,.15);flex:none}
+.modal{position:fixed;inset:0;background:rgba(58,42,30,.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal-box{background:#fff;border:3px solid var(--line);border-radius:22px;box-shadow:0 6px 0 var(--line);padding:20px 24px;max-width:620px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-box ul{margin:0 0 14px;padding-left:1.2em;font-size:15px;line-height:1.8}
+.search-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.slist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:40vh;overflow-y:auto}
+.slist button{font-size:14px;padding:6px 14px;box-shadow:0 3px 0 var(--line)}
+.slist button small{color:var(--sub);margin-left:6px;font-weight:500}
+.slist .muted{padding:6px 2px}
+.slist .sgrp{flex-basis:100%;margin-top:8px;padding:2px 2px 2px 8px;font-weight:800;font-size:14px;border-left:4px solid var(--don)}
+.slist .sgrp:first-child{margin-top:0}
+.sfilter{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:10px;font-size:14px;font-weight:700}
+.sfilter label{display:inline-flex;align-items:center;gap:6px}
+.sfilter select{font:inherit;font-weight:500;padding:5px 8px;border:2px solid var(--line);border-radius:10px;background:var(--card,#fff);color:var(--text);max-width:220px}
+.sfilter select.on{border-color:var(--don)}
+.sfilter button{padding:5px 14px;font-size:13px}
+.sd-back{padding:5px 14px;font-size:14px}
+.sd-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0 8px}
+.sd-head .title{font-size:22px;font-weight:800}
+.sd-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.sd-tabs button{padding:4px 14px;font-size:14px}
+.sd-tabs button.on{background:var(--don);color:#fff;box-shadow:0 4px 0 var(--don-d)}
+.sd-works{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
+.sd-works span{background:#fff;border:2px solid var(--line);border-radius:999px;padding:0 10px;font-size:12px;font-weight:700}
+.result-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;min-height:48px}
+.result-row .mark{font-size:24px;font-weight:800;animation:pop .4s cubic-bezier(.3,1.6,.6,1)}
+.result-row .mark.ok{color:var(--ok)} .result-row .mark.ng{color:var(--ng)}
+.result-row .title{font-size:20px;font-weight:800}
+.result-row .sp{flex:1}
+.result{text-align:center;padding:10px 0}
+.result .mark{font-size:42px;font-weight:800;animation:pop .4s cubic-bezier(.3,1.6,.6,1)}
+.result .mark.ok{color:var(--ok);text-shadow:3px 3px 0 #c8f2d6} .result .mark.ng{color:var(--ng);text-shadow:3px 3px 0 #ffd6d1}
+@keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+.result .title{font-size:24px;font-weight:800}
+.flash{animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+table.sum{width:100%;border-collapse:collapse;font-size:14px}
+table.sum td,table.sum th{padding:7px 6px;border-bottom:2px dotted var(--line);text-align:left}
+table.sum td.num{text-align:right;white-space:nowrap;font-weight:800}
+a{color:var(--ka-d);font-weight:700}
+.share{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin:4px 0 14px}
+.share button{display:inline-flex;align-items:center;gap:6px;padding:8px 16px}
+.share svg{width:16px;height:16px;fill:currentColor}
+.share .sh-x{background:#000;color:#fff;box-shadow:0 4px 0 #555}
+.share .sh-th{background:#fff;color:#000;border:2px solid #000;box-shadow:0 4px 0 #000}
+.total{font-size:52px;font-weight:800;color:var(--don);text-align:center;text-shadow:4px 4px 0 #ffd36b;animation:pop .5s cubic-bezier(.3,1.6,.6,1)}
+.foot{font-size:12px;color:#5a3410;text-align:center;margin:20px 0}
+.foot a{color:#7a2e00}
+.hidden{display:none!important}
+@media (max-width:560px){
+  main{padding:12px}
+  header h1{font-size:18px}
+  .title-card .logo{font-size:24px}
+  .big{font-size:17px;padding:12px 26px}
+}
+</style>
+</head>
+<body>
+<header>
+  <svg class="logo-icon" viewBox="0 4 44 44" aria-hidden="true">
+    <!-- 太鼓の面: 濃い縁・白い縁・赤（ドン） -->
+    <circle cx="22" cy="26" r="20" fill="#3a2a1e"/>
+    <circle cx="22" cy="26" r="17.5" fill="#fff"/>
+    <circle cx="22" cy="26" r="15" fill="#ff4b3e"/>
+    <!-- 音符 -->
+    <path d="M18.5 18.5 L28.5 16 V30.2" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M18.5 18.5 V32.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+    <ellipse cx="15.6" cy="33" rx="3.6" ry="2.8" fill="#fff" transform="rotate(-20 15.6 33)"/>
+    <ellipse cx="25.6" cy="30.7" rx="3.6" ry="2.8" fill="#fff" transform="rotate(-20 25.6 30.7)"/>
+  </svg>
+  <h1 id="homeBtn" title="トップへ">太鼓の達人 曲名当てクイズ</h1>
+  <div class="sp"></div>
+  <div class="stat" id="hdrStat"></div>
+  <button class="help-btn" id="homeIcon" title="トップへ" aria-label="トップへ"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" style="display:block;margin:auto"><path d="M3 11.2 12 3.5l9 7.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.8 10.2V20h4.4v-5.6h3.6V20h4.4v-9.8" fill="currentColor"/></svg></button>
+  <button class="help-btn" id="helpBtn" title="あそびかた" aria-label="あそびかた">?</button>
+</header>
+
+<!-- 曲の再生（正解・あきらめた時に右下に出す） -->
+<div class="player hidden" id="player">
+  <div class="player-head" id="plHead" title="ドラッグで移動できます">
+    <span id="plLabel">♪</span>
+    <button id="plNext" title="別の動画にする">別の動画</button>
+    <a id="plOpen" target="_blank" rel="noopener">YouTubeで開く</a>
+    <span class="sp"></span>
+    <button id="plClose" title="閉じる（この問題ではもう流しません）" aria-label="閉じる">×</button>
+  </div>
+  <div class="player-body" id="plBody"></div>
+</div>
+
+<!-- あそびかた（右上の ? から開く） -->
+<div class="modal hidden" id="helpModal">
+  <div class="modal-box" role="dialog" aria-labelledby="helpTitle">
+    <h2 id="helpTitle">あそびかた</h2>
+    <ul>
+      <li>おに譜面と、★・BPM・最大コンボ数・ジャンル・初出作品が表示されます。どの曲か考えて、曲名を入力しましょう</li>
+      <li>何度でも回答できます。わからないときは「あきらめる」で答えを見られます</li>
+      <li>最後に、何問当てられたかが表示されます</li>
+      <li>ひらがな・カタカナ、英字の大文字・小文字、記号の有無は区別しません。(裏譜面) などのカッコ書きは不要です</li>
+      <li>入力中は曲名の候補が出ます（「入力候補」で表示を切り替えられます）</li>
+      <li>出題設定の「作品」は、選んだ作品のどれかに収録されている譜面から出題します</li>
+      <li>「曲を検索」では、曲ごとの譜面・情報・収録作品を見られます</li>
+    </ul>
+    <p class="muted" style="font-size:12px;line-height:1.7">
+      このコンテンツはファンメイドコンテンツです。ファンメイドコンテンツポリシー（<a href="https://taiko-ch.net/ip_policy/" target="_blank" rel="noopener">https://taiko-ch.net/ip_policy/</a>）のもと制作されています。<br>
+      曲データ・譜面の出典: <a href="https://wikiwiki.jp/taiko-fumen/" target="_blank" rel="noopener">太鼓の達人 譜面とか Wiki</a>（譜面は Wiki の譜面画像を読み取り、このサイトで描き直したものです）
+    </p>
+    <div style="text-align:right"><button class="primary" id="helpClose">閉じる</button></div>
+  </div>
+</div>
+<main>
+
+<!-- ===== タイトル / 設定 ===== -->
+<section id="scSetup">
+  <div class="card">
+    <h2>出題設定</h2>
+    <div class="setup-cols"><div class="setup-col">
+    <div class="setrow"><span class="lbl">★の数</span><div style="flex:1;min-width:0">
+      <div class="row" style="margin-bottom:6px"><button id="lvAll">すべて</button><button id="lvNone">クリア</button></div>
+      <div class="row" id="lvBox"></div>
+    </div></div>
+    <div class="setrow"><span class="lbl">ジャンル</span><div style="flex:1;min-width:0">
+      <div class="row" style="margin-bottom:6px"><button id="gAll">すべて</button><button id="gNone">クリア</button></div>
+      <div class="row" id="genreBox"></div>
+    </div></div>
+    <div class="setrow"><span class="lbl">作品<br><span class="muted" style="font-weight:500">（収録）</span></span><div style="flex:1;min-width:0">
+      <div class="row" style="margin-bottom:6px"><button id="wAll">すべて</button><button id="wAC">ACのみ</button><button id="wCS">CSのみ</button><button id="wNone">クリア</button></div>
+      <div class="muted" style="margin:2px 0 4px">AC</div><div class="row" id="workAC"></div>
+      <div class="muted" style="margin:10px 0 4px">CS</div><div class="row" id="workCS"></div>
+      <div id="workOSWrap"><div class="muted" style="margin:10px 0 4px">海外</div><div class="row" id="workOS"></div></div>
+      <p class="muted" style="margin:8px 0 0">選んだ作品のどれかに収録されている譜面から出題します。<span id="workNote"></span></p>
+    </div></div>
+    </div><div class="setup-col">
+    <div class="setrow"><span class="lbl">問題数</span><div class="row">
+      <select id="qCount"><option value="5">5問</option><option value="10" selected>10問</option><option value="20">20問</option><option value="30">30問</option><option value="50">50問</option><option value="100">100問</option><option value="0">すべて</option></select>
+    </div></div>
+    <div class="setrow"><span class="lbl">BGM<br>効果音</span><div style="flex:1;min-width:0">
+      <div class="row" id="sfxBox"></div>
+      <p id="bgmNow" style="margin:6px 0 0;font-weight:700;color:#5a2e16"></p>
+    </div></div>
+    <div class="row" style="margin-top:18px;justify-content:center;flex-direction:column">
+      <button class="primary big" id="startBtn">スタート！</button>
+      <span class="muted" id="poolInfo"></span>
+      <span class="muted" id="bestInfo"></span>
+    </div>
+    <!-- 曲を検索（別画面を開くボタンだけ） -->
+    <div class="setup-search">
+      <button class="blue big" id="searchBtn">曲を検索</button>
+    </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ===== 出題 ===== -->
+<section id="scQuiz" class="hidden">
+  <div class="card" id="qCard">
+    <div class="qtop">
+      <span class="qno" id="qNo"></span>
+      <div class="info" id="info"></div>
+      <span class="score-now" id="qScore"></span>
+    </div>
+    <div id="chartArea"></div>
+    <div id="answerArea">
+      <div class="answer-row">
+        <div class="answer-box">
+          <input id="ans" type="text" autocomplete="off" placeholder="曲名を入力（Enterで回答）">
+          <div class="sugg hidden" id="sugg"></div>
+        </div>
+        <button class="primary" id="ansBtn">回答する</button>
+        <button id="giveupBtn">あきらめる</button>
+        <label class="chk blue" id="suggLbl" title="入力中に曲名の候補を表示"><input type="checkbox" id="suggOn">入力候補</label>
+      </div>
+      <div class="wrongs" id="wrongs"></div>
+    </div>
+    <div id="resultArea" class="hidden"></div>
+  </div>
+</section>
+
+<!-- ===== 曲を検索 ===== -->
+<section id="scSearch" class="hidden">
+  <div class="card" id="sCard">
+    <div class="search-row">
+      <div class="answer-box">
+        <input id="sq" type="search" autocomplete="off" placeholder="曲名・読み・作品名で検索（例: ゆうがお、Doom、AC14）">
+      </div>
+      <button id="sBack">クイズの設定へ</button>
+    </div>
+    <div class="sfilter" id="sFilter">
+      <label>★<select id="sfLv"></select></label>
+      <label>ジャンル<select id="sfGenre"></select></label>
+      <label>作品<select id="sfWork"></select></label>
+      <label>並び順<select id="sfSort">
+        <option value="name">名前順</option><option value="lvd">★が多い順</option><option value="lva">★が少ない順</option>
+        <option value="genre">ジャンル順</option><option value="work">作品順</option>
+      </select></label>
+      <button id="sfReset" title="絞り込みと並び順を元に戻す">リセット</button>
+    </div>
+    <div id="sList" class="slist"></div>
+    <div id="sDetail" class="hidden"></div>
+  </div>
+</section>
+
+<!-- ===== 結果 ===== -->
+<section id="scEnd" class="hidden">
+  <div class="card">
+    <h2>結果発表</h2>
+    <div class="total" id="endTotal"></div>
+    <p class="muted" style="text-align:center" id="endSub"></p>
+    <div class="share" id="shareBox">
+      <span class="muted">結果をシェア</span>
+      <button class="sh-x" id="shareX" title="X（旧Twitter）でシェア"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.8l-5.3-6.9L4.8 22H1.7l8.1-9.3L1.5 2h6.9l4.8 6.4L18.9 2zm-1.2 18h1.9L7.4 3.9h-2L17.7 20z"/></svg>X</button>
+      <button class="sh-th" id="shareTh" title="Threads でシェア"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.3 11.1c-.1 0-.2-.1-.3-.1-.2-3.1-1.9-4.9-4.7-4.9h-.1c-1.7 0-3.1.7-3.9 2l1.5 1c.6-.9 1.6-1.1 2.4-1.1 1 0 1.7.3 2.2.9.3.4.6 1 .7 1.7-.8-.1-1.6-.2-2.5-.1-2.5.1-4.1 1.6-4 3.6.1 1 .6 1.9 1.4 2.5.7.5 1.7.7 2.7.7 1.3-.1 2.3-.6 3-1.5.5-.7.9-1.6 1-2.7.6.4 1.1.9 1.3 1.5.5 1 .5 2.7-.9 4.1-1.2 1.2-2.7 1.8-4.9 1.8-2.4 0-4.3-.8-5.5-2.3-1.1-1.4-1.7-3.5-1.7-6.1s.6-4.7 1.7-6.1C6.9 4.4 8.7 3.6 11.1 3.6c2.5 0 4.3.8 5.6 2.3.6.8 1.1 1.7 1.4 2.8l1.8-.5c-.4-1.4-1-2.6-1.8-3.6C16.5 2.7 14.1 1.7 11.1 1.7 8.1 1.7 5.8 2.7 4.3 4.6 2.9 6.4 2.2 8.9 2.2 12s.7 5.6 2.1 7.4c1.5 1.9 3.8 2.9 6.8 2.9 2.7 0 4.6-.7 6.2-2.3 2.1-2.1 2-4.7 1.3-6.3-.5-1.1-1.4-2-2.6-2.6h1.3zm-4.6 4.4c-1.1.1-2.2-.4-2.3-1.4 0-.8.5-1.6 2.3-1.7h.6c.6 0 1.2.1 1.8.2-.2 2.4-1.3 2.9-2.4 2.9z"/></svg>Threads</button>
+      <button id="shareMore" class="hidden" title="ほかのアプリでシェア">その他</button>
+      <button id="shareCopy" title="結果の文章をコピー">コピー</button>
+    </div>
+    <table class="sum" id="endTable"></table>
+    <div class="row" style="justify-content:center;margin-top:16px">
+      <button class="primary big" id="againBtn">同じ設定でもう一度</button>
+      <button class="big" id="backBtn">設定にもどる</button>
+    </div>
+  </div>
+</section>
+
+<div class="foot">
+  このコンテンツはファンメイドコンテンツです。ファンメイドコンテンツポリシー（<a href="https://taiko-ch.net/ip_policy/" target="_blank" rel="noopener">https://taiko-ch.net/ip_policy/</a>）のもと制作されています。<br>
+  曲データ・譜面の出典: <a href="https://wikiwiki.jp/taiko-fumen/" target="_blank" rel="noopener">太鼓の達人 譜面とか Wiki</a>（譜面は Wiki の譜面画像を読み取り、このサイトで描き直したものです）
+</div>
+</main>
+
+<script src="data.js"></script>
+<script src="fumen-parse.js"></script>
+<script src="bgm.js"></script>
+<script>
+'use strict';
+// 譜面画像のある曲だけを出題対象にする
+const ALL = window.QUIZ_DATA || [];
+// 曲データ（data.js）が読めないとき（スマホで index.html だけを開いた場合など）は、画面の上に理由を出す
+if(!window.QUIZ_DATA) document.addEventListener('DOMContentLoaded', ()=>{
+  const m = document.createElement('div');
+  m.style.cssText = 'margin:12px 16px;padding:12px 16px;border:3px solid #ff4b3e;border-radius:14px;background:#fff;color:#3a2a1e;font-weight:700;line-height:1.6';
+  m.textContent = '曲データ（data.js）を読み込めませんでした。そのため作品・譜面が表示されません。ダウンロードしたファイルを直接開くと読み込めないことがあります（特にスマホ）。公開ページ（GitHub Pages など）か、パソコンの start_server.bat から開いてください。';
+  document.querySelector('main').prepend(m);
+});
+// 出題できるのは、譜面データ（charts/<id>.js）を作成済みの譜面だけ。【双打】は2人用譜面なので除外
+const DATA = ALL.filter(r=>r.ch && !/^【双打】/.test(r.n));
+const WIKI = 'https://wikiwiki.jp/taiko-fumen/';
+const $ = id => document.getElementById(id);
+
+const GENRES = [
+  ['ポップス','#49d5eb'],['キッズ','#fe90d2'],['アニメ','#fe9800'],['ボーカロイド™曲','#cbcfde'],
+  ['ゲームミュージック','#cc8aeb'],['バラエティ','#0acc2a'],['クラシック','#ded523'],['ナムコオリジナル','#ff7028'],['どうよう','#fe90d2']
+];
+const GENRE_COLOR = Object.fromEntries(GENRES);
+// 譜面画像の上端（曲名と★の行）を隠す割合（画像の幅に対する比）
+
+/* ---------- 文字の正規化 ---------- */
+function kata2hira(s){return s.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60));}
+function norm(s){
+  if(!s) return '';
+  s = s.normalize('NFKC').toLowerCase();
+  s = kata2hira(s);
+  s = s.replace(/[\s・･!?~〜～\-‐－―—_.,、。'"’‘“”`:;\/\\♪☆★♡♥♢♦◆○●◎×&+*#%$@^|<>=「」『』\[\]{}()（）【】！？…≠]/g,'');
+  return s;
+}
+function stripParen(s){
+  return (s||'').replace(/【[^】]*】/g,'').replace(/[(（][^()（）]*[)）]/g,'');
+}
+function keyOf(s){return norm(stripParen(s));}
+function baseName(r){return stripParen(r.n).trim() || r.n;}
+
+/* ---------- 曲名候補（画像のない曲も含めて全曲から） ---------- */
+const SONGS = (()=>{
+  const m = new Map();
+  for(const r of ALL){
+    const b = baseName(r);
+    const k = keyOf(b);
+    if(!k) continue;
+    if(!m.has(k)) m.set(k,{name:b, yomi:r.y?stripParen(r.y):'', nk:norm(b), yk:r.y?keyOf(r.y):''});
+    else if(!m.get(k).yomi && r.y){const e=m.get(k); e.yomi=stripParen(r.y); e.yk=keyOf(r.y);}
+  }
+  return [...m.values()].sort((a,b)=>a.name.localeCompare(b.name,'ja'));
+})();
+
+/* ---------- 設定 ---------- */
+const store = {
+  get(k,d){try{const v=localStorage.getItem('taikoQuiz.'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem('taikoQuiz.'+k,JSON.stringify(v));}catch(e){}}
+};
+const cfg = Object.assign({
+  lv:[8,9,10], genre:GENRES.map(g=>g[0]), count:10, sugg:true, worksOff:[], sound:true, bgm:true, se:true
+}, store.get('cfg',{}));
+if(!Array.isArray(cfg.worksOff)) cfg.worksOff=[];
+// 「海外の曲」は最初は選ばない（海外版の曲は出題しない、が以前からの既定）
+if(!cfg.osInit){ cfg.osInit=true; if(!cfg.worksOff.includes('海外の曲')) cfg.worksOff.push('海外の曲'); }
+
+/* ---------- 作品（収録）: 各譜面は収録されている作品の番号 r.ws を持つ ---------- */
+const WORKS = (window.QUIZ_WORKS||[]).map((w,i)=>Object.assign({i, n:0}, w));
+for(const r of ALL){ if(r.ws) for(const i of r.ws) WORKS[i].n++; }
+function inWorks(r){
+  // 収録作品が分からない譜面は、作品をすべて選んでいるときだけ出題する
+  if(!r.ws || !r.ws.length) return !WORKS.some(w=>cfg.worksOff.includes(w.name));
+  return r.ws.some(i=>!cfg.worksOff.includes(WORKS[i].name));
+}
+
+function chip(label, on, onChange, title){
+  const l = document.createElement('label');
+  l.className = 'chk'+(on?' on':'');
+  if(title) l.title = title;
+  const i = document.createElement('input'); i.type='checkbox'; i.checked=on;
+  i.onchange = ()=>{l.classList.toggle('on',i.checked); onChange(i.checked);};
+  l.append(i, label);
+  return l;
+}
+function toggleIn(arr, v, on){const i=arr.indexOf(v); if(on&&i<0)arr.push(v); if(!on&&i>=0)arr.splice(i,1);}
+
+function renderSetup(){
+  const lvBox=$('lvBox'); lvBox.innerHTML='';
+  for(let lv=1;lv<=10;lv++) lvBox.append(chip('★'+lv, cfg.lv.includes(lv), on=>{toggleIn(cfg.lv,lv,on);saveCfg();}));
+  const gBox=$('genreBox'); gBox.innerHTML='';
+  for(const [g] of GENRES) gBox.append(chip(g, cfg.genre.includes(g), on=>{toggleIn(cfg.genre,g,on);saveCfg();}));
+  for(const [kind,boxId] of [['AC','workAC'],['CS','workCS'],['OS','workOS']]){
+    const box=$(boxId); box.innerHTML='';
+    for(const w of WORKS.filter(w=>w.n>0 && w.kind===kind)) box.append(chip(w.name, !cfg.worksOff.includes(w.name), on=>{toggleIn(cfg.worksOff,w.name,!on);saveCfg();}, `おに ${w.n}譜面`));
+  }
+  $('workOSWrap').classList.toggle('hidden', !$('workOS').children.length); // 海外の曲が無いときは見出しごと隠す
+  const wDone = WORKS.length, wTotal = window.QUIZ_WORKS_TOTAL || wDone;
+  $('workNote').textContent = wDone < wTotal ? `（作品ごとの収録曲を取得中です: ${wDone}/${wTotal} 作品。まだ表示されていない作品は、取得が終わると追加されます）` : '';
+  $('qCount').value = String(cfg.count);
+  const fBox=$('sfxBox'); fBox.innerHTML='';
+  fBox.append(chip('BGM', cfg.bgm, on=>{cfg.bgm=on; saveCfg(); if(!on) stopSong(); bgmUpdate();}), chip('効果音', cfg.se, on=>{cfg.se=on; saveCfg(); if(on) playSE(true);}));
+  updatePool();
+  const best = store.get('best2',null);
+  $('bestInfo').textContent = best ? `これまでの最高: ${best.n}問中 ${best.ok}問正解（${best.date}）` : '';
+}
+function saveCfg(){store.set('cfg',cfg); updatePool();}
+function pool(){
+  return DATA.filter(r=>
+    (r.s!==3 || r.o1) && // 旧基準の★は同じ譜面の重複なので出さない（旧基準にしか無い昔の曲は出す）
+    cfg.lv.includes(r.lv) &&
+    (cfg.genre.includes(r.g) || !GENRE_COLOR[r.g]) &&
+    inWorks(r)
+  );
+}
+$('gAll').onclick=()=>{cfg.genre=GENRES.map(g=>g[0]);saveCfg();renderSetup();};
+$('gNone').onclick=()=>{cfg.genre=[];saveCfg();renderSetup();};
+$('wAll').onclick=()=>{cfg.worksOff=[];saveCfg();renderSetup();};
+$('wAC').onclick=()=>{cfg.worksOff=WORKS.filter(w=>w.kind!=='AC').map(w=>w.name);saveCfg();renderSetup();};
+$('wCS').onclick=()=>{cfg.worksOff=WORKS.filter(w=>w.kind!=='CS').map(w=>w.name);saveCfg();renderSetup();};
+$('wNone').onclick=()=>{cfg.worksOff=WORKS.map(w=>w.name);saveCfg();renderSetup();};
+function updatePool(){
+  const n = pool().length;
+  $('poolInfo').textContent = `出題候補: ${n} 譜面`;
+  $('startBtn').disabled = n===0;
+}
+$('lvAll').onclick=()=>{cfg.lv=[1,2,3,4,5,6,7,8,9,10];saveCfg();renderSetup();};
+$('lvNone').onclick=()=>{cfg.lv=[];saveCfg();renderSetup();};
+$('qCount').onchange=()=>{cfg.count=+$('qCount').value;saveCfg();};
+
+/* ---------- 画面遷移 ---------- */
+function show(id){
+  for(const s of ['scSetup','scQuiz','scEnd','scSearch']) $(s).classList.toggle('hidden',s!==id);
+  document.body.classList.toggle('wide', id==='scQuiz' || id==='scSearch'); // 出題中と検索は画面いっぱいに広げる
+  document.body.classList.toggle('nofoot', id==='scQuiz' || id==='scSearch'); // 出題中は画面いっぱいに広げる
+  document.body.classList.toggle('setup', id==='scSetup'); // 出題設定は広い画面で2列にする
+  window.scrollTo(0,0);
+  bgmUpdate();
+}
+
+/* ---------- BGM（設定画面でフォルダ内の mp3 をランダムに流す。一覧は bgm.js） ---------- */
+const BGM_LIST = (window.QUIZ_BGM || []).slice();
+const BGM_VOL = 0.35, BGM_FADE_OUT = 900, BGM_FADE_IN = 1500; // 音量と、フェードの長さ(ms)
+const bgm = {audio:new Audio(), last:-1, blocked:false, fade:0};
+bgm.audio.volume = BGM_VOL;
+bgm.audio.addEventListener('ended', ()=>bgmNext());
+bgm.audio.addEventListener('error', ()=>{ if(bgmWanted()) setTimeout(bgmNext, 500); });
+// どの画面でも流す。ただし YouTube の曲を流している間は止める（流れ終わったら戻る）
+function ytActive(){ return !!player.r && !player.ended && location.protocol !== 'file:'; }
+// 音量を target まで ms かけて変える。終わったら done を呼ぶ
+function bgmFadeTo(target, ms, done){
+  clearInterval(bgm.fade);
+  const a = bgm.audio, from = a.volume, t0 = performance.now();
+  if(a.paused || ms<=0 || Math.abs(from-target)<0.005){ a.volume = target; done && done(); return; }
+  bgm.fade = setInterval(()=>{
+    const k = Math.min(1, (performance.now()-t0)/ms);
+    a.volume = Math.max(0, Math.min(1, from + (target-from)*k));
+    if(k>=1){ clearInterval(bgm.fade); done && done(); }
+  }, 30);
+}
+function bgmFadeOut(done){
+  if(bgm.audio.paused){ done && done(); return; }
+  bgmFadeTo(0, BGM_FADE_OUT, ()=>{ bgm.audio.pause(); done && done(); });
+}
+function bgmWanted(){ return cfg.bgm && BGM_LIST.length>0 && !ytActive(); }
+function bgmNext(){
+  if(!bgmWanted()) return;
+  let i = Math.random()*BGM_LIST.length|0;
+  if(BGM_LIST.length>1 && i===bgm.last) i = (i+1)%BGM_LIST.length; // 同じ曲が続かないように
+  bgm.last = i;
+  bgm.audio.src = encodeURI(BGM_LIST[i]);
+  bgmPlay();
+}
+function bgmPlay(){
+  const p = bgm.audio.play();
+  if(p) p.then(()=>{bgm.blocked=false; bgmLabel();}).catch(()=>{bgm.blocked=true; bgmLabel();}); // 自動再生が止められたら、最初の操作で流す
+}
+function bgmLabel(){
+  const el=$('bgmNow'); if(!el) return;
+  const on = bgmWanted() && bgm.last>=0;
+  el.textContent = !on ? '' : bgm.blocked ? '♪ 画面をタップするとBGMが流れます' : `♪ 再生中: ${BGM_LIST[bgm.last].replace(/\.mp3$/i,'')}`;
+}
+function bgmUpdate(){
+  if(!bgmWanted()){ bgmFadeOut(); bgmLabel(); return; }
+  if(bgm.last<0 || !bgm.audio.src){ bgm.audio.volume = BGM_VOL; bgmNext(); return; } // 最初の1曲はそのまま流す
+  if(bgm.audio.paused){ bgm.audio.volume = 0; bgmPlay(); } // 止めたところから、フェードインで再開
+  bgmFadeTo(BGM_VOL, BGM_FADE_IN);
+  bgmLabel();
+}
+['pointerdown','keydown'].forEach(t=>document.addEventListener(t, ()=>{ if(bgm.blocked && bgmWanted()) bgmPlay(); }, true));
+
+/* ---------- 効果音（Web Audio で合成。ファイル不要） ---------- */
+let seCtx = null;
+function playSE(ok){
+  if(!cfg.se) return;
+  try{
+    seCtx = seCtx || new (window.AudioContext||window.webkitAudioContext)();
+    if(seCtx.state==='suspended') seCtx.resume();
+    const t0 = seCtx.currentTime + 0.01, out = seCtx.createGain();
+    out.gain.value = 0.5; out.connect(seCtx.destination);
+    const tone = (type, f0, f1, start, dur, vol)=>{
+      const o=seCtx.createOscillator(), g=seCtx.createGain();
+      o.type=type; o.frequency.setValueAtTime(f0, t0+start);
+      if(f1) o.frequency.exponentialRampToValueAtTime(f1, t0+start+dur);
+      g.gain.setValueAtTime(0.0001, t0+start);
+      g.gain.exponentialRampToValueAtTime(vol, t0+start+0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0+start+dur);
+      o.connect(g); g.connect(out); o.start(t0+start); o.stop(t0+start+dur+0.02);
+    };
+    if(ok){
+      // ピンポーン（チャイムのように、高い「ピン」→ 少し低い「ポーン」が響いて消える）
+      for(const [f, st, dur] of [[1319, 0, 0.5], [1047, 0.2, 1.2]]){
+        tone('sine', f, 0, st, dur, 0.6);
+        tone('sine', f*2, 0, st, dur*0.5, 0.12);   // 倍音で金属的な響きを足す
+        tone('triangle', f, 0, st, dur*0.7, 0.15);
+      }
+    }else{
+      // ブッ（低いブザー音を短く切る）
+      const o=seCtx.createOscillator(), lp=seCtx.createBiquadFilter(), g=seCtx.createGain();
+      o.type='sawtooth'; o.frequency.value=110;
+      lp.type='lowpass'; lp.frequency.value=900;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.5, t0+0.01);
+      g.gain.setValueAtTime(0.5, t0+0.12);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0+0.17);
+      o.connect(lp); lp.connect(g); g.connect(out); o.start(t0); o.stop(t0+0.2);
+    }
+  }catch(e){}
+}
+$('homeBtn').onclick=()=>{ if(game && !game.ended && game.history.length && !confirm('クイズを中断してトップに戻りますか？')) return; stopSong(); game=null; $('hdrStat').textContent=''; renderSetup(); show('scSetup'); };
+
+/* ---------- ゲーム ---------- */
+let game = null;
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startGame(){
+  const p = shuffle(pool().slice());
+  // 同じ曲(表・裏など)は1回のクイズで1度だけ。読み取れない譜面があれば次の候補で補う
+  const seen=new Set(), list=[];
+  for(const r of p){const k=keyOf(baseName(r)); if(seen.has(k)) continue; seen.add(k); list.push(r);}
+  // 問題数「すべて」は出題候補の全曲（途中で「ここで終了」もできる）
+  game = {list, pos:-1, target: cfg.count || Infinity, all:!cfg.count, history:[], ended:false};
+  show('scQuiz');
+  nextQ();
+}
+$('startBtn').onclick=startGame;
+$('againBtn').onclick=startGame;
+$('backBtn').onclick=()=>{renderSetup();show('scSetup');};
+
+function correctCount(){ return game.history.filter(x=>x.ok).length; }
+function updateStat(){ $('hdrStat').textContent = `正解 ${correctCount()} / ${game.history.length}`; }
+
+function nextQ(){
+  stopSong();
+  if(game.history.length >= game.target){ endGame(); return; }
+  game.pos++;
+  if(game.pos >= game.list.length){ endGame(); return; }
+  const r = game.list[game.pos];
+  game.q = {r, wrong:[], done:false};
+  // 次の問題の譜面を先に読み取っておく
+  const nx = game.list[game.pos+1]; if(nx) getFumen(nx);
+  const no = game.history.length+1;
+  $('qNo').textContent = `第${no}問 / ${Math.min(game.target, game.list.length)}`;
+  $('qScore').textContent = '';
+  $('info').innerHTML = infoHTML(r);
+  $('answerArea').classList.remove('hidden');
+  $('resultArea').classList.add('hidden');
+  $('ans').value=''; $('wrongs').innerHTML=''; hideSugg();
+  renderChart();
+  updateStat();
+  setTimeout(()=>$('ans').focus(),50);
+}
+
+/* ---------- 譜面の読み取り（画像→音符データ）---------- */
+const fumenCache = new Map();
+// 譜面データを読み込む（Wiki の画像は読み込まない。読み取りと最大コンボ数の確認はデータ作成時に済ませてある）
+function getFumen(r){
+  if(!r.ch) return Promise.resolve(null);
+  const url = r.ch;
+  if(!fumenCache.has(url)){
+    fumenCache.set(url, FumenParse.loadChart(r.ch).catch(()=>null));
+  }
+  return fumenCache.get(url);
+}
+// 譜面を読み取って描く。うまく読み取れない譜面は出題せず、次の候補に差し替える
+function renderChart(){
+  const q=game.q, area=$('chartArea');
+  const token = q.renderToken = (q.renderToken||0)+1;
+  area.innerHTML='<div class="chart-wrap gen"><p class="muted" style="padding:14px;margin:0">譜面を読み込み中…</p></div>';
+  getFumen(q.r).then(f=>{
+    if(token!==q.renderToken || !game || game.q!==q) return;
+    if(!f){ nextQ(); return; }
+    area.innerHTML='';
+    const wrap=document.createElement('div'); wrap.className='chart-wrap gen';
+    const sc=document.createElement('div'); sc.className='chart-scroll';
+    const cv=document.createElement('canvas'); cv.style.display='block'; cv.style.margin='0 auto';
+    sc.append(cv); wrap.append(sc); area.append(wrap);
+    // 譜面全体が1画面に収まる大きさで描く（下の回答欄のぶんを残す）
+    const below = Math.max(64, $('answerArea').classList.contains('hidden') ? $('resultArea').offsetHeight : $('answerArea').offsetHeight);
+    const maxH = Math.max(260, window.innerHeight - wrap.getBoundingClientRect().top - window.scrollY*0 - below - 28);
+    sc.style.maxHeight = maxH + 'px';
+    FumenParse.renderFumen(cv, f, {maxW: wrap.clientWidth - 2, maxH});
+  });
+}
+let resizeTimer=0;
+window.addEventListener('resize',()=>{ clearTimeout(resizeTimer); resizeTimer=setTimeout(()=>{ if(game && game.q && !$('scQuiz').classList.contains('hidden')) renderChart(); },200); });
+
+/* ---------- 回答 ---------- */
+function isCorrect(input, r){
+  const a = keyOf(input), b = norm(input);
+  if(!a && !b) return false;
+  const cands = new Set([keyOf(r.n), norm(r.n), keyOf(baseName(r))]);
+  if(r.y){cands.add(keyOf(r.y)); cands.add(norm(r.y));}
+  cands.delete('');
+  return cands.has(a) || cands.has(b);
+}
+function submit(){
+  const q=game.q; if(q.done) return;
+  const v=$('ans').value.trim(); if(!v) return;
+  hideSugg();
+  if(isCorrect(v,q.r)){finishQ(true); return;}
+  playSE(false);
+  if(!q.wrong.includes(v)) q.wrong.push(v);
+  $('wrongs').innerHTML = q.wrong.map(w=>`<span>${esc(w)}</span>`).join('');
+  const card=$('qCard'); card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+  $('ans').select();
+}
+$('ansBtn').onclick=submit;
+$('giveupBtn').onclick=()=>{ if(!game.q.done) finishQ(false); };
+
+function wikiUrl(r){return WIKI+encodeURIComponent('収録曲/おに/'+r.p).replace(/%2F/g,'/');}
+function finishQ(ok){
+  const q=game.q;
+  q.done=true;
+  game.history.push({r:q.r, ok});
+  if(ok) playSE(true); // あきらめたときは効果音なし
+  playSong(q.r); // 正解・あきらめたとき、その曲を流す
+  $('answerArea').classList.add('hidden');
+  updateStat();
+  const r=q.r, last = game.history.length>=game.target || game.pos>=game.list.length-1;
+  const ra=$('resultArea'); ra.classList.remove('hidden');
+  // 回答欄と同じくらいの高さの1行で表示する（譜面と合わせて1画面に収めるため）
+  ra.innerHTML = `<div class="result-row">
+      <span class="mark ${ok?'ok':'ng'}">${ok?'正解！':'ざんねん…'}</span>
+      <span class="title">${esc(r.n)}</span>
+      <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a>
+      <span class="sp"></span>
+      ${last?'':'<button id="endNowBtn">ここで終了</button>'}
+      <button class="primary" id="nextBtn">${last?'結果を見る':'次の問題へ'}</button>
+    </div>`;
+  $('nextBtn').onclick=nextQ;
+  if(!last) $('endNowBtn').onclick=endGame; // 途中で終了して結果を見る（結果画面からトップに戻れる）
+  setTimeout(()=>$('nextBtn').focus({preventScroll:true}),30);
+}
+
+function endGame(){
+  stopSong();
+  game.ended=true;
+  const h=game.history, n=h.length, okN=correctCount();
+  $('endTotal').textContent = `${okN} / ${n} 問正解`;
+  $('endSub').textContent = n ? `正解率 ${Math.round(okN/n*100)}%` : '';
+  $('endTable').innerHTML = '<tr><th>#</th><th>曲名</th><th>★</th><th class="num">結果</th></tr>' + h.map((x,i)=>
+    `<tr><td>${i+1}</td><td><a href="${wikiUrl(x.r)}" target="_blank" rel="noopener">${esc(x.r.n)}</a></td><td>${x.r.lv}</td><td class="num">${x.ok?'⭕':'❌'}</td></tr>`).join('');
+  if(n){
+    const best=store.get('best2',null);
+    if(!best || okN/n > best.ok/best.n){
+      const d=new Date(); store.set('best2',{ok:okN,n,date:`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`});
+      $('endSub').textContent += ' ／ 自己ベスト更新！';
+    }
+  }
+  $('shareBox').classList.toggle('hidden', !n);
+  show('scEnd');
+}
+
+/* ---------- 結果のシェア ---------- */
+// 公開中のサイトのときだけ URL を付ける（手元の file:// や localhost の URL は他の人が開けないため）
+function shareUrl(){
+  return /^https?:$/.test(location.protocol) && !/^(localhost|127\.|\[::1\])/.test(location.hostname)
+    ? location.origin + location.pathname : '';
+}
+function shareText(){
+  const h=game.history, n=h.length, okN=correctCount();
+  const marks = h.slice(0,30).map(x=>x.ok?'⭕':'❌').join('') + (n>30?'…':'');
+  return `太鼓の達人 曲名当てクイズで ${okN} / ${n} 問正解！（正解率 ${Math.round(okN/n*100)}%）\n${marks}\n#太鼓の達人 #曲名当てクイズ`;
+}
+function openShare(base){
+  const u=shareUrl(), q=new URLSearchParams({text: shareText()});
+  if(u) q.set('url', u);
+  window.open(base + q.toString(), '_blank', 'noopener');
+}
+$('shareX').onclick=()=>openShare('https://x.com/intent/post?');
+$('shareTh').onclick=()=>{ // Threads は url 引数が無いので本文の最後に付ける
+  const u=shareUrl();
+  window.open('https://www.threads.net/intent/post?' + new URLSearchParams({text: shareText() + (u?'\n'+u:'')}), '_blank', 'noopener');
+};
+if(navigator.share){ // スマホなど: LINE・Instagram などほかのアプリにも送れる
+  $('shareMore').classList.remove('hidden');
+  $('shareMore').onclick=()=>{ const u=shareUrl(); navigator.share(u?{text:shareText(),url:u}:{text:shareText()}).catch(()=>{}); };
+}
+$('shareCopy').onclick=async()=>{
+  const u=shareUrl(), t=shareText()+(u?'\n'+u:'');
+  try{ await navigator.clipboard.writeText(t); }
+  catch(e){ const a=document.createElement('textarea'); a.value=t; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); }
+  const b=$('shareCopy'); b.textContent='コピーしました'; setTimeout(()=>b.textContent='コピー',1500);
+};
+
+// ★・BPM・最大コンボ数・ジャンル・初出作品（出題画面と検索画面で共通）
+function infoHTML(r){
+  return `<div><div class="k">難易度</div><div class="v">★×${r.lv}</div>${r.s===3?'<div class="k">旧基準</div>':''}</div>`+
+    `<div><div class="k">BPM</div><div class="v">${esc(r.bpm||'?')}</div></div>`+
+    `<div><div class="k">最大コンボ数</div><div class="v">${esc(r.c||'?')}</div></div>`+
+    `<div><div class="k">ジャンル</div><div class="v"><span class="gchip" style="background:${GENRE_COLOR[r.g]||'#eee'}">${esc(r.g)}</span></div></div>`+
+    `<div><div class="k">初出作品</div><div class="v">${r.w?esc(r.w):'不明'}</div>${r.dt?`<div class="k">${esc(r.dt)}</div>`:''}</div>`;
+}
+
+/* ---------- 曲を検索 ---------- */
+// 曲（表・裏などをまとめたもの）ごとの譜面一覧
+const SONG_CHARTS = (()=>{
+  const m = new Map();
+  for(const r of ALL){
+    const k = keyOf(baseName(r)); if(!k) continue;
+    if(!m.has(k)) m.set(k, {name: baseName(r), yomi:'', nk: norm(baseName(r)), yk:'', charts: []});
+    const e = m.get(k);
+    e.charts.push(r);
+    if(r.y && !e.yomi){ e.yomi = stripParen(r.y); e.yk = keyOf(r.y); }
+  }
+  // 譜面の並び: 通常 → 裏 → 双打、旧基準は最後
+  const rank = r => (r.s===3?10:0) + (/^【双打】/.test(r.n)?2:0) + (/裏譜面/.test(r.n)?1:0);
+  for(const e of m.values()){
+    e.charts.sort((a,b)=>rank(a)-rank(b) || b.lv-a.lv);
+    e.ws = new Set(e.charts.flatMap(c=>c.ws||[])); // どれかの譜面が収録されている作品
+    e.lvs = new Set(e.charts.map(c=>c.lv));
+    e.gs = new Set(e.charts.map(c=>c.g));
+    const nl = e.charts.filter(c=>c.s!==3);
+    e.maxLv = Math.max(...(nl.length?nl:e.charts).map(c=>c.lv));
+    e.minLv = Math.min(...(nl.length?nl:e.charts).map(c=>c.lv));
+    e.w0 = e.ws.size ? Math.min(...e.ws) : 1e9; // 作品順: 一覧で最初に出てくる作品
+  }
+  return [...m.values()].sort((a,b)=>a.name.localeCompare(b.name,'ja'));
+})();
+// 入力に合う作品（完全一致があればそれだけ。無ければ前方一致）
+function matchWorks(k){
+  if(!k) return [];
+  const ws = WORKS.filter(w=>w.i>=0);
+  const exact = ws.filter(w=>norm(w.name)===k); // 「AC1」で AC10〜AC14 まで出ないように、完全一致を優先する
+  if(exact.length) return exact;
+  return k.length>=2 ? ws.filter(w=>norm(w.name).startsWith(k)) : [];
+}
+let search = {song:null, idx:0, token:0, scroll:0};
+$('searchBtn').onclick=()=>{ show('scSearch'); $('sq').focus(); doSearch(); };
+$('sBack').onclick=()=>{ renderSetup(); show('scSetup'); };
+$('sq').addEventListener('input', doSearch);
+$('sq').addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.isComposing){ const b=$('sList').querySelector('button'); if(b) b.click(); } });
+
+/* 絞り込み（★・ジャンル・作品）と並び順。選んだものは次に開いたときも残す */
+const SF_DEFAULT = {lv:'', genre:'', work:'', sort:'name'};
+const sf = Object.assign({}, SF_DEFAULT, store.get('sf',{}));
+(function initFilter(){
+  const opt = (v,t)=>`<option value="${esc(String(v))}">${esc(t)}</option>`;
+  $('sfLv').innerHTML = opt('','すべて') + [10,9,8,7,6,5,4,3,2,1].map(v=>opt(v,'★'+v)).join('');
+  $('sfGenre').innerHTML = opt('','すべて') + GENRES.map(g=>opt(g[0],g[0])).join('');
+  $('sfWork').innerHTML = opt('','すべて') + [['AC','AC'],['CS','CS'],['OS','海外']].map(([kind,label])=>{
+    const ws = WORKS.filter(w=>w.n>0 && w.kind===kind);
+    return ws.length ? `<optgroup label="${label}">${ws.map(w=>opt(w.i,w.name)).join('')}</optgroup>` : '';
+  }).join('');
+  const ids = {lv:'sfLv', genre:'sfGenre', work:'sfWork', sort:'sfSort'};
+  const sync = ()=>{ for(const [k,id] of Object.entries(ids)){ $(id).value = sf[k]; if($(id).value!==String(sf[k])){ sf[k]=SF_DEFAULT[k]; $(id).value=sf[k]; } $(id).classList.toggle('on', sf[k]!==SF_DEFAULT[k]); } };
+  for(const [k,id] of Object.entries(ids)) $(id).onchange=()=>{ sf[k]=$(id).value; store.set('sf',sf); sync(); search.scroll=0; doSearch(); };
+  $('sfReset').onclick=()=>{ Object.assign(sf, SF_DEFAULT); store.set('sf',sf); sync(); search.scroll=0; doSearch(); };
+  sync();
+})();
+function sfPass(s){
+  return (!sf.lv || s.lvs.has(+sf.lv)) && (!sf.genre || s.gs.has(sf.genre)) && (!sf.work || s.ws.has(+sf.work));
+}
+const genreRank = s=>{ const i = GENRES.findIndex(g=>s.gs.has(g[0])); return i<0 ? 99 : i; };
+const genreOf = s=>{ const g = GENRES.find(g=>s.gs.has(g[0])); return g ? g[0] : [...s.gs][0] || '不明'; };
+// 並び順ごとの比べ方と、まとまりの見出し
+const SORTS = {
+  name:  {cmp:null},
+  lvd:   {cmp:(a,b)=>b.maxLv-a.maxLv, grp:s=>'★'+s.maxLv},
+  lva:   {cmp:(a,b)=>a.minLv-b.minLv, grp:s=>'★'+s.minLv},
+  genre: {cmp:(a,b)=>genreRank(a)-genreRank(b), grp:genreOf},
+  work:  {cmp:(a,b)=>a.w0-b.w0, grp:s=>s.w0<1e9 ? WORKS[s.w0].name : '収録作品不明'},
+};
+function sortSongs(list){
+  const c = SORTS[sf.sort] || SORTS.name;
+  return c.cmp ? list.slice().sort((a,b)=>c.cmp(a,b) || a.name.localeCompare(b.name,'ja')) : list;
+}
+const SEARCH_MAX = 5000; // 絞り込みだけのときは全曲を出す
+function doSearch(){
+  const k = norm($('sq').value);
+  const box = $('sList');
+  box.classList.remove('hidden');
+  $('sDetail').classList.add('hidden'); // 検索し直したら一覧に戻る
+  const filtered = !!(sf.lv || sf.genre || sf.work);
+  if(!k && !filtered && sf.sort==='name'){ box.innerHTML = `<span class="muted">曲名・読み・作品名を入力するか、★・ジャンル・作品で絞り込んでください（全 ${SONG_CHARTS.length} 曲）</span>`; return; }
+  let starts=[], incl=[], works=[], wHits=[];
+  if(k){
+    for(const s of SONG_CHARTS){
+      if(s.nk.startsWith(k) || (s.yk && s.yk.startsWith(k))) starts.push(s);
+      else if(s.nk.includes(k) || (s.yk && s.yk.includes(k))) incl.push(s);
+    }
+    // 作品名でも探す（その作品に収録されている曲。曲名で見つかった曲は除く）
+    works = matchWorks(k);
+    const byName = new Set(starts.concat(incl));
+    wHits = works.length ? SONG_CHARTS.filter(s=>!byName.has(s) && works.some(w=>s.ws.has(w.i))) : [];
+  } else {
+    starts = SONG_CHARTS.slice(); // 入力なし: 絞り込みに合う全曲
+  }
+  const nameHits = sortSongs(starts.concat(incl).filter(sfPass));
+  wHits = sortSongs(wHits.filter(sfPass));
+  const limit = k ? 80 : SEARCH_MAX;
+  const hits = nameHits.slice(0, limit);
+  box.innerHTML = hits.length || wHits.length ? '' : '<span class="muted">見つかりませんでした</span>';
+  const grp = (SORTS[sf.sort]||{}).grp;
+  const addList = list=>{
+    let last = null;
+    for(const s of list){
+      if(grp){ const g = grp(s); if(g!==last){ last = g; box.insertAdjacentHTML('beforeend', `<div class="sgrp">${esc(g)}</div>`); } }
+      const b = document.createElement('button');
+      const lvs = [...new Set(s.charts.filter(c=>c.s!==3).map(c=>c.lv))].sort((a,b)=>b-a).map(v=>'★'+v).join('・');
+      b.innerHTML = `${esc(s.name)}<small>${lvs}</small>`;
+      b.onclick = ()=>{ search.scroll = box.scrollTop; search.song = s; search.idx = 0; showSong(); };
+      box.append(b);
+    }
+  };
+  if(hits.length && (filtered || !k)) box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;font-weight:700">${nameHits.length} 曲</div>`);
+  addList(hits);
+  if(nameHits.length > hits.length) box.insertAdjacentHTML('beforeend', `<span class="muted">ほか ${nameHits.length-hits.length} 曲（${k?'もっと詳しく入力':'さらに絞り込んで'}ください）</span>`);
+  if(wHits.length){
+    const inName = nameHits.filter(s=>works.some(w=>s.ws.has(w.i))).length;
+    box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">作品「${works.map(w=>esc(w.name)).join('」「')}」の収録曲: ${wHits.length + inName} 曲</div>`);
+    addList(wHits);
+  }
+}
+// 詳細から検索結果（一覧）に戻る。一覧のスクロール位置も戻す
+function backToList(){
+  search.token++;
+  $('sDetail').classList.add('hidden');
+  $('sList').classList.remove('hidden');
+  $('sList').scrollTop = search.scroll;
+}
+function chartLabel(r){
+  const kind = /^【双打】/.test(r.n) ? '双打' : /裏譜面/.test(r.n) ? '裏譜面' : '表譜面';
+  return `${kind} ★${r.lv}${r.s===3?'（旧基準）':''}`;
+}
+function showSong(){
+  const s = search.song, r = s.charts[search.idx];
+  const d = $('sDetail'); d.classList.remove('hidden');
+  $('sList').classList.add('hidden'); // 譜面を1画面に収めるため、候補一覧は閉じる（「検索結果に戻る」でまた開く）
+  const works = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
+  d.innerHTML = `<div class="sd-head"><button class="sd-back" id="sdBack" title="検索結果の一覧に戻る（Esc）">← 検索結果に戻る</button><span class="title">${esc(s.name)}</span>${s.yomi?`<span class="muted">${esc(s.yomi)}</span>`:''}
+      <div class="sd-tabs">${s.charts.map((c,i)=>`<button data-i="${i}" class="${i===search.idx?'on':''}">${chartLabel(c)}</button>`).join('')}</div>
+      <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a></div>
+    <div class="info">${infoHTML(r)}</div>
+    <div class="sd-works"><span style="border:none;background:none;padding-left:0">収録作品:</span>${works.length?works.map(w=>`<span>${esc(w)}</span>`).join(''):'<span class="muted" style="border:none">不明（取得中の可能性があります）</span>'}</div>
+    <div id="sChart"></div>`;
+  d.querySelectorAll('.sd-tabs button').forEach(b=>b.onclick=()=>{ search.idx=+b.dataset.i; showSong(); });
+  $('sdBack').onclick=backToList;
+  drawSearchChart(r);
+}
+function drawSearchChart(r){
+  const area = $('sChart'), token = ++search.token;
+  if(!r.ch){ area.innerHTML='<p class="muted">この譜面のデータはまだ作成していないため（またはうまく読み取れなかったため）、譜面を表示できません。「Wikiで見る」から確認してください。</p>'; return; }
+  area.innerHTML='<div class="chart-wrap gen"><p class="muted" style="padding:14px;margin:0">譜面を読み込み中…</p></div>';
+  getFumen(r).then(f=>{
+    if(token!==search.token) return;
+    if(!f){ area.innerHTML='<p class="muted">この譜面はうまく読み取れませんでした。「Wikiで見る」から確認してください。</p>'; return; }
+    area.innerHTML='';
+    const wrap=document.createElement('div'); wrap.className='chart-wrap gen';
+    const sc=document.createElement('div'); sc.className='chart-scroll';
+    const cv=document.createElement('canvas'); cv.style.display='block'; cv.style.margin='0 auto';
+    sc.append(cv); wrap.append(sc); area.append(wrap);
+    const maxH = Math.max(300, window.innerHeight - wrap.getBoundingClientRect().top - 24);
+    sc.style.maxHeight = maxH + 'px';
+    FumenParse.renderFumen(cv, f, {maxW: wrap.clientWidth - 2, maxH});
+  });
+}
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && !$('scSearch').classList.contains('hidden') && !$('sDetail').classList.contains('hidden')) backToList();
+});
+window.addEventListener('resize',()=>{ clearTimeout(resizeTimer); resizeTimer=setTimeout(()=>{ if(search.song && !$('scSearch').classList.contains('hidden')) drawSearchChart(search.song.charts[search.idx]); },200); });
+
+/* ---------- 入力候補 ---------- */
+let suggSel=-1, suggItems=[];
+$('suggOn').checked = cfg.sugg; $('suggLbl').classList.toggle('on',cfg.sugg);
+$('suggOn').onchange=()=>{cfg.sugg=$('suggOn').checked; $('suggLbl').classList.toggle('on',cfg.sugg); store.set('cfg',cfg); if(!cfg.sugg) hideSugg();};
+function hideSugg(){ $('sugg').classList.add('hidden'); suggSel=-1; suggItems=[]; }
+function updateSugg(){
+  const v=$('ans').value; const k=norm(v);
+  if(!cfg.sugg || !k){hideSugg();return;}
+  const starts=[], incl=[];
+  for(const s of SONGS){
+    if(s.nk.startsWith(k) || (s.yk && s.yk.startsWith(k))) starts.push(s);
+    else if(k.length>=2 && (s.nk.includes(k) || (s.yk && s.yk.includes(k)))) incl.push(s);
+    if(starts.length>=10) break;
+  }
+  suggItems = starts.concat(incl).slice(0,10);
+  const box=$('sugg');
+  if(!suggItems.length){hideSugg();return;}
+  suggSel=-1;
+  box.innerHTML = suggItems.map((s,i)=>`<div data-i="${i}">${esc(s.name)}${s.yomi&&norm(s.yomi)!==s.nk?`<small>${esc(s.yomi)}</small>`:''}</div>`).join('');
+  box.classList.remove('hidden');
+  for(const d of box.children) d.onmousedown=e=>{e.preventDefault(); pickSugg(+d.dataset.i);};
+}
+function pickSugg(i){ $('ans').value=suggItems[i].name; hideSugg(); $('ans').focus(); }
+$('ans').addEventListener('input',updateSugg);
+$('ans').addEventListener('blur',()=>setTimeout(hideSugg,100));
+$('ans').addEventListener('keydown',e=>{
+  if(e.isComposing) return;
+  const open=!$('sugg').classList.contains('hidden');
+  if(e.key==='ArrowDown'&&open){e.preventDefault(); suggSel=Math.min(suggItems.length-1,suggSel+1); markSugg();}
+  else if(e.key==='ArrowUp'&&open){e.preventDefault(); suggSel=Math.max(-1,suggSel-1); markSugg();}
+  else if(e.key==='Escape'){hideSugg();}
+  else if(e.key==='Enter'){e.preventDefault(); if(open&&suggSel>=0){pickSugg(suggSel);} else submit();}
+});
+function markSugg(){[...$('sugg').children].forEach((d,i)=>d.classList.toggle('sel',i===suggSel)); const s=$('sugg').children[suggSel]; if(s) s.scrollIntoView({block:'nearest'});}
+
+if(!ALL.length){
+  $('poolInfo').innerHTML='<b style="color:var(--ng)">data.js が見つかりません。</b>tools/build_data.py を実行して作成してください。';
+}
+/* ---------- 曲の再生（YouTube の埋め込み） ---------- */
+const YT_KIND = ['自動生成音源', '公式音源']; // オート動画・プレイ動画は流さない（data.js にも入れていない）
+let player = {r:null, i:0, ended:false};
+function playSong(r){
+  if(!cfg.bgm || !r.yt || !r.yt.length){ stopSong(); return; } // BGM がオフのときは出さない
+  const p = player = {r, i:0, ended:false};
+  $('player').classList.remove('hidden');
+  if(location.protocol === 'file:'){ loadVideo(); return; } // 埋め込みが動かないので BGM はそのまま
+  // BGM をフェードアウトしてから YouTube の曲を流す
+  $('plLabel').textContent = `♪ ${baseName(r)}`;
+  $('plBody').innerHTML = '<div class="msg">まもなく再生します…</div>';
+  bgmUpdate();
+  bgmFadeOut(()=>{ if(player===p) loadVideo(); });
+}
+// YouTube の再生状態を受け取る（IFrame Player API の postMessage）。流れ終わったら BGM をフェードインで戻す
+function ytState(s){
+  if(!player.r) return;
+  if(s===0 && !player.ended){ player.ended = true; bgmUpdate(); }        // 再生終了
+  else if(s===1 && player.ended){ player.ended = false; bgmUpdate(); }   // もう一度再生したら BGM を止める
+}
+addEventListener('message', e=>{
+  const f = $('plBody').querySelector('iframe');
+  if(!f || e.source !== f.contentWindow) return;
+  let d; try{ d = typeof e.data==='string' ? JSON.parse(e.data) : e.data; }catch(_){ return; }
+  if(!d) return;
+  if(d.event==='onStateChange') ytState(d.info);
+  else if(d.event==='infoDelivery' && d.info && typeof d.info.playerState==='number') ytState(d.info.playerState);
+  else if(d.event==='onError' && !player.ended){ player.ended = true; bgmUpdate(); } // 再生できない動画なら BGM に戻す
+});
+function loadVideo(){
+  player.ended = false;
+  const r = player.r, id = r.yt[player.i];
+  const kind = player.i===0 && r.ytk!=null ? YT_KIND[r.ytk] : '動画';
+  $('plLabel').textContent = `♪ ${baseName(r)}（${kind}）`;
+  $('plLabel').title = $('plLabel').textContent;
+  $('plOpen').href = 'https://www.youtube.com/watch?v=' + id;
+  $('plNext').classList.toggle('hidden', r.yt.length < 2);
+  if(location.protocol === 'file:'){
+    // ファイルを直接開いた場合は YouTube の埋め込みが動かないため案内を出す
+    $('plBody').innerHTML = '<div class="msg">曲を再生するには、<code>start_server.bat</code> を実行して開いたページ（http://localhost:8000）で遊んでください。<br>「YouTubeで開く」からも聴けます。</div>';
+    return;
+  }
+  $('plBody').innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="曲の再生"></iframe>`;
+  const f = $('plBody').querySelector('iframe');
+  // 再生状態を送ってもらうよう登録する
+  f.addEventListener('load', ()=>{
+    const send = o=>{ try{ f.contentWindow.postMessage(JSON.stringify(Object.assign({id:1, channel:'widget'}, o)), '*'); }catch(_){} };
+    send({event:'listening'});
+    send({event:'command', func:'addEventListener', args:['onStateChange']});
+    send({event:'command', func:'addEventListener', args:['onError']});
+  });
+}
+function stopSong(){ $('plBody').innerHTML=''; $('player').classList.add('hidden'); player={r:null,i:0,ended:false}; bgmUpdate(); } // プレーヤーを閉じたら BGM をフェードインで戻す
+$('plNext').onclick=()=>{
+  if(!player.r) return; player.i=(player.i+1)%player.r.yt.length;
+  if(player.ended){ player.ended=false; bgmUpdate(); } // BGM に戻っていたら、またフェードアウトしてから流す
+  const p = player; bgmFadeOut(()=>{ if(player===p) loadVideo(); });
+};
+$('plClose').onclick=stopSong; // 閉じたら、その問題ではもう流さない（次に流れるのは次の問題の回答後）
+
+// プレーヤーを見出しのドラッグで動かす。位置はこのブラウザに記憶する
+(function(){
+  const pl = $('player'), head = $('plHead');
+  const clamp = (x, y)=>{
+    const w = pl.offsetWidth || 212, h = pl.offsetHeight || 260;
+    return [Math.min(Math.max(0, x), innerWidth - w), Math.min(Math.max(0, y), innerHeight - h)];
+  };
+  const place = (x, y)=>{ [x, y] = clamp(x, y); pl.style.left = x+'px'; pl.style.top = y+'px'; pl.style.right='auto'; pl.style.bottom='auto'; };
+  const saved = store.get('playerPos', null);
+  if(saved) place(saved[0], saved[1]);
+  let drag = null;
+  head.addEventListener('pointerdown', e=>{
+    if(e.target.closest('button, a')) return;
+    const r = pl.getBoundingClientRect();
+    drag = {dx: e.clientX - r.left, dy: e.clientY - r.top};
+    head.setPointerCapture(e.pointerId);
+    pl.style.pointerEvents='none'; head.style.pointerEvents='auto'; // ドラッグ中に iframe がマウスを奪わないように
+  });
+  head.addEventListener('pointermove', e=>{ if(drag) place(e.clientX - drag.dx, e.clientY - drag.dy); });
+  const end = ()=>{
+    if(!drag) return;
+    drag = null; pl.style.pointerEvents='';
+    const r = pl.getBoundingClientRect(); store.set('playerPos', [r.left, r.top]);
+  };
+  head.addEventListener('pointerup', end); head.addEventListener('pointercancel', end);
+  addEventListener('resize', ()=>{ if(pl.style.left){ const r = pl.getBoundingClientRect(); place(r.left, r.top); } });
+})();
+
+/* ---------- あそびかた ---------- */
+$('helpBtn').onclick=()=>$('helpModal').classList.remove('hidden');
+$('homeIcon').onclick=()=>$('homeBtn').click(); // 左上のタイトルと同じ（クイズの途中なら確認してから戻る）
+$('helpClose').onclick=()=>$('helpModal').classList.add('hidden');
+$('helpModal').onclick=e=>{ if(e.target===$('helpModal')) $('helpModal').classList.add('hidden'); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('helpModal').classList.add('hidden'); });
+
+renderSetup();
+show('scSetup');
+</script>
+</body>

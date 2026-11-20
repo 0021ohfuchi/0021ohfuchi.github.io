@@ -1,0 +1,166 @@
+# lists.json + details.json から ../data.js を生成する
+# 使い方: python build_data.py  (tools フォルダで実行)
+import json, os, re, hashlib
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+lists = json.load(open(os.path.join(HERE, 'lists.json'), encoding='utf-8'))
+dp = os.path.join(HERE, 'details.json')
+details = json.load(open(dp, encoding='utf-8')) if os.path.exists(dp) else {}
+cp = os.path.join(HERE, 'charts_index.json')
+charts_index = json.load(open(cp, encoding='utf-8')) if os.path.exists(cp) else {}
+IMG = 'https://cdn.wikiwiki.jp/to/w/taiko-fumen/'
+SEC = {'新筐体収録曲': 0, '難易度・ジャンル別曲数': 0, '新筐体期間限定曲': 0, '新筐体ブラジル版限定曲': 0,
+       '新筐体未収録曲': 1, '幻の曲': 2, '旧基準': 3}
+GENRE_FIX = {'ボーカロイド™曲': 'ボーカロイド™曲'}
+known = {'ポップス', 'キッズ', 'アニメ', 'ボーカロイド™曲', 'ゲームミュージック', 'バラエティ', 'クラシック',
+         'ナムコオリジナル', 'どうよう'}
+
+# 初出バージョン → 年 の対応表を、年が分かっている曲から作る（裏譜面ページは配信日表がないため）
+def ver_keys(ver):
+    v = re.sub(r'\(.*?\)|\*\d+', '', ver.split(' / ')[0]).strip()
+    keys = [v]
+    while re.search(r'[.\d]$', v) and '.' in v:
+        v = v.rsplit('.', 1)[0]
+        keys.append(v)
+    return keys
+
+
+import collections, statistics
+vy = collections.defaultdict(list)
+for d in details.values():
+    if d.get('ver') and d.get('year'):
+        for k in ver_keys(d['ver']):
+            vy[k].append(d['year'])
+VER_YEAR = {k: int(statistics.median_low(v)) for k, v in vy.items()}
+
+
+def guess_year(ver):
+    for k in ver_keys(ver):
+        if k in VER_YEAR:
+            return VER_YEAR[k]
+    return None
+
+
+# 初出（初出順/時系列順 ページから parse_debut.py で作成）
+dbp = os.path.join(HERE, 'debut.json')
+debut = json.load(open(dbp, encoding='utf-8')) if os.path.exists(dbp) else {}
+ARCADE_WORKS = {'無印', 'ニジイロ', 'KATSU-DON', 'ソライロ', 'モモイロ', 'キミドリ', 'ムラサキ', 'ホワイト', 'レッド',
+                'イエロー', 'ブルー', 'グリーン', 'AC12増'}  # アニメ祭り・アニメスペシャルは家庭用（CS）
+
+
+def work_label(info):
+    """作品名: アーケード初出ならバージョン名、家庭用初出なら機種名"""
+    sec, work = info['sec'], info['work']
+    sec = {'AC15': '新筐体 無印', 'ニジイロ Ver.': 'ニジイロ2020'}.get(sec, sec).replace(' ver.', '')
+    if not work:  # 作品名が分からない（時期だけ分かる）
+        return 'AC', sec
+    if re.fullmatch(r'AC\d+', work) or work in ARCADE_WORKS:
+        return 'AC', sec
+    return 'CS', work
+
+
+# 作品ごとの収録曲（scrape_works.py で作成）→ 譜面ページ名 → 作品番号の一覧
+wp = os.path.join(HERE, 'works.json')
+works_raw = json.load(open(wp, encoding='utf-8')) if os.path.exists(wp) else {}
+WORKS_TOTAL = (works_raw.pop('_meta', None) or {}).get('total', 75)
+# 家庭用（CS）の作品の並び順（scrape_works.py の一覧と同じ）。古い works.json でもこの順に並べる。
+# アニメ祭り・アニメスペシャルは家庭用として扱う
+CS_ORDER = ['CS1', 'CS2', 'CS3', 'CS4', 'CS5', 'CS6', 'CS7', 'アニメ祭り', 'アニメスペシャル', 'TDM', '米TDM',
+            'PSP1', 'PSP2', 'PSPDX', 'DS1', 'DS2', 'DS3', 'Wii1', 'Wii2', 'Wii3', 'Wii4', 'Wii5',
+            '3DS1', '3DS2', '3DS3', 'Wii U1', 'Wii U2', 'Wii U3', 'PS Vita1', 'PS Vita1亜', 'PS Vita MS', 'PS4 1',
+            'NS1', 'iOS', 'Xbox1', 'NS RPG', 'RC', 'PTB', 'DF', 'DFMP', 'NS2', 'NS2MP', 'Beena', 'もばいる']
+for i, name in enumerate(CS_ORDER):
+    if name in works_raw:
+        works_raw[name]['kind'] = 'CS'
+        works_raw[name]['order'] = 1000 + i
+for name, v in works_raw.items():   # 一覧にない CS 作品は最後に
+    if v['kind'] == 'CS' and name not in CS_ORDER:
+        v['order'] = 2000 + v['order']
+WORK_LIST = sorted(({'name': k, 'kind': v['kind'], 'order': v['order']} for k, v in works_raw.items()), key=lambda w: w['order'])
+# 海外版でしか遊べない曲（北米版・アジア版・中国版・ブラジル版などの曲）は「海外の曲」という作品にまとめる
+OVERSEAS_WORK = '海外の曲'
+WORK_LIST.append({'name': OVERSEAS_WORK, 'kind': 'OS', 'order': 9999})
+WORK_INDEX = {w['name']: i for i, w in enumerate(WORK_LIST)}
+song_works = {}
+for name, v in works_raw.items():
+    for p in v['songs']:
+        song_works.setdefault(p, set()).add(WORK_INDEX[name])
+
+# 国内のジャンル名。国内のどの作品にも収録されていない曲のうち、ジャンル名がこれ以外のもの
+# （Pop・Rock・華語流行音樂・綜合音樂・中国版の J-POP など）と、ブラジル版限定曲を海外の曲とみなす
+# （「J-POP」は旧基準の一覧では国内の昔の曲にも使われているが、それらは国内の作品に収録されているので対象外になる）
+JP_GENRES = {'ポップス', 'キッズ', 'アニメ', 'ボーカロイド™曲', 'ボーカロイド曲', 'ゲームミュージック', 'バラエティ',
+             'クラシック', 'ナムコオリジナル', 'どうよう'}
+OVERSEAS_SECTIONS = {'新筐体ブラジル版限定曲'}
+# 旧基準の一覧にしか載っていない譜面（新基準の★が無い昔の曲）。旧基準でも出題する
+NEW_STD_PAGES = set(s['page'] for s in lists if s['section'] != '旧基準')
+
+# 曲を流す YouTube 動画（裏譜面ページに無ければ表譜面のものを使う）
+# 流すのは曲だけの音源（0=自動生成音源, 1=公式音源/MV）のみ。オート動画・プレイ動画（2, 3）は使わない
+yt_by_page = {}
+for s in lists:
+    d = details.get(s['href'], {})
+    vids = [v for v in d.get('yt', []) if v[0] <= 1]
+    if vids:
+        yt_by_page.setdefault(s['page'].split('/', 2)[-1], vids)
+
+out = []
+for s in lists:
+    d = details.get(s['href'], {})
+    g = s['genre']
+    r = {
+        'n': s['name'],
+        'p': s['page'].split('/', 2)[-1],
+        'lv': s['level'],
+        's': SEC.get(s['section'], 4),
+        'g': g,
+        'bpm': s['bpm'],
+        'c': s['combo'].replace('/', '・'),
+    }
+    if s['section'] == '旧基準' and s['page'] not in NEW_STD_PAGES:
+        r['o1'] = 1  # 旧基準にしか無い譜面（出題する）
+    for k_src, k_dst in (('yomi', 'y'), ('ver', 'v'), ('year', 'yr'), ('density', 'd'), ('roll', 'r')):
+        if d.get(k_src):
+            r[k_dst] = d[k_src]
+    db = debut.get(r['p'])  # 裏譜面は表と初出が違うことがあるので、表の情報では代用しない
+    if db:
+        if db.get('date'):
+            r['yr'] = int(db['date'][:4])
+            r['dt'] = db['date']
+            r.pop('yg', None)
+        kind, label = work_label(db)
+        r['w'] = label
+        r['wk'] = kind
+    yt = yt_by_page.get(r['p']) or yt_by_page.get(re.sub(r'\(裏譜面\)$', '', r['p']))
+    if yt:
+        r['yt'] = [i for _, i in yt]
+        r['ytk'] = yt[0][0]  # 0=自動生成音源 1=公式音源/MV
+    if r['p'] in song_works:
+        r['ws'] = sorted(song_works[r['p']])
+    elif s['section'] in OVERSEAS_SECTIONS or g not in JP_GENRES:
+        r['ws'] = [WORK_INDEX[OVERSEAS_WORK]]         # 海外の曲
+    elif r.get('w') in WORK_INDEX:
+        r['ws'] = [WORK_INDEX[r['w']]]                 # 幻の曲など、作品ページに無い曲は初出の作品に入れる
+    if 'yr' not in r and d.get('ver'):
+        gy = guess_year(d['ver'])
+        if gy:
+            r['yr'] = gy
+            r['yg'] = 1  # 推定値
+    # 譜面データ（parse_charts.py で作成済みのもの）。画像の URL は data.js に入れない（直接参照しないため）
+    if d.get('imgs'):
+        cid = hashlib.md5(d['imgs'][0].encode()).hexdigest()[:12]
+        if charts_index.get(cid, {}).get('ok'):
+            r['ch'] = cid
+    out.append(r)
+
+js = '// 自動生成: tools/build_data.py\n// 出典: 太鼓の達人 譜面とか Wiki (https://wikiwiki.jp/taiko-fumen/)\n'
+js += 'window.QUIZ_WORKS=' + json.dumps([{'name': w['name'], 'kind': w['kind']} for w in WORK_LIST], ensure_ascii=False) + ';\n'
+js += 'window.QUIZ_WORKS_TOTAL=' + str(WORKS_TOTAL) + ';\n'
+js += 'window.QUIZ_DATA=' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + ';\n'
+open(os.path.join(HERE, '..', 'data.js'), 'w', encoding='utf-8').write(js)
+# 設定画面の BGM: taiko-quiz フォルダ直下の mp3 の一覧（ブラウザはフォルダの中身を調べられないため）
+ROOT = os.path.join(HERE, '..')
+mp3s = sorted(f for f in os.listdir(ROOT) if f.lower().endswith('.mp3') and os.path.isfile(os.path.join(ROOT, f)))
+open(os.path.join(ROOT, 'bgm.js'), 'w', encoding='utf-8').write(
+    '// 自動生成: tools/build_data.py（taiko-quiz フォルダ直下の mp3 の一覧）\nwindow.QUIZ_BGM=' + json.dumps(mp3s, ensure_ascii=False) + ';\n')
+print('songs', len(out), 'with charts', sum(1 for r in out if 'ch' in r), 'details', len(details))

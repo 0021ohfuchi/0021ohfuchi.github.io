@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!-- 譜面画像（ローカルに保存したもの）を fumen-parse.js で読み取り、結果を JSON で書き出す。
+     parse_charts.py がヘッドレス Chrome で開く（クイズ本体では使わない） -->
+<meta charset="utf-8">
+<body><pre id="out">running</pre>
+<script src="../fumen-parse.js"></script>
+<script src="cache/chart_jobs.js"></script>
+<script>
+(async () => {
+  const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('load')); i.src = src; });
+  // 描画に必要なものだけを残して小さくする
+  const compact = f => ({
+    w: f.width,
+    rows: f.rows.map(r => ({
+      l: r.lineY, t: r.top, b: r.bottom, e: r.laneEnd,
+      bars: r.bars, g: r.gogo,
+      lb: r.labels.map(x => [x.kind === 'bpm' ? 'B' : 'H', Math.round(x.x * 2) / 2, x.value]),
+      ln: r.lanes.map(l => [l.type, l.top, l.bottom, l.notes.map(n => {
+        const a = [Math.round(n.x * 2) / 2, n.kind === 'note' ? (n.c === 'd' ? 'd' : 'k') : n.kind === 'roll' ? (n.c === 'o' ? 'o' : 'r') : 'e', n.big ? 1 : 0];
+        if (n.kind === 'end') a[1] = n.c === 'o' ? 'E' : 'e';
+        if (n.count) a.push(n.count);
+        return a;
+      })])
+    }))
+  });
+  const results = [];
+  for (const job of window.CHART_JOBS || []) {
+    try {
+      const img = await load(job.file);
+      const f = FumenParse.parseFumenImage(img);
+      if (!f.ok) { results.push({ id: job.id, ok: false, reason: f.reason }); continue; }
+      const verified = job.combos.includes(String(f.combo));
+      results.push({ id: job.id, ok: verified, combo: f.combo, chart: verified ? compact(f) : null });
+    } catch (e) {
+      results.push({ id: job.id, ok: false, reason: String(e.message || e) });
+    }
+  }
+  document.getElementById('out').textContent = '@@BEGIN@@' + JSON.stringify(results) + '@@END@@';
+})();
+</script>

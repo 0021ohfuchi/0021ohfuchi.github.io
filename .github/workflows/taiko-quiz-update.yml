@@ -1,0 +1,68 @@
+# 太鼓の達人 曲名当てクイズ（taiko-quiz/）の曲データを毎日自動で更新する
+# 太鼓の達人 譜面とか Wiki から差分だけを取得し、変わっていればコミットする。
+# GitHub Pages はコミットされた data.js・charts をそのまま配信するので、サイトにも反映される。
+name: 曲名当てクイズ 曲データの自動更新
+
+on:
+  schedule:
+    - cron: '0 18 * * *'   # 毎日 03:00（日本時間）
+  workflow_dispatch:        # Actions のページから手動でも実行できる
+    inputs:
+      max_fetch:
+        description: '取得する曲ページの上限'
+        default: '150'
+      refresh_oldest:
+        description: '取り直す古い曲ページの数'
+        default: '30'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: taiko-quiz-update
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: taiko-quiz
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 取得したページのキャッシュを次回に引き継ぐ（無くても動くが、あるとアクセスが減る）
+      - uses: actions/cache@v4
+        with:
+          path: taiko-quiz/tools/cache
+          key: wiki-cache-${{ github.run_id }}
+          restore-keys: wiki-cache-
+
+      - name: Wiki から差分を取得して data.js を作り直す
+        timeout-minutes: 300
+        continue-on-error: true   # 途中で止まっても、進んだぶんは下でコミットする
+        env:
+          MAX_FETCH: ${{ github.event.inputs.max_fetch || '150' }}
+          REFRESH_OLDEST: ${{ github.event.inputs.refresh_oldest || '30' }}
+          DELAY: '20'
+        run: python tools/update.py
+
+      - name: 変更があればコミットする
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.js bgm.js charts tools/lists.json tools/extra_lists.json tools/details.json tools/debut.json tools/works.json tools/charts_index.json
+          if git diff --cached --quiet; then
+            echo "変更なし"
+          else
+            git commit -m "曲名当てクイズ: 曲データを自動更新 ($(TZ=Asia/Tokyo date +%Y-%m-%d))"
+            git pull --rebase --autostash
+            git push
+          fi

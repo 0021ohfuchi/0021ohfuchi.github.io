@@ -1,0 +1,85 @@
+# 曲データの差分更新（GitHub Actions から毎日実行する。手元で実行してもよい）
+#
+#   1. おに★1〜10の一覧ページを取り直す（新曲・★・BPM・コンボ数の変更）。一覧に無い曲は extra_songs.py で足す
+#   2. 初出ページ（AC16）を取り直す
+#   3. 今も曲が追加される作品の収録曲を取り直す（未取得の作品があればそれも取る）
+#   4. まだ取っていない曲ページ＋取得日が古い曲ページを、上限つきで取る
+#   5. 新しい譜面画像をダウンロードして譜面データ（charts/）に変換する
+#   6. data.js を作り直す
+#
+# Wiki は短時間に数回アクセスすると 429 を返すので、どの段階も約20秒に1ページのペースで取る。
+# 途中で止まっても、各段階は進んだところまで保存してあり、次の実行で続きから再開する。
+#
+# 環境変数で調整できる:
+#   MAX_FETCH      曲ページを取る上限（既定 150）
+#   REFRESH_OLDEST 取り直す古い曲ページの数（既定 30）
+#   ACTIVE_WORKS   取り直す作品の表示名（カンマ区切り）
+#   SKIP           飛ばす段階（例: "works,debut"）
+import json, os, shutil, subprocess, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+PY = [sys.executable, '-I']
+SKIP = set(x.strip() for x in os.environ.get('SKIP', '').split(',') if x.strip())
+ACTIVE_WORKS = os.environ.get('ACTIVE_WORKS', 'ニジイロ（現行）,NS2,PTB,DF,NS2MP,DFMP')
+
+
+def run(step, args, env=None):
+    if step in SKIP:
+        print(f'== {step}: skip', flush=True)
+        return True
+    print(f'== {step}', flush=True)
+    e = dict(os.environ, PYTHONIOENCODING='utf-8', **(env or {}))
+    r = subprocess.run(PY + args, cwd=HERE, env=e)
+    if r.returncode != 0:
+        print(f'!! {step} failed (code {r.returncode})', flush=True)
+    return r.returncode == 0
+
+
+def song_count(path):
+    try:
+        return len(json.load(open(path, encoding='utf-8')))
+    except Exception:
+        return 0
+
+
+ok = True
+
+# 1. 一覧（取得に失敗して曲数が大きく減ったら、前の一覧に戻す）
+lists = os.path.join(HERE, 'lists.json')
+before = song_count(lists)
+if os.path.exists(lists):
+    shutil.copy(lists, lists + '.bak')
+if run('lists', ['scrape_lists.py', os.path.join('cache', 'lists'), 'lists.json'], {'REFRESH': '1'}):
+    after = song_count(lists)
+    print(f'lists: {before} -> {after}', flush=True)
+    if before and after < before * 0.9:
+        print('!! 曲数が大きく減ったため、前の一覧に戻します', flush=True)
+        shutil.copy(lists + '.bak', lists)
+        ok = False
+else:
+    if os.path.exists(lists + '.bak'):
+        shutil.copy(lists + '.bak', lists)
+    ok = False
+if os.path.exists(lists + '.bak'):
+    os.remove(lists + '.bak')
+
+# 1b. 一覧に載っていない曲（作品ページには載っている曲）を足す。取得済みのものは Wiki にアクセスしない
+ok &= run('extra', ['extra_songs.py'])
+
+# 2. 初出
+ok &= run('debut', ['parse_debut.py'], {'REFRESH': '1'})
+
+# 3. 作品ごとの収録曲
+ok &= run('works', ['scrape_works.py'], {'REFRESH_WORKS': ACTIVE_WORKS})
+
+# 4. 曲ページ
+ok &= run('songs', ['scrape_songs.py', os.path.join('cache', 'songs'), 'lists.json', 'details.json'],
+          {'MAX_FETCH': os.environ.get('MAX_FETCH', '150'), 'REFRESH_OLDEST': os.environ.get('REFRESH_OLDEST', '30')})
+
+# 5. 譜面画像を譜面データ（charts/）に変換する（サイトは Wiki の画像を直接読み込まない）
+ok &= run('charts', ['parse_charts.py'], {'MAX_IMG': os.environ.get('MAX_IMG', '300')})
+
+# 6. data.js
+ok &= run('build', ['build_data.py'])
+
+sys.exit(0 if ok else 1)

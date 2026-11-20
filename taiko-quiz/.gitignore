@@ -1,0 +1,12 @@
+# 取得したWikiページのキャッシュ（大きいのでリポジトリには入れない。Actions では actions/cache で引き継ぐ）
+tools/cache/
+# 実行ログや作業用ファイル
+tools/*.log
+tools/*.err
+tools/*.bak.json
+tools/lists.json.bak
+tools/debut_combos.txt
+tools/works.txt
+tools/diff.txt
+tools/x.txt
+__pycache__/

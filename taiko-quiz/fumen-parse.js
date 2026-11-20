@@ -59,24 +59,31 @@
     const isDark = p => p[0] + p[1] + p[2] < 330;
 
     // 1) レーンを探す（x=5 の縦方向で、同じ色が 16〜24px 続く所）
-    const X0 = 5;
+    // 左端だけでなく右端近くも調べる（最初の段が途中から始まる＝左側が空いている画像があるため）
     const lanes = [];
-    for (let y = 0; y < H; y++) {
-      const c = P(X0, y);
-      let y2 = y; while (y2 + 1 < H && same(P(X0, y2 + 1), c, 2)) y2++;
-      const h = y2 - y + 1;
-      const sum = c[0] + c[1] + c[2];
-      if (h >= 16 && h <= 24 && !isBg(c) && sum > 200 && sum < 520) { // ゴーゴーのピンクなど明るい色は除く
-        const type = c[0] - c[2] > 20 ? 'm' : c[2] - c[0] > 20 ? 'e' : 'n';
-        lanes.push({ top: y, bottom: y2, cy: Math.round((y + y2) / 2), color: c, type });
+    for (const X0 of [5, W - 20, W - 60]) {
+      if (X0 < 0) continue;
+      for (let y = 0; y < H; y++) {
+        const c = P(X0, y);
+        let y2 = y; while (y2 + 1 < H && same(P(X0, y2 + 1), c, 2)) y2++;
+        const h = y2 - y + 1;
+        const sum = c[0] + c[1] + c[2];
+        // 右側で見つけたものは、音符（明るい赤・青）を見間違えないよう、くすんだ色で左右にも続くものだけ
+        const bandLike = X0 === 5 || (Math.max(...c) < 200 && same(P(X0 - 10, Math.round((y + y2) / 2)), c, 3) && same(P(X0 + 10, Math.round((y + y2) / 2)), c, 3));
+        if (h >= 16 && h <= 24 && !isBg(c) && sum > 200 && sum < 520 && bandLike && // ゴーゴーのピンクなど明るい色は除く
+            !lanes.some(l => Math.abs(l.top - y) <= 3)) {
+          const type = c[0] - c[2] > 20 ? 'm' : c[2] - c[0] > 20 ? 'e' : 'n';
+          lanes.push({ top: y, bottom: y2, cy: Math.round((y + y2) / 2), color: c, type });
+        }
+        y = y2;
       }
-      y = y2;
     }
+    lanes.sort((a, b) => a.top - b.top);
     if (!lanes.length) return { ok: false, reason: 'レーンが見つかりません' };
     const groups = [];
     for (const ln of lanes) {
       const last = groups[groups.length - 1];
-      if (last && ln.top - last[last.length - 1].bottom <= 2) last.push(ln);
+      if (last && ln.top - last[last.length - 1].bottom <= 6) last.push(ln); // 段の途中から始まる分岐レーンは縁の線をはさむことがある
       else groups.push([ln]);
     }
     const branched = groups.some(gr => gr.length > 1);
@@ -234,6 +241,10 @@
       }
       let laneEnd = W - 1;
       while (laneEnd > 0 && isBg(P(laneEnd, gr[0].top + 1))) laneEnd--;
+      // 段の左端（最初の段が途中から始まる画像では、左側が空いている）
+      let laneStart = 0;
+      while (laneStart < laneEnd && isBg(P(laneStart, gr[0].top + 1))) laneStart++;
+      if (laneStart < 8) laneStart = 0;
       // 白い小節線がない段もあるので、小節番号の位置とレーン右端からも補う
       const snap = x => 23.5 + Math.round((x - 23.5) / 12) * 12;
       const addBar = x => { if (!bars.some(b => Math.abs(b - x) < 6)) bars.push(x); };
@@ -262,8 +273,10 @@
         }
       }
       const ri = rows.length;
-      const laneData = gr.map(l => ({ type: l.type, top: l.top, bottom: l.bottom, notes: scanLane(l).map(n => Object.assign(n, { row: ri })) }));
-      rows.push({ lineY, top: gr[0].top, bottom: gr[gr.length - 1].bottom, bars, laneEnd, gogo, lanes: laneData, labels: lineY > 30 ? readLabels(lineY) : [] });
+      // レーンの左端（分岐のレーンが段の途中から始まる譜面がある。そこより左は上の灰色のレーンの音符）
+      const laneX0 = l => { for (let x = 0; x < W; x++) if (same(P(x, l.cy), l.color, 3)) return x < 8 ? 0 : x; return 0; };
+      const laneData = gr.map(l => ({ type: l.type, top: l.top, bottom: l.bottom, x0: laneX0(l), notes: scanLane(l).map(n => Object.assign(n, { row: ri })) }));
+      rows.push({ lineY, top: gr[0].top, bottom: gr[gr.length - 1].bottom, bars, laneStart, laneEnd, gogo, lanes: laneData, labels: lineY > 30 ? readLabels(lineY) : [] });
       if (dbg) {
         dbg.lanes.push(...gr);
         bars.forEach(b => dbg.bars.push({ x: b, y: gr[0].top }));
@@ -273,8 +286,15 @@
     // 達人譜面のレーン: 赤いレーン（なければ音符が一番多いレーン）
     const masterLane = r => r.lanes.find(l => l.type === 'm') ||
       r.lanes.reduce((a, b) => (b.notes.filter(n => n.kind === 'note').length > a.notes.filter(n => n.kind === 'note').length ? b : a));
+    // レーン L の音符。L が段の途中から始まるなら、その左側は基準（灰色）のレーンの音符を使う
+    const baseLane = r => r.lanes.find(l => l.type === 'n') || r.lanes[0];
+    const laneNotes = (r, L) => {
+      const base = baseLane(r);
+      if (!L || L === base || !L.x0) return (L || base).notes;
+      return base.notes.filter(n => n.x < L.x0 - 4).concat(L.notes);
+    };
     let notes = [];
-    for (const r of rows) notes = notes.concat(masterLane(r).notes);
+    for (const r of rows) notes = notes.concat(laneNotes(r, masterLane(r)));
     if (dbg) for (const r of rows) for (const l of r.lanes) for (const n of l.notes) dbg.notes.push({ x: n.x, y: Math.round((l.top + l.bottom) / 2), kind: n.kind });
 
     // 4) 小節と拍に変換
@@ -319,9 +339,9 @@
     const combo = out.filter(o => /^(don|ka)/.test(o.type)).length;
     // レーンの種類ごとの音符数（普通=灰 / 玄人=青 / 達人=赤）。その種類のレーンが無い段は灰色（無ければ最初）のレーンで数える。
     // 分岐譜面のほか、「玄人のレーン＝2P 用譜面」のように別譜面を並べた画像でも、灰色のレーンだけの数で確認できるようにする
-    const laneOf = (r, t) => r.lanes.find(l => l.type === t) || r.lanes.find(l => l.type === 'n') || r.lanes[0];
+    const laneOf = (r, t) => r.lanes.find(l => l.type === t) || baseLane(r);
     const combos = [...new Set(['n', 'e', 'm'].map(t => rows.reduce((a, r, ri) =>
-      a + laneOf(r, t).notes.filter(n => n.kind === 'note' && beatOf(ri, n.x) !== null).length, 0)).concat([combo]))];
+      a + laneNotes(r, laneOf(r, t)).filter(n => n.kind === 'note' && beatOf(ri, n.x) !== null).length, 0)).concat([combo]))];
     return {
       ok: true, width: W, rows, measures: measures.map(m => ({ start: m.start, beats: m.beats })),
       notes: out, changes, combo, combos, totalBeats: acc, branched, debug: dbg
@@ -404,9 +424,13 @@
     g.fillStyle = '#ffd0d6';
     for (const [a, b] of r.gogo) g.fillRect(a, r.lineY - 32, b - a, 32);
     // レーン帯
-    g.fillStyle = '#3a2a1e'; g.fillRect(0, bandTop, r.laneEnd + 1, bandBot - bandTop + 1);
-    g.fillStyle = '#ffffff'; g.fillRect(0, bandTop + 2, r.laneEnd + 1, bandBot - bandTop - 3);
-    for (const l of r.lanes) { g.fillStyle = LANE_COLORS[l.type]; g.fillRect(0, l.top, r.laneEnd + 1, l.bottom - l.top + 1); }
+    const x0 = r.laneStart || 0, lw = r.laneEnd + 1 - x0; // 最初の段が途中から始まる譜面もある
+    g.fillStyle = '#3a2a1e'; g.fillRect(x0, bandTop, lw, bandBot - bandTop + 1);
+    g.fillStyle = '#ffffff'; g.fillRect(x0, bandTop + 2, lw, bandBot - bandTop - 3);
+    for (const l of r.lanes) { // 段の途中から始まるレーンは、そこから描く
+      const lx = Math.max(x0, l.x0 || 0);
+      g.fillStyle = LANE_COLORS[l.type]; g.fillRect(lx, l.top, r.laneEnd + 1 - lx, l.bottom - l.top + 1);
+    }
     // 小節線と拍の目印
     for (let i = 0; i < r.bars.length; i++) {
       const x = r.bars[i];
@@ -513,10 +537,10 @@
     return {
       ok: true, width: c.w,
       rows: c.rows.map(r => ({
-        lineY: r.l, top: r.t, bottom: r.b, laneEnd: r.e, bars: r.bars, gogo: r.g,
+        lineY: r.l, top: r.t, bottom: r.b, laneStart: r.s || 0, laneEnd: r.e, bars: r.bars, gogo: r.g,
         labels: r.lb.map(([k, x, v]) => ({ kind: k === 'B' ? 'bpm' : 'hs', x, value: v })),
-        lanes: r.ln.map(([type, top, bottom, notes]) => ({
-          type, top, bottom,
+        lanes: r.ln.map(([type, top, bottom, notes, x0]) => ({
+          type, top, bottom, x0: x0 || 0,
           notes: notes.map(a => ({ x: a[0], kind: KIND[a[1]][0], c: KIND[a[1]][1], big: !!a[2], count: a[3] }))
         }))
       }))

@@ -12,7 +12,7 @@
   const compact = f => ({
     w: f.width,
     rows: f.rows.map(r => ({
-      l: r.lineY, t: r.top, b: r.bottom, e: r.laneEnd,
+      l: r.lineY, t: r.top, b: r.bottom, e: r.laneEnd, ...(r.laneStart ? { s: r.laneStart } : {}),
       bars: r.bars, g: r.gogo,
       lb: r.labels.map(x => [x.kind === 'bpm' ? 'B' : 'H', Math.round(x.x * 2) / 2, x.value]),
       ln: r.lanes.map(l => [l.type, l.top, l.bottom, l.notes.map(n => {
@@ -20,7 +20,7 @@
         if (n.kind === 'end') a[1] = n.c === 'o' ? 'E' : 'e';
         if (n.count) a.push(n.count);
         return a;
-      })])
+      })].concat(l.x0 ? [l.x0] : []))  // 5番目: 段の途中から始まるレーンの左端
     }))
   });
   const results = [];

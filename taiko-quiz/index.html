@@ -318,7 +318,7 @@ a{color:var(--ka-d);font-weight:700}
     <div class="setrow"><span class="lbl">問題数</span><div class="row">
       <select id="qCount"><option value="5">5問</option><option value="10" selected>10問</option><option value="20">20問</option><option value="30">30問</option><option value="50">50問</option><option value="100">100問</option><option value="0">すべて</option></select>
     </div></div>
-    <div class="setrow"><span class="lbl">BGM<br>効果音</span><div style="flex:1;min-width:0">
+    <div class="setrow"><span class="lbl">サウンド</span><div style="flex:1;min-width:0">
       <div class="row" id="sfxBox"></div>
       <p id="bgmNow" style="margin:6px 0 0;font-weight:700;color:#5a2e16"></p>
     </div></div>
@@ -390,15 +390,17 @@ a{color:var(--ka-d);font-weight:700}
     <h2>結果発表</h2>
     <div class="total" id="endTotal"></div>
     <p class="muted" style="text-align:center" id="endSub"></p>
-    <div class="share" id="shareBox">
-      <span class="muted">結果をシェア</span>
+    <div class="share" id="shareBox" data-html2canvas-ignore>
+      <span class="muted">結果をシェア（結果画面の画像つき）</span>
       <button class="sh-x" id="shareX" title="X（旧Twitter）でシェア"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.8l-5.3-6.9L4.8 22H1.7l8.1-9.3L1.5 2h6.9l4.8 6.4L18.9 2zm-1.2 18h1.9L7.4 3.9h-2L17.7 20z"/></svg>X</button>
       <button class="sh-th" id="shareTh" title="Threads でシェア"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.3 11.1c-.1 0-.2-.1-.3-.1-.2-3.1-1.9-4.9-4.7-4.9h-.1c-1.7 0-3.1.7-3.9 2l1.5 1c.6-.9 1.6-1.1 2.4-1.1 1 0 1.7.3 2.2.9.3.4.6 1 .7 1.7-.8-.1-1.6-.2-2.5-.1-2.5.1-4.1 1.6-4 3.6.1 1 .6 1.9 1.4 2.5.7.5 1.7.7 2.7.7 1.3-.1 2.3-.6 3-1.5.5-.7.9-1.6 1-2.7.6.4 1.1.9 1.3 1.5.5 1 .5 2.7-.9 4.1-1.2 1.2-2.7 1.8-4.9 1.8-2.4 0-4.3-.8-5.5-2.3-1.1-1.4-1.7-3.5-1.7-6.1s.6-4.7 1.7-6.1C6.9 4.4 8.7 3.6 11.1 3.6c2.5 0 4.3.8 5.6 2.3.6.8 1.1 1.7 1.4 2.8l1.8-.5c-.4-1.4-1-2.6-1.8-3.6C16.5 2.7 14.1 1.7 11.1 1.7 8.1 1.7 5.8 2.7 4.3 4.6 2.9 6.4 2.2 8.9 2.2 12s.7 5.6 2.1 7.4c1.5 1.9 3.8 2.9 6.8 2.9 2.7 0 4.6-.7 6.2-2.3 2.1-2.1 2-4.7 1.3-6.3-.5-1.1-1.4-2-2.6-2.6h1.3zm-4.6 4.4c-1.1.1-2.2-.4-2.3-1.4 0-.8.5-1.6 2.3-1.7h.6c.6 0 1.2.1 1.8.2-.2 2.4-1.3 2.9-2.4 2.9z"/></svg>Threads</button>
       <button id="shareMore" class="hidden" title="ほかのアプリでシェア">その他</button>
       <button id="shareCopy" title="結果の文章をコピー">コピー</button>
+      <button id="shareSave" title="結果画面の画像を保存">画像を保存</button>
+      <div class="muted" id="shareMsg" style="flex-basis:100%;text-align:center;min-height:1.4em"></div>
     </div>
     <table class="sum" id="endTable"></table>
-    <div class="row" style="justify-content:center;margin-top:16px">
+    <div class="row" style="justify-content:center;margin-top:16px" data-html2canvas-ignore>
       <button class="primary big" id="againBtn">同じ設定でもう一度</button>
       <button class="big" id="backBtn">設定にもどる</button>
     </div>
@@ -414,6 +416,8 @@ a{color:var(--ka-d);font-weight:700}
 <script src="data.js"></script>
 <script src="fumen-parse.js"></script>
 <script src="bgm.js"></script>
+<!-- 結果発表の画面を画像にする（シェア用） -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script>
 'use strict';
 // 譜面画像のある曲だけを出題対象にする
@@ -473,7 +477,7 @@ const store = {
   set(k,v){try{localStorage.setItem('taikoQuiz.'+k,JSON.stringify(v));}catch(e){}}
 };
 const cfg = Object.assign({
-  lv:[8,9,10], genre:GENRES.map(g=>g[0]), count:10, sugg:true, worksOff:[], sound:true, bgm:true, se:true
+  lv:[8,9,10], genre:GENRES.map(g=>g[0]), count:10, sugg:true, worksOff:[], sound:true, bgm:true, se:true, yt:true
 }, store.get('cfg',{}));
 if(!Array.isArray(cfg.worksOff)) cfg.worksOff=[];
 // 「海外の曲」は最初は選ばない（海外版の曲は出題しない、が以前からの既定）
@@ -513,7 +517,10 @@ function renderSetup(){
   $('workNote').textContent = wDone < wTotal ? `（作品ごとの収録曲を取得中です: ${wDone}/${wTotal} 作品。まだ表示されていない作品は、取得が終わると追加されます）` : '';
   $('qCount').value = String(cfg.count);
   const fBox=$('sfxBox'); fBox.innerHTML='';
-  fBox.append(chip('BGM', cfg.bgm, on=>{cfg.bgm=on; saveCfg(); if(!on) stopSong(); bgmUpdate();}), chip('効果音', cfg.se, on=>{cfg.se=on; saveCfg(); if(on) playSE(true);}));
+  fBox.append(
+    chip('BGM', cfg.bgm, on=>{cfg.bgm=on; saveCfg(); bgmUpdate();}, '設定画面・出題中に流れる曲'),
+    chip('効果音', cfg.se, on=>{cfg.se=on; saveCfg(); if(on) playSE(true);}, '正解・不正解の音'),
+    chip('音源', cfg.yt, on=>{cfg.yt=on; saveCfg(); if(!on) stopSong(); bgmUpdate();}, '正解・あきらめた後に、その曲を YouTube で流す'));
   updatePool();
   const best = store.get('best2',null);
   $('bestInfo').textContent = best ? `これまでの最高: ${best.n}問中 ${best.ok}問正解（${best.date}）` : '';
@@ -785,6 +792,8 @@ function endGame(){
   }
   $('shareBox').classList.toggle('hidden', !n);
   show('scEnd');
+  shareMsg('');
+  if(n){ shot = null; setTimeout(makeShot, 700); } // 数字が弾むアニメーションが終わってから写す
 }
 
 /* ---------- 結果のシェア ---------- */
@@ -798,20 +807,72 @@ function shareText(){
   const marks = h.slice(0,30).map(x=>x.ok?'⭕':'❌').join('') + (n>30?'…':'');
   return `太鼓の達人 曲名当てクイズで ${okN} / ${n} 問正解！（正解率 ${Math.round(okN/n*100)}%）\n${marks}\n#太鼓の達人 #曲名当てクイズ`;
 }
-function openShare(base){
-  const u=shareUrl(), q=new URLSearchParams({text: shareText()});
-  if(u) q.set('url', u);
-  window.open(base + q.toString(), '_blank', 'noopener');
+/* 結果発表の画面の画像（シェアボタン・下のボタンは写さない）。結果画面を出したらすぐ作っておく
+   （スマホの共有はボタンを押した直後でないと開けないため、押してから作ると間に合わないことがある） */
+let shot = null; // {blob, file} または作成中の Promise
+function makeShot(){
+  shot = null;
+  if(!window.html2canvas) return Promise.resolve(null);
+  const card = $('scEnd').querySelector('.card');
+  const p = html2canvas(card, {
+    scale: 2, backgroundColor: null, useCORS: true,
+    onclone: doc=>{ // 画像の下にサイト名と URL を入れる
+      const c = doc.getElementById('scEnd').querySelector('.card');
+      const f = doc.createElement('div');
+      f.style.cssText = 'margin-top:14px;text-align:center;font-weight:800;color:#5a2e16;font-size:15px';
+      f.textContent = '太鼓の達人 曲名当てクイズ' + (shareUrl() ? '　' + shareUrl().replace(/^https?:\/\//,'') : '');
+      c.append(f);
+      c.querySelectorAll('.total').forEach(e=>e.style.animation='none');
+    }
+  }).then(cv=>new Promise(res=>cv.toBlob(res,'image/png'))).then(blob=>{
+    if(!blob) return null;
+    const d = new Date(), name = `taiko-quiz-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.png`;
+    let file = null; try{ file = new File([blob], name, {type:'image/png'}); }catch(e){}
+    return (shot = {blob, file, name});
+  }).catch(e=>{ console.warn('結果画像を作れませんでした', e); return null; });
+  shot = p;
+  return p;
 }
-$('shareX').onclick=()=>openShare('https://x.com/intent/post?');
-$('shareTh').onclick=()=>{ // Threads は url 引数が無いので本文の最後に付ける
-  const u=shareUrl();
-  window.open('https://www.threads.net/intent/post?' + new URLSearchParams({text: shareText() + (u?'\n'+u:'')}), '_blank', 'noopener');
-};
+async function getShot(){ return shot && shot.then ? await shot : (shot || await makeShot()); }
+function shareMsg(t){ $('shareMsg').textContent = t || ''; }
+function saveShot(s){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(s.blob); a.download = s.name;
+  document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+}
+// スマホ（画像の共有ができる端末）: 共有メニューから X・Threads などを選ぶ
+function canShareFile(s){ return !!(s && s.file && navigator.canShare && navigator.canShare({files:[s.file]})); }
+async function shareWithImage(intentUrl){
+  const s = await getShot(), u = shareUrl();
+  if(canShareFile(s)){
+    try{ await navigator.share({files:[s.file], text: shareText() + (u?'\n'+u:'')}); shareMsg(''); }
+    catch(e){ if(e.name!=='AbortError') shareMsg('共有できませんでした。「画像を保存」してから投稿してください'); }
+    return;
+  }
+  // パソコン: 画像をクリップボードに入れてから投稿画面を開く（投稿画面で貼り付ける）。
+  // 新しいタブを先に開くとこの画面がフォーカスを失いコピーできないので、コピーが先
+  if(s){
+    try{
+      await navigator.clipboard.write([new ClipboardItem({'image/png': s.blob})]);
+      shareMsg('結果の画像をコピーしました。投稿画面で貼り付け（Ctrl+V）してください');
+    }catch(e){
+      saveShot(s);
+      shareMsg('結果の画像を保存しました。投稿画面で画像を添付してください');
+    }
+  } else shareMsg('');
+  window.open(intentUrl, '_blank', 'noopener');
+}
+function intentX(){ const u=shareUrl(), q=new URLSearchParams({text: shareText()}); if(u) q.set('url', u); return 'https://x.com/intent/post?' + q; }
+function intentTh(){ const u=shareUrl(); return 'https://www.threads.net/intent/post?' + new URLSearchParams({text: shareText() + (u?'\n'+u:'')}); } // Threads は url 引数が無いので本文に付ける
+$('shareX').onclick=()=>shareWithImage(intentX());
+$('shareTh').onclick=()=>shareWithImage(intentTh());
 if(navigator.share){ // スマホなど: LINE・Instagram などほかのアプリにも送れる
   $('shareMore').classList.remove('hidden');
-  $('shareMore').onclick=()=>{ const u=shareUrl(); navigator.share(u?{text:shareText(),url:u}:{text:shareText()}).catch(()=>{}); };
+  $('shareMore').onclick=async()=>{
+    const s = await getShot(), u = shareUrl(), t = {text: shareText() + (u?'\n'+u:'')};
+    navigator.share(canShareFile(s) ? Object.assign(t,{files:[s.file]}) : t).catch(()=>{});
+  };
 }
+$('shareSave').onclick=async()=>{ const s = await getShot(); if(s){ saveShot(s); shareMsg(''); } else shareMsg('画像を作れませんでした'); };
 $('shareCopy').onclick=async()=>{
   const u=shareUrl(), t=shareText()+(u?'\n'+u:'');
   try{ await navigator.clipboard.writeText(t); }
@@ -1038,7 +1099,7 @@ if(!ALL.length){
 const YT_KIND = ['自動生成音源', '公式音源']; // オート動画・プレイ動画は流さない（data.js にも入れていない）
 let player = {r:null, i:0, ended:false};
 function playSong(r){
-  if(!cfg.bgm || !r.yt || !r.yt.length){ stopSong(); return; } // BGM がオフのときは出さない
+  if(!cfg.yt || !r.yt || !r.yt.length){ stopSong(); return; } // 音源がオフのときは出さない
   const p = player = {r, i:0, ended:false};
   $('player').classList.remove('hidden');
   if(location.protocol === 'file:'){ loadVideo(); return; } // 埋め込みが動かないので BGM はそのまま

@@ -104,12 +104,53 @@ if 'WM' in works_raw:
     br = works_raw.pop('WM')
     br['songs'] = [p for p in br['songs'] if p in BR_ONLY]
     works_raw['ブラジル版限定'] = br
-# 家庭用（CS）の作品の並び順（scrape_works.py の一覧と同じ）。古い works.json でもこの順に並べる。
+# 家庭用（CS）の作品: ハードごとに、この順で並べる。画面には正式名称を出す（ユーザー指定）。
 # アニメ祭り・アニメスペシャルは家庭用として扱う
-CS_ORDER = ['CS1', 'CS2', 'CS3', 'CS4', 'CS5', 'CS6', 'CS7', 'アニメ祭り', 'アニメスペシャル', 'TDM', '米TDM',
-            'PSP1', 'PSP2', 'PSPDX', 'DS1', 'DS2', 'DS3', 'Wii1', 'Wii2', 'Wii3', 'Wii4', 'Wii5',
-            '3DS1', '3DS2', '3DS3', 'Wii U1', 'Wii U2', 'Wii U3', 'PS Vita1', 'PS Vita1亜', 'PS Vita MS', 'PS4 1',
-            'NS1', 'iOS', 'Xbox1', 'NS RPG', 'RC', 'PTB', 'DF', 'DFMP', 'NS2', 'NS2MP', 'Beena', 'もばいる']
+CS_INFO = [  # (略称, 正式名称, ハード)
+    ('CS1', '太鼓の達人 タタコンでドドンがドン', 'PlayStation 2'),
+    ('CS2', '太鼓の達人 ドキッ！新曲だらけの春祭り', 'PlayStation 2'),
+    ('CS3', '太鼓の達人 あっぱれ三代目', 'PlayStation 2'),
+    ('CS4', '太鼓の達人 あつまれ！祭りだ！！四代目', 'PlayStation 2'),
+    ('CS5', '太鼓の達人 ゴー！ゴー！五代目', 'PlayStation 2'),
+    ('CS6', '太鼓の達人 わいわいハッピー！六代目', 'PlayStation 2'),
+    ('CS7', '太鼓の達人 ドカッ！と大盛り七代目', 'PlayStation 2'),
+    ('アニメ祭り', '太鼓の達人 アニメ祭り', 'PlayStation 2'),
+    ('アニメスペシャル', '太鼓の達人 とびっきり！アニメスペシャル', 'PlayStation 2'),
+    ('TDM', '太鼓の達人 TAIKO DRUM MASTER', 'PlayStation 2'),
+    ('PSP1', '太鼓の達人 ぽ〜たぶる', 'PSP'),
+    ('PSP2', '太鼓の達人 ぽ〜たぶる2', 'PSP'),
+    ('PSPDX', '太鼓の達人 ぽ〜たぶるDX', 'PSP'),
+    ('DS1', '太鼓の達人DS タッチでドコドン！', 'ニンテンドーDS'),
+    ('DS2', '太鼓の達人DS 七つの島の大冒険', 'ニンテンドーDS'),
+    ('DS3', '太鼓の達人DS ドロロン！ヨーカイ大決戦！！', 'ニンテンドーDS'),
+    ('Wii1', '太鼓の達人Wii', 'Wii'),
+    ('Wii2', '太鼓の達人Wii ドドーンと2代目！', 'Wii'),
+    ('Wii3', '太鼓の達人Wii みんなでパーティ☆3代目！', 'Wii'),
+    ('Wii4', '太鼓の達人Wii 決定版', 'Wii'),
+    ('Wii5', '太鼓の達人Wii 超ごうか版', 'Wii'),
+    ('3DS1', '太鼓の達人 ちびドラゴンと不思議なオーブ', 'ニンテンドー3DS'),
+    ('3DS2', '太鼓の達人 どんとかつの時空大冒険', 'ニンテンドー3DS'),
+    ('3DS3', '太鼓の達人 ドコドン！ミステリーアドベンチャー', 'ニンテンドー3DS'),
+    ('Wii U1', '太鼓の達人 Wii Uば〜じょん！', 'Wii U'),
+    ('Wii U2', '太鼓の達人 特盛り！', 'Wii U'),
+    ('Wii U3', '太鼓の達人 あつめて★ともだち大作戦！', 'Wii U'),
+    ('PS Vita1', '太鼓の達人 Vバージョン', 'PlayStation Vita'),
+    ('PS Vita MS', 'アイドルマスター マストソングス 赤盤／青盤', 'PlayStation Vita'),
+    ('PS4 1', '太鼓の達人 セッションでドドンがドン！', 'PlayStation 4'),
+    ('NS1', '太鼓の達人 Nintendo Switchば〜じょん！', 'ニンテンドースイッチ'),
+    ('NS RPG', '太鼓の達人 ドコどんRPGパック！', 'ニンテンドースイッチ'),
+    ('NS2', '太鼓の達人 ドンダフルフェスティバル', 'ニンテンドースイッチ'),
+    ('Xbox1', '太鼓の達人 The Drum Master!', 'PlayStation 5 / Xbox One / Xbox Series X|S / Windows / Steam'),
+    ('DF', '太鼓の達人 ドンダフルフェスティバル', 'PlayStation 5 / Xbox One / Xbox Series X|S / Windows / Steam'),
+    ('iOS', '太鼓の達人プラス', 'スマートフォン'),
+    ('RC', '太鼓の達人 RHYTHM CONNECT', 'スマートフォン'),
+    ('PTB', '太鼓の達人 Pop Tap Beat', 'スマートフォン'),
+    ('Beena', 'Beena', 'その他'),
+    ('もばいる', 'もばいる', 'その他'),
+]
+CS_ORDER = [c[0] for c in CS_INFO]
+CS_LABEL = {c[0]: c[1] for c in CS_INFO}
+CS_HW = {c[0]: c[2] for c in CS_INFO}
 for i, name in enumerate(CS_ORDER):
     if name in works_raw:
         works_raw[name]['kind'] = 'CS'
@@ -198,10 +239,15 @@ for s in lists:
         cid = hashlib.md5(d['imgs'][k if 0 <= k < len(d['imgs']) else 0].encode()).hexdigest()[:12]
         if charts_index.get(cid, {}).get('ok'):
             r['ch'] = cid
+    if r.get('w') in CS_LABEL:
+        r['w'] = CS_LABEL[r['w']]  # 初出作品も家庭用は正式名称で出す
     out.append(r)
 
 js = '// 自動生成: tools/build_data.py\n// 出典: 太鼓の達人 譜面とか Wiki (https://wikiwiki.jp/taiko-fumen/)\n'
-js += 'window.QUIZ_WORKS=' + json.dumps([{'name': w['name'], 'kind': w['kind']} for w in WORK_LIST], ensure_ascii=False) + ';\n'
+# 作品: name=画面に出す名前（CS は正式名称）、short=略称（検索で略称でも探せるように）、hw=ハード（CS をハードごとに分けて並べる）
+js += 'window.QUIZ_WORKS=' + json.dumps([dict({'name': CS_LABEL.get(w['name'], w['name']), 'kind': w['kind']},
+                                              **({'short': w['name'], 'hw': CS_HW.get(w['name'], 'その他')} if w['kind'] == 'CS' else {}))
+                                         for w in WORK_LIST], ensure_ascii=False) + ';\n'
 js += 'window.QUIZ_WORKS_TOTAL=' + str(WORKS_TOTAL) + ';\n'
 js += 'window.QUIZ_WORKS_DONE=' + str(WORKS_DONE) + ';\n'
 js += 'window.QUIZ_DATA=' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + ';\n'

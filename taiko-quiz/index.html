@@ -1167,36 +1167,46 @@ function doSearch(){
   } else {
     starts = SONG_CHARTS.slice(); // 入力なし: 絞り込みに合う全曲
   }
-  const nameHits = sortSongs(starts.concat(incl).filter(sfPass));
-  wHits = sortSongs(wHits.filter(sfPass));
-  const limit = k ? 80 : SEARCH_MAX;
-  const hits = nameHits.slice(0, limit);
-  box.innerHTML = hits.length || wHits.length ? '' : '<span class="muted">見つかりませんでした</span>';
-  const grp = (SORTS[sf.sort]||{}).grp;
-  // 作品で探したときは、その作品に入っている譜面だけを出す（同じ曲でも譜面ごとに収録作品が違うことがある。
+  // 一覧には、表譜面（＋双打・旧基準）と裏譜面を別々に出す（裏譜面はその難易度で並べる）。
+  // 作品で探したときは、その作品に入っている譜面だけにする（裏譜面が入っていない作品なら裏譜面は出さない。
   // 例: ウィーアー！は旧基準の(東方神起)だけが中国版限定）
   const workSet = list=>{ const s = new Set(list.map(w=>w.i)); if(sf.work) s.add(+sf.work); return s; };
-  const addList = (list, ws)=>{
+  const entries = (list, ws)=>sortSongs(list.flatMap(s0=>{
+    const cs = ws && ws.size ? s0.charts.filter(c=>(c.ws||[]).some(i=>ws.has(i))) : s0.charts;
+    const isUra = c=>/裏譜面/.test(c.n) && !/^【双打】/.test(c.n) && !SEPARATE_OLD.has(c.n); // 双打の裏は表の側に入れる
+    return [[s0.name, cs.filter(c=>!isUra(c))], [s0.name + '(裏譜面)', cs.filter(isUra)]].filter(([, p])=>p.length).map(([name, p])=>{
+      const single = p.filter(c=>!/^【双打】/.test(c.n)), base = single.length ? single : p; // 難易度は双打を除いて考える
+      const nl = base.filter(c=>c.s!==3), lvList = nl.length ? nl : base;              // 旧基準しか無い曲は旧基準の★
+      const lvs = lvList.map(c=>c.lv), ws2 = new Set(p.flatMap(c=>c.ws||[]));
+      return Object.assign({}, s0, {name, song: s0, charts: p, lvs: new Set(lvs), gs: new Set(p.map(c=>c.g)), ws: ws2,
+        maxLv: Math.max(...lvs), minLv: Math.min(...lvs), lvText: [...new Set(lvs)].sort((a,b)=>b-a).map(v=>'★'+v).join('・'),
+        w0: ws2.size ? Math.min(...ws2) : 1e9});
+    });
+  }).filter(sfPass));
+  const songCount = list=>new Set(list.map(e=>e.song)).size; // 曲数は表・裏をまとめて数える
+  const nameHits = entries(starts.concat(incl), workSet([]));
+  const wEnt = entries(wHits, workSet(works));
+  const limit = k ? 80 : SEARCH_MAX;
+  const hits = nameHits.slice(0, limit);
+  box.innerHTML = hits.length || wEnt.length ? '' : '<span class="muted">見つかりませんでした</span>';
+  const grp = (SORTS[sf.sort]||{}).grp;
+  const addList = list=>{
     let last = null;
-    for(const s0 of list){
-      const cs = ws && ws.size ? s0.charts.filter(c=>(c.ws||[]).some(i=>ws.has(i))) : s0.charts;
-      const s = cs.length && cs.length !== s0.charts.length ? Object.assign({}, s0, {charts: cs}) : s0;
+    for(const s of list){
       if(grp){ const g = grp(s); if(g!==last){ last = g; box.insertAdjacentHTML('beforeend', `<div class="sgrp">${esc(g)}</div>`); } }
       const b = document.createElement('button');
-      const nl = s.charts.filter(c=>c.s!==3), lvList = nl.length ? nl : s.charts; // 旧基準しか無い曲は旧基準の★を出す
-      const lvs = [...new Set(lvList.map(c=>c.lv))].sort((a,b)=>b-a).map(v=>'★'+v).join('・');
-      b.innerHTML = `${esc(s.name)}<small>${lvs}</small>`;
+      b.innerHTML = `${esc(s.name)}<small>${s.lvText}</small>`;
       b.onclick = ()=>{ search.scroll = box.scrollTop; search.song = s; search.idx = 0; showSong(); };
       box.append(b);
     }
   };
-  if(hits.length && (filtered || !k)) box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;font-weight:700">${nameHits.length} 曲</div>`);
-  addList(hits, workSet([]));
-  if(nameHits.length > hits.length) box.insertAdjacentHTML('beforeend', `<span class="muted">ほか ${nameHits.length-hits.length} 曲（${k?'もっと詳しく入力':'さらに絞り込んで'}ください）</span>`);
-  if(wHits.length){
-    const inName = nameHits.filter(s=>works.some(w=>s.ws.has(w.i))).length;
-    box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">作品「${works.map(w=>esc(w.name)).join('」「')}」の収録曲: ${wHits.length + inName} 曲</div>`);
-    addList(wHits, workSet(works));
+  if(hits.length && (filtered || !k)) box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;font-weight:700">${songCount(nameHits)} 曲</div>`);
+  addList(hits);
+  if(nameHits.length > hits.length) box.insertAdjacentHTML('beforeend', `<span class="muted">ほか ${nameHits.length-hits.length} 件（${k?'もっと詳しく入力':'さらに絞り込んで'}ください）</span>`);
+  if(wEnt.length){
+    const inName = songCount(nameHits.filter(s=>works.some(w=>s.ws.has(w.i))));
+    box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">作品「${works.map(w=>esc(w.name)).join('」「')}」の収録曲: ${songCount(wEnt) + inName} 曲</div>`);
+    addList(wEnt);
   }
 }
 // 詳細から検索結果（一覧）に戻る。一覧のスクロール位置も戻す

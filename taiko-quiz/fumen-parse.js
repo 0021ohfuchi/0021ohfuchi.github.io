@@ -559,7 +559,7 @@
       const [r, x0, x1] = w;
       for (const l of r.lanes) {
         const hits = l.notes.filter(n => n.kind === 'note' && n.c === rm.c && n.x >= x0 - 6 && n.x < x1 - 6).sort((a, b) => a.x - b.x);
-        const t = hits[(rm.n || 1) - 1];
+        const t = hits[(rm.n || 1) < 0 ? hits.length + rm.n : (rm.n || 1) - 1]; // n: -1 なら最後の音符
         if (t) { l.notes.splice(l.notes.indexOf(t), 1); removed = 1; }
       }
       if (removed) { f.combo -= 1; if (f.combos) f.combos = f.combos.map(c => c - 1); removed = 0; }

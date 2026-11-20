@@ -73,8 +73,8 @@ WORKS_DONE = sum(1 for v in works_raw.values() if v.get('done'))  # 取得済み
 for old, new in [('ニジイロ（現行）', 'ニジイロ2026')]:
     if old in works_raw:
         works_raw[new] = works_raw.pop(old)
-# 作品の統合（ユーザー指定）: 米TDM は TDM に、太鼓ミュージックパスは本体（NS2・DF）にまとめる
-for src, dst in [('米TDM', 'TDM'), ('NS2MP', 'NS2'), ('DFMP', 'DF')]:
+# 作品の統合（ユーザー指定）: 米TDM は TDM に、太鼓ミュージックパスは本体（NS2・DF）に、さらに DF は NS2 にまとめる
+for src, dst in [('米TDM', 'TDM'), ('NS2MP', 'NS2'), ('DFMP', 'DF'), ('DF', 'NS2')]:
     if src in works_raw and dst in works_raw:
         works_raw[dst]['songs'] = sorted(set(works_raw[dst]['songs']) | set(works_raw.pop(src)['songs']))
 # 新AC中国版（AC16中）は「ニジイロ（中国版限定）」として、中国版にしか無い曲だけを入れる（ユーザー指定。国内版と共通の曲は入れない）

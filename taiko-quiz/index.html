@@ -375,7 +375,7 @@ a{color:var(--ka-d);font-weight:700}
       </div>
     </div>
     <div class="sfilter" id="sFilter">
-      <label>★<select id="sfLv"></select></label>
+      <label>難易度<select id="sfLv"></select></label>
       <label>ジャンル<select id="sfGenre"></select></label>
       <label>作品<select id="sfWork"></select></label>
       <label>並び順<select id="sfSort">
@@ -1069,7 +1069,7 @@ const SF_DEFAULT = {lv:'', genre:'', work:'', sort:'name'};
 const sf = Object.assign({}, SF_DEFAULT, store.get('sf',{}));
 (function initFilter(){
   const opt = (v,t)=>`<option value="${esc(String(v))}">${esc(t)}</option>`;
-  $('sfLv').innerHTML = opt('','すべて') + [10,9,8,7,6,5,4,3,2,1].map(v=>opt(v,'★'+v)).join('');
+  $('sfLv').innerHTML = opt('','すべて') + [10,9,8,7,6,5,4,3,2,1].map(v=>opt(v,'★×'+v)).join('');
   $('sfGenre').innerHTML = opt('','すべて') + GENRES.map(g=>opt(g[0],g[0])).join('');
   // 作品の選択肢: AC、家庭用はハードごと、海外
   const groups = [['AC', ()=>WORKS.filter(w=>w.n>0 && w.kind==='AC')]].concat(csHardwares().map(hw=>[hw, ()=>csWorksOf(hw)]), [['海外', ()=>WORKS.filter(w=>w.n>0 && w.kind==='OS')]]);

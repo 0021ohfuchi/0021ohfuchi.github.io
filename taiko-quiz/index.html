@@ -147,7 +147,7 @@ html.noscroll,html.noscroll body{overflow:hidden;height:100%;overscroll-behavior
 /* 出題設定: 広い画面では「★の数〜作品」を左、「問題数〜スタート」を右の2列に並べる */
 body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで広げる */
 @media (min-width:1000px){
-  .setup-cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:0 36px;align-items:start}
+  .setup-cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:0 36px;align-items:stretch} /* 2列の間の点線を一番下まで伸ばす */
   .setup-cols > .setup-col + .setup-col{border-left:3px dashed #e8cfa8;padding-left:32px}
   .setup-cols > .setup-col > .setrow:first-child{margin-top:0}
 }

@@ -315,7 +315,7 @@ a{color:var(--ka-d);font-weight:700}
       <div class="row" id="genreBox"></div>
     </div></div>
     <div class="setrow"><span class="lbl">収録作品</span><div style="flex:1;min-width:0">
-      <div class="row" style="margin-bottom:6px"><button class="blue sm" id="wAll">すべて</button><button class="blue sm" id="wAC">ACのみ</button><button class="blue sm" id="wCS">CSのみ</button><button class="blue sm" id="wNone">クリア</button></div>
+      <div class="row" style="margin-bottom:6px"><button class="blue sm" id="wAll">すべて</button><button class="blue sm" id="wNone">クリア</button></div>
       <div id="workAC"></div><!-- AC は旧筐体・新筐体・ニジイロのまとまりごとにしまう -->
       <div id="workCS"></div><!-- 家庭用（CS）はハードごとに見出しを付けて並べる -->
 
@@ -594,6 +594,14 @@ function renderSetup(){
       if(!open.includes(g)) continue;
       const box=document.createElement('div'); box.className='hw-titles';
       box.insertAdjacentHTML('beforeend', `<div class="muted" style="margin:0 0 4px">${esc(g)}</div>`);
+      // 開いたまとまりの中だけを まとめて選ぶ・外す ボタン
+      const ctl=document.createElement('div'); ctl.className='row'; ctl.style.marginBottom='6px';
+      for(const [label, sel] of [['すべて', true], ['クリア', false]]){
+        const b=document.createElement('button'); b.className='blue sm'; b.textContent=label;
+        b.onclick=()=>{ for(const w of groupWorks(g)) toggleIn(cfg.worksOff, wkey(w), !sel); saveCfg(); renderSetup(); };
+        ctl.append(b);
+      }
+      box.append(ctl);
       const row=document.createElement('div'); row.className='row';
       for(const w of groupWorks(g)) row.append(workChip(w));
       box.append(row); container.append(box);
@@ -625,9 +633,7 @@ function pool(){
 }
 $('gAll').onclick=()=>{cfg.genre=GENRES.map(g=>g[0]);saveCfg();renderSetup();};
 $('gNone').onclick=()=>{cfg.genre=[];saveCfg();renderSetup();};
-$('wAll').onclick=()=>{cfg.worksOff=[];cfg.hwOpen=allGroups();saveCfg();renderSetup();}; // すべて は全部のまとまりを開き、ACのみ・CSのみ はそれぞれのまとまりだけ開き、クリア は全部しまう
-$('wAC').onclick=()=>{cfg.worksOff=WORKS.filter(w=>w.kind!=='AC').map(wkey);cfg.hwOpen=acGroups();saveCfg();renderSetup();};
-$('wCS').onclick=()=>{cfg.worksOff=WORKS.filter(w=>w.kind!=='CS').map(wkey);cfg.hwOpen=csHardwares();saveCfg();renderSetup();};
+$('wAll').onclick=()=>{cfg.worksOff=[];cfg.hwOpen=allGroups();saveCfg();renderSetup();}; // すべて は全部のまとまりを開いて全作品を選び、クリア は全部しまう
 $('wNone').onclick=()=>{cfg.worksOff=WORKS.map(wkey);cfg.hwOpen=[];saveCfg();renderSetup();};
 function updatePool(){
   const n = pool().length;

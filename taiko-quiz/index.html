@@ -98,6 +98,8 @@ button:disabled{opacity:.45;cursor:default;transform:none}
 .setrow{display:flex;gap:10px;align-items:flex-start;margin:12px 0;flex-wrap:wrap}
 .setrow + .setrow{margin-top:34px} /* ★の数・ジャンル・作品・問題数の間を1行ぶんあける */
 .setrow .row{flex:1;min-width:0}
+/* ハードを選んだときに出る、そのハードのタイトル */
+.hw-titles{margin-top:10px;padding:8px 0 2px 12px;border-left:4px solid #ff4b3e}
 select{font:inherit;font-weight:700;padding:7px 12px;border-radius:999px;border:2px solid var(--line);background:#fff;color:var(--text)}
 button.big{font-size:19px;padding:11px 34px}
 .title-card{text-align:center;background:linear-gradient(135deg,#fff 0 60%,#ffeef6)}
@@ -550,13 +552,31 @@ function renderSetup(){
     const box=$(boxId); box.innerHTML='';
     for(const w of WORKS.filter(w=>w.n>0 && w.kind===kind)) box.append(workChip(w));
   }
-  // 家庭用（CS）はハードごとに見出しと行を分ける
+  // 家庭用（CS）: ハードのボタンを並べ、タイトルはハードの中にしまう。
+  // ハードを押すと、そのハードの全タイトルを選んで表示する。もう一度押すと全タイトルを外してしまう。
+  // ハードは「中のタイトルが 1 つでも選ばれていれば」選択中（＝タイトルを表示）
   const cs=$('workCS'); cs.innerHTML='';
+  cs.insertAdjacentHTML('beforeend', '<div class="muted" style="margin:10px 0 4px">CS</div>');
+  const hwRow=document.createElement('div'); hwRow.className='row'; cs.append(hwRow);
+  const hwOn = hw => csWorksOf(hw).some(w=>!cfg.worksOff.includes(wkey(w)));
   for(const hw of csHardwares()){
-    cs.insertAdjacentHTML('beforeend', `<div class="muted" style="margin:10px 0 4px">${esc(hw)}</div>`);
+    const ws = csWorksOf(hw), n = ws.reduce((a,w)=>a+w.n,0);
+    hwRow.append(chip(hw, hwOn(hw), on=>{
+      for(const w of ws) toggleIn(cfg.worksOff, wkey(w), !on);
+      saveCfg(); renderSetup();
+    }, `${ws.length}タイトル・おに ${n}譜面`));
+  }
+  for(const hw of csHardwares()){
+    if(!hwOn(hw)) continue;
+    const box=document.createElement('div'); box.className='hw-titles';
+    box.insertAdjacentHTML('beforeend', `<div class="muted" style="margin:0 0 4px">${esc(hw)}</div>`);
     const row=document.createElement('div'); row.className='row';
-    for(const w of csWorksOf(hw)) row.append(workChip(w));
-    cs.append(row);
+    for(const w of csWorksOf(hw)){
+      const c = workChip(w);
+      c.addEventListener('change', ()=>setTimeout(renderSetup, 0)); // 最後の 1 つを外したらハードもしまう
+      row.append(c);
+    }
+    box.append(row); cs.append(box);
   }
   $('workOSWrap').classList.toggle('hidden', !$('workOS').children.length); // 海外の曲が無いときは見出しごと隠す
   // 取得済みの作品数と、取得する作品の数（画面に出る作品は、まとめ直したり消したりしているので数が違う）

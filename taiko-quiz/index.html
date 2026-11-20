@@ -429,6 +429,8 @@ if(!window.QUIZ_DATA) document.addEventListener('DOMContentLoaded', ()=>{
 const DATA = ALL.filter(r=>r.ch && !/^【双打】/.test(r.n));
 const WIKI = 'https://wikiwiki.jp/taiko-fumen/';
 const $ = id => document.getElementById(id);
+// スマホ・タブレット（指で操作する端末）。入力欄に自動でカーソルを合わせると、キーボードが開いて画面が隠れる
+const IS_TOUCH = matchMedia('(hover: none) and (pointer: coarse)').matches;
 
 const GENRES = [
   ['ポップス','#49d5eb'],['キッズ','#fe90d2'],['アニメ','#fe9800'],['ボーカロイド™曲','#cbcfde'],
@@ -681,7 +683,7 @@ function nextQ(){
   $('ans').value=''; $('wrongs').innerHTML=''; hideSugg();
   renderChart();
   updateStat();
-  setTimeout(()=>$('ans').focus(),50);
+  if(!IS_TOUCH) setTimeout(()=>$('ans').focus(),50); // スマホでは自動で解答欄に合わせない（キーボードで譜面が隠れるため）
 }
 
 /* ---------- 譜面の読み取り（画像→音符データ）---------- */
@@ -860,7 +862,7 @@ function matchWorks(k){
   return k.length>=2 ? ws.filter(w=>norm(w.name).startsWith(k)) : [];
 }
 let search = {song:null, idx:0, token:0, scroll:0};
-$('searchBtn').onclick=()=>{ show('scSearch'); $('sq').focus(); doSearch(); };
+$('searchBtn').onclick=()=>{ show('scSearch'); if(!IS_TOUCH) $('sq').focus(); doSearch(); };
 $('sBack').onclick=()=>{ renderSetup(); show('scSetup'); };
 $('sq').addEventListener('input', doSearch);
 $('sq').addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.isComposing){ const b=$('sList').querySelector('button'); if(b) b.click(); } });

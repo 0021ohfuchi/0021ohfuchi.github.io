@@ -74,8 +74,8 @@ if 'AC16中' in works_raw:
     cn = works_raw.pop('AC16中')
     cn['songs'] = [p for p in cn['songs'] if p in CN_ONLY]
     works_raw['中国版限定'] = cn
-    # AC11亜・AC12亜（亜洲版）にしか収録されていない曲も「中国版限定」に移す（ユーザー指定）
-    ASIA = {'AC11亜', 'AC12亜'}
+    # AC11亜・AC12亜・PS Vita1亜（亜洲版）にしか収録されていない曲も「中国版限定」に移す（ユーザー指定）
+    ASIA = {'AC11亜', 'AC12亜', 'PS Vita1亜'}
     in_works = {}
     for name, v in works_raw.items():
         for p in v['songs']:
@@ -84,6 +84,11 @@ if 'AC16中' in works_raw:
     for name in ASIA & set(works_raw):
         works_raw[name]['songs'] = [p for p in works_raw[name]['songs'] if p not in move]
     cn['songs'] = sorted(set(cn['songs']) | set(move))
+    # 残った曲がすべてほかの作品でも遊べる亜洲版の作品は、選ぶ意味がないので作品ごと消す
+    for name in sorted(ASIA & set(works_raw)):
+        rest = works_raw[name]['songs']
+        if all(in_works.get(p, set()) - ASIA for p in rest):
+            del works_raw[name]
 # 新ACブラジル版（WM）も「ブラジル版限定」として、ブラジル版にしか無い2曲だけを入れる（ユーザー指定）
 BR_ONLY = ['Escatumbararibê', 'Hoje é Domingo']
 if 'WM' in works_raw:

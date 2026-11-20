@@ -473,8 +473,10 @@ const SEPARATE_OLD = new Set(['ウィーアー！(東方神起)', 'Butterfly(倖
   '拝啓、学校にて・・・(裏譜面)（-Long Ver.-）', '將軍令(吳克群)', 'モンスターハンターメドレー(旧)']);
 const isSeparate = r => r.s===3 && SEPARATE_OLD.has(r.n);
 // 曲としての名前（まとめるときの名前）と、まとめるためのキー
-function songName(r){ return isSeparate(r) ? r.n.replace('(裏譜面)', '') : baseName(r); }
-function songKey(r){ return isSeparate(r) ? 'sep:' + norm(songName(r)) : keyOf(baseName(r)); }
+// まとめるときは【双打】以外の【 】を残す（旋風ノ舞【天】と【地】、UMA…【BPM150編】と【BPM240編】などは別の曲）
+function groupBase(r){ return (stripParen(r.n.replace(/【(?!双打)([^】]*)】/g, '\u0001$1\u0002')).replace(/\u0001/g, '【').replace(/\u0002/g, '】').trim()) || r.n; }
+function songName(r){ return isSeparate(r) ? r.n.replace('(裏譜面)', '') : groupBase(r); }
+function songKey(r){ return isSeparate(r) ? 'sep:' + norm(songName(r)) : norm(groupBase(r)); }
 const SONGS = (()=>{
   const m = new Map();
   for(const r of ALL){

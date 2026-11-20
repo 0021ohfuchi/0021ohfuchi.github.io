@@ -125,7 +125,8 @@ select{font:inherit;font-weight:700;padding:7px 12px;border-radius:999px;border:
 .chart-wrap{border-radius:14px;overflow:hidden;border:3px solid var(--text);background:#cfcfcf;position:relative}
 .chart-wrap.gen{background:#fffaf0;border-color:var(--line)}
 .chart-wrap.gen .chart-scroll{overflow:auto}
-.chart-scroll{overflow:auto}
+.chart-scroll{overflow:auto;overscroll-behavior:contain} /* 譜面の端までスクロールしてもページは動かさない */
+html.noscroll,html.noscroll body{overflow:hidden;height:100%;overscroll-behavior:none}
 .chart-tabs{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
 .chart-tabs button{padding:3px 12px;font-size:13px}
 .chart-tabs button.on{background:var(--ka);color:#fff;box-shadow:0 3px 0 var(--ka-d)}
@@ -568,6 +569,8 @@ function show(id){
   document.body.classList.toggle('wide', id==='scQuiz' || id==='scSearch'); // 出題中と検索は画面いっぱいに広げる
   document.body.classList.toggle('nofoot', id==='scQuiz' || id==='scSearch'); // 出題中は画面いっぱいに広げる
   document.body.classList.toggle('setup', id==='scSetup'); // 出題設定は広い画面で2列にする
+  // スマホの出題画面では、ページ自体はスクロールさせない（譜面は枠の中だけでスクロールする）
+  document.documentElement.classList.toggle('noscroll', id==='scQuiz' && IS_TOUCH);
   window.scrollTo(0,0);
   bgmUpdate();
 }
@@ -800,6 +803,10 @@ function submit(){
   $('ans').select();
 }
 $('ansBtn').onclick=submit;
+// スマホでキーボードを開閉したとき、ブラウザがページをずらしたままにしないよう一番上に戻す
+const resetScroll = ()=>{ if(document.documentElement.classList.contains('noscroll')) setTimeout(()=>window.scrollTo(0,0), 50); };
+$('ans').addEventListener('blur', resetScroll);
+if(window.visualViewport) visualViewport.addEventListener('resize', resetScroll);
 $('giveupBtn').onclick=()=>{ if(!game.q.done && confirm('あきらめて答えを見ますか？')) finishQ(false); };
 
 function wikiUrl(r){return WIKI+encodeURIComponent('収録曲/おに/'+r.p).replace(/%2F/g,'/');}

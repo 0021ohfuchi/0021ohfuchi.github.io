@@ -245,6 +245,10 @@ a{color:var(--ka-d);font-weight:700}
   header h1{font-size:18px}
   .title-card .logo{font-size:24px}
   .big{font-size:17px;padding:12px 26px}
+  /* スマホ: 譜面をなるべく画面の幅いっぱいに使う */
+  body.wide main{padding:6px 4px}
+  body.wide #qCard{padding:8px 6px;border-radius:14px}
+  .chart-wrap{border-width:2px;border-radius:10px}
 }
 </style>
 </head>
@@ -422,7 +426,7 @@ a{color:var(--ka-d);font-weight:700}
 </main>
 
 <script src="data.js"></script>
-<script src="fumen-parse.js"></script>
+<script src="fumen-parse.js?v=20261120c"></script><!-- 変更したら v を変える（スマホに古いファイルが残らないように） -->
 <script src="bgm.js"></script>
 <!-- 結果発表の画面を画像にする（シェア用） -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
@@ -750,10 +754,19 @@ function renderChart(){
   });
 }
 // スマホの縦画面: 譜面を段組みせず 1 列で、枠の幅いっぱいに描く（枠の中を縦にスクロールして見る）
-const PHONE_PORTRAIT = matchMedia('(orientation: portrait) and (max-width: 700px)');
+// 縦向きかどうかは端末の向きで判断する（画面の縦横比で判断すると、スマホでキーボードを開いたときに
+// 表示領域が横長になって「横向き」と判定され、譜面が段組みに戻ってしまうため）
+function isPhonePortrait(){
+  const sw = Math.min(screen.width, screen.height);
+  const narrow = sw <= 700 || matchMedia('(max-width: 700px)').matches;
+  if(!narrow) return false;
+  if(screen.orientation && screen.orientation.type) return screen.orientation.type.startsWith('portrait');
+  if(typeof window.orientation === 'number') return window.orientation % 180 === 0;
+  return screen.height >= screen.width;
+}
 function chartOpts(wrap, maxH, extra){
   const maxW = wrap.clientWidth - 2;
-  return Object.assign(PHONE_PORTRAIT.matches ? {maxW, cols: 1} : {maxW, maxH}, extra);
+  return Object.assign(isPhonePortrait() ? {maxW, cols: 1} : {maxW, maxH}, extra);
 }
 // 出題中、BPM を伏せている間は譜面の中の BPM の表示も描かない
 function quizChartExtra(){ return {hideBpm: !!$('info').querySelector('.hid[data-k="bpm"]')}; }

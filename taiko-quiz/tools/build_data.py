@@ -11,7 +11,8 @@ charts_index = json.load(open(cp, encoding='utf-8')) if os.path.exists(cp) else 
 IMG = 'https://cdn.wikiwiki.jp/to/w/taiko-fumen/'
 SEC = {'新筐体収録曲': 0, '難易度・ジャンル別曲数': 0, '新筐体期間限定曲': 0, '新筐体ブラジル版限定曲': 0,
        '新筐体未収録曲': 1, '幻の曲': 2, '旧基準': 3}
-GENRE_FIX = {'ボーカロイド™曲': 'ボーカロイド™曲'}
+# 表示するジャンル名の統一（旧基準の一覧の「J-POP」はポップスにまとめる）。海外の曲の判定には元のジャンル名を使う
+GENRE_FIX = {'ボーカロイド™曲': 'ボーカロイド™曲', 'J-POP': 'ポップス'}
 known = {'ポップス', 'キッズ', 'アニメ', 'ボーカロイド™曲', 'ゲームミュージック', 'バラエティ', 'クラシック',
          'ナムコオリジナル', 'どうよう'}
 
@@ -115,7 +116,7 @@ for s in lists:
         'p': s['page'].split('/', 2)[-1],
         'lv': s['level'],
         's': SEC.get(s['section'], 4),
-        'g': g,
+        'g': GENRE_FIX.get(g, g),
         'bpm': s['bpm'],
         'c': s['combo'].replace('/', '・'),
     }

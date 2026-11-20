@@ -113,9 +113,13 @@
         const p = P(x, y);
         // 音符の黒い縁は色味のある暗い色（真っ黒ではない）。混ざった画素はくすんだ色。右隣は次の音符の色
         // （レーンに描かれた絵の黒い線や肌色を音符と見間違えないように）
-        if (p[0] + p[1] + p[2] >= 345 || p[0] + p[1] + p[2] < 60) continue;
+        // 青どうしの境目の縁は (101,122,130) のように少し明るい
+        if (p[0] + p[1] + p[2] >= 360 || p[0] + p[1] + p[2] < 60) continue;
         const spread = q => Math.max(q[0], q[1], q[2]) - Math.min(q[0], q[1], q[2]);
-        const blend = [P(x - 1, y), P(x - 2, y)].find(q => !cls(q) && q[0] + q[1] + q[2] >= 300 && spread(q) < 70);
+        // 混ざった画素: 音符の中の色そのもの（赤 255,66,66 / 青 67,200,255）ではない明るめの画素
+        // （青どうしの境目では (144,201,224) のように青寄りになるので、色の判定ではなく中の色との違いで見る）
+        const isInterior = q => same(q, [255, 66, 66], 14) || same(q, [67, 200, 255], 14);
+        const blend = [P(x - 1, y), P(x - 2, y)].find(q => !isInterior(q) && q[0] + q[1] + q[2] >= 300 && (spread(q) < 70 || !cls(q) || cls(q) === 'k' || cls(q) === 'd'));
         if (!blend) continue;
         const c3 = colorNear(x - 2, y, -1);
         if (c3 !== 'd' && c3 !== 'k') continue;
@@ -124,6 +128,7 @@
         if (cr !== 'd' && cr !== 'k' && !grayR) continue;
         if (isWhite(P(x - 1, y)) || isWhite(P(x - 2, y))) continue; // 大音符は白い縁があるので他の方法で見つかる
         const cx = x - 8.5;
+        if (cand.some(c => c.big && Math.abs(c.x - cx) <= 12)) continue; // 大音符の右の縁を小さい音符と見間違えない
         if (!cand.some(c => Math.abs(c.x - cx) <= 5)) cand.push({ x: cx, c: c3, big: false }); // 縁から見つかった音符と重複させない
       }
       cand.sort((a, b) => a.x - b.x);

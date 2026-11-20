@@ -464,11 +464,20 @@ function keyOf(s){return norm(stripParen(s));}
 function baseName(r){return stripParen(r.n).trim() || r.n;}
 
 /* ---------- 曲名候補（画像のない曲も含めて全曲から） ---------- */
+// 旧基準の譜面のうち、新しい基準の同名の曲とは別の歌手・別の版のものは、別の曲として扱う（ユーザー指定）。
+// 曲名はカッコ書きも含めた名前にする（例: ウィーアー！(東方神起)）。正解はこの名前でも、カッコを除いた名前でもよい
+const SEPARATE_OLD = new Set(['ウィーアー！(東方神起)', 'Butterfly(倖田來未)', 'キューティーハニー(前川陽子)', 'クラシックメドレー(運動会編)',
+  'ゲゲゲの鬼太郎(5期)', 'にんげんっていいな(ガガガDX)', 'ハム太郎とっとこうた(2000)', '学園天国(小泉今日子)', '新しい光(ウルトラマンゼロ)',
+  '拝啓、学校にて・・・(裏譜面)（-Long Ver.-）', '將軍令(吳克群)', 'モンスターハンターメドレー(旧)']);
+const isSeparate = r => r.s===3 && SEPARATE_OLD.has(r.n);
+// 曲としての名前（まとめるときの名前）と、まとめるためのキー
+function songName(r){ return isSeparate(r) ? r.n.replace('(裏譜面)', '') : baseName(r); }
+function songKey(r){ return isSeparate(r) ? 'sep:' + norm(songName(r)) : keyOf(baseName(r)); }
 const SONGS = (()=>{
   const m = new Map();
   for(const r of ALL){
-    const b = baseName(r);
-    const k = keyOf(b);
+    const b = songName(r);
+    const k = songKey(r);
     if(!k) continue;
     if(!m.has(k)) m.set(k,{name:b, yomi:r.y?stripParen(r.y):'', nk:norm(b), yk:r.y?keyOf(r.y):''});
     else if(!m.get(k).yomi && r.y){const e=m.get(k); e.yomi=stripParen(r.y); e.yk=keyOf(r.y);}
@@ -776,7 +785,7 @@ window.addEventListener('resize',()=>{ clearTimeout(resizeTimer); resizeTimer=se
 function isCorrect(input, r){
   const a = keyOf(input), b = norm(input);
   if(!a && !b) return false;
-  const cands = new Set([keyOf(r.n), norm(r.n), keyOf(baseName(r))]);
+  const cands = new Set([keyOf(r.n), norm(r.n), keyOf(baseName(r)), norm(songName(r))]); // songName: 別の曲として扱う旧基準の曲の名前
   if(r.y){cands.add(keyOf(r.y)); cands.add(norm(r.y));}
   cands.delete('');
   return cands.has(a) || cands.has(b);
@@ -987,8 +996,8 @@ function redrawQuizChart(){ if(game && game.q && game.q.redraw) game.q.redraw();
 const SONG_CHARTS = (()=>{
   const m = new Map();
   for(const r of ALL){
-    const k = keyOf(baseName(r)); if(!k) continue;
-    if(!m.has(k)) m.set(k, {name: baseName(r), yomi:'', nk: norm(baseName(r)), yk:'', charts: []});
+    const k = songKey(r); if(!k) continue;
+    if(!m.has(k)) m.set(k, {name: songName(r), yomi:'', nk: norm(songName(r)), yk:'', charts: []});
     const e = m.get(k);
     e.charts.push(r);
     if(r.y && !e.yomi){ e.yomi = stripParen(r.y); e.yk = keyOf(r.y); }

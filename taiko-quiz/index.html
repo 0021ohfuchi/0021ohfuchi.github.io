@@ -154,7 +154,7 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
   .setup-cols > .setup-col > .setrow:first-child{margin-top:0}
 }
 /* 曲を検索（出題設定の中、スタートの下） */
-.setup-search{margin-top:18px;padding-top:18px;border-top:3px dashed #e8cfa8;display:flex;justify-content:center}
+.setup-search{margin-top:18px;padding-top:18px;border-top:3px dashed #e8cfa8;display:flex;flex-wrap:wrap;justify-content:center}
 /* 出題設定: 1画面に収まるよう、広い画面では左右2段に並べる */
 .setup-grid{display:grid;grid-template-columns:1fr;gap:16px}
 .setup-grid .card{margin-bottom:0;padding:18px 22px}
@@ -293,7 +293,7 @@ a{color:var(--ka-d);font-weight:700}
       <li>ひらがな・カタカナ、英字の大文字・小文字、記号の有無は区別しません。(裏譜面) などのカッコ書きは不要です</li>
       <li>入力中は曲名の候補が出ます（「入力候補」で表示を切り替えられます）</li>
       <li>出題設定の「作品」は、選んだ作品のどれかに収録されている譜面から出題します</li>
-      <li>「曲を検索」では、曲ごとの譜面・情報・収録作品を見られます</li>
+      <li>「曲検索」では、曲ごとの譜面・情報・収録作品を見られます</li>
     </ul>
     <p class="muted" style="font-size:12px;line-height:1.7">
       このコンテンツはファンメイドコンテンツです。ファンメイドコンテンツポリシー（<a href="https://taiko-ch.net/ip_policy/" target="_blank" rel="noopener">https://taiko-ch.net/ip_policy/</a>）のもと制作されています。<br>
@@ -339,7 +339,8 @@ a{color:var(--ka-d);font-weight:700}
     </div>
     <!-- 曲を検索（別画面を開くボタンだけ） -->
     <div class="setup-search">
-      <button class="blue big" id="searchBtn">曲を検索</button>
+      <button class="blue big" id="searchBtn">曲検索</button>
+      <p class="muted" style="margin:8px 0 0;text-align:center;flex-basis:100%">曲名・読み・作品名から曲を探して、譜面・難易度・BPM・最大コンボ数・ジャンル・収録作品を見られます</p>
     </div>
     </div></div>
   </div>
@@ -597,14 +598,16 @@ function renderSetup(){
       if(!open.includes(g)) continue;
       const box=document.createElement('div'); box.className='hw-titles';
       box.insertAdjacentHTML('beforeend', `<div class="muted" style="margin:0 0 4px">${esc(g)}</div>`);
-      // 開いたまとまりの中だけを まとめて選ぶ・外す ボタン
-      const ctl=document.createElement('div'); ctl.className='row'; ctl.style.marginBottom='6px';
-      for(const [label, sel] of [['すべて', true], ['クリア', false]]){
-        const b=document.createElement('button'); b.className='blue sm'; b.textContent=label;
-        b.onclick=()=>{ for(const w of groupWorks(g)) toggleIn(cfg.worksOff, wkey(w), !sel); saveCfg(); renderSetup(); };
-        ctl.append(b);
+      // 開いたまとまりの中だけを まとめて選ぶ・外す ボタン（作品が 1 つしか無いまとまりには出さない）
+      if(groupWorks(g).length > 1){
+        const ctl=document.createElement('div'); ctl.className='row'; ctl.style.marginBottom='6px';
+        for(const [label, sel] of [['すべて', true], ['クリア', false]]){
+          const b=document.createElement('button'); b.className='blue sm'; b.textContent=label;
+          b.onclick=()=>{ for(const w of groupWorks(g)) toggleIn(cfg.worksOff, wkey(w), !sel); saveCfg(); renderSetup(); };
+          ctl.append(b);
+        }
+        box.append(ctl);
       }
-      box.append(ctl);
       const row=document.createElement('div'); row.className='row';
       for(const w of groupWorks(g)) row.append(workChip(w));
       box.append(row); container.append(box);

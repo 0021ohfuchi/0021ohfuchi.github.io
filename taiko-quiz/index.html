@@ -352,7 +352,6 @@ a{color:var(--ka-d);font-weight:700}
         </div>
         <button class="primary" id="ansBtn">回答する</button>
         <button id="giveupBtn">あきらめる</button>
-        <label class="chk blue" id="suggLbl" title="入力中に曲名の候補を表示"><input type="checkbox" id="suggOn">入力候補</label>
       </div>
       <div class="wrongs" id="wrongs"></div>
     </div>
@@ -477,7 +476,7 @@ const store = {
   set(k,v){try{localStorage.setItem('taikoQuiz.'+k,JSON.stringify(v));}catch(e){}}
 };
 const cfg = Object.assign({
-  lv:[8,9,10], genre:GENRES.map(g=>g[0]), count:10, sugg:true, worksOff:[], sound:true, bgm:true, se:true, yt:true
+  lv:[8,9,10], genre:GENRES.map(g=>g[0]), count:10, worksOff:[], sound:true, bgm:true, se:true, yt:true
 }, store.get('cfg',{}));
 if(!Array.isArray(cfg.worksOff)) cfg.worksOff=[];
 // 「海外の曲」は最初は選ばない（海外版の曲は出題しない、が以前からの既定）
@@ -815,11 +814,14 @@ function makeShot(){
   if(!window.html2canvas) return Promise.resolve(null);
   const card = $('scEnd').querySelector('.card');
   const p = html2canvas(card, {
-    scale: 2, backgroundColor: null, useCORS: true,
+    // スマホで見やすい縦長の画像にする: 画面の幅にかかわらず幅 540px（画像は 1080px）で描き、
+    // 問題数が少なくても縦横比 4:5 より横長にならないようにする
+    scale: 2, backgroundColor: null, useCORS: true, windowWidth: 600, windowHeight: 900,
     onclone: doc=>{ // 画像の下にサイト名と URL を入れる
       const c = doc.getElementById('scEnd').querySelector('.card');
+      c.style.cssText += ';width:540px;max-width:none;min-height:675px;margin:0;box-sizing:border-box;display:flex;flex-direction:column';
       const f = doc.createElement('div');
-      f.style.cssText = 'margin-top:14px;text-align:center;font-weight:800;color:#5a2e16;font-size:15px';
+      f.style.cssText = 'margin-top:auto;padding-top:14px;text-align:center;font-weight:800;color:#5a2e16;font-size:14px';
       f.textContent = '太鼓の達人 曲名当てクイズ' + (shareUrl() ? '　' + shareUrl().replace(/^https?:\/\//,'') : '');
       c.append(f);
       c.querySelectorAll('.total').forEach(e=>e.style.animation='none');
@@ -1059,12 +1061,10 @@ window.addEventListener('resize',()=>{ clearTimeout(resizeTimer); resizeTimer=se
 
 /* ---------- 入力候補 ---------- */
 let suggSel=-1, suggItems=[];
-$('suggOn').checked = cfg.sugg; $('suggLbl').classList.toggle('on',cfg.sugg);
-$('suggOn').onchange=()=>{cfg.sugg=$('suggOn').checked; $('suggLbl').classList.toggle('on',cfg.sugg); store.set('cfg',cfg); if(!cfg.sugg) hideSugg();};
 function hideSugg(){ $('sugg').classList.add('hidden'); suggSel=-1; suggItems=[]; }
 function updateSugg(){
   const v=$('ans').value; const k=norm(v);
-  if(!cfg.sugg || !k){hideSugg();return;}
+  if(!k){hideSugg();return;} // 入力候補は常に表示する
   const starts=[], incl=[];
   for(const s of SONGS){
     if(s.nk.startsWith(k) || (s.yk && s.yk.startsWith(k))) starts.push(s);

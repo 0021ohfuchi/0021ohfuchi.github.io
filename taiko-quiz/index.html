@@ -116,6 +116,7 @@ select{font:inherit;font-weight:700;padding:7px 12px;border-radius:999px;border:
 .info>div{background:var(--chip);border-radius:999px;padding:3px 14px;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
 .info .k{font-size:11px;color:var(--sub);font-weight:700}
 .info .v{font-size:17px;font-weight:800;line-height:1.3}
+.info .v.ws{font-size:14px;white-space:normal;max-width:32em} /* 収録作品は長いので小さめ・折り返しあり */
 /* 伏せた情報: 項目名だけ見せて値は「？」。タップで表示 */
 .info .mask{display:none}
 .info>div.hid{cursor:pointer;background:#ffe49a;box-shadow:inset 0 0 0 2px #f5c542}
@@ -700,7 +701,7 @@ function nextQ(){
   const no = game.history.length+1;
   $('qNo').textContent = `第${no}問 / ${Math.min(game.target, game.list.length)}`;
   $('qScore').textContent = '';
-  $('info').innerHTML = infoHTML(r, quizHidden());
+  $('info').innerHTML = infoHTML(r, quizHidden(), true); // 出題中は収録作品の欄も出す（曲検索は下に一覧があるので出さない）
   $('answerArea').classList.remove('hidden');
   $('resultArea').classList.add('hidden');
   $('ans').value=''; $('wrongs').innerHTML=''; hideSugg();
@@ -951,18 +952,26 @@ function fmtBpm(b){
   return b.split('-').map(x=>/※/.test(x) ? '約'+x.replace(/※/g,'') : x).join('-');
 }
 // hide: 伏せておく項目（'lv','bpm','combo','genre','work'）。伏せた項目はタップすると表示する
-function infoHTML(r, hide){
+function infoHTML(r, hide, withWorks){
   const cell = (key, inner)=> hide && hide.has(key)
     ? `<div class="hid" data-k="${key}" title="タップで表示">${inner}<span class="mask">タップで表示</span></div>` : `<div>${inner}</div>`;
   return cell('lv', `<div class="k">難易度</div><div class="v">★×${r.lv}</div>${r.s===3?'<div class="k">旧基準</div>':''}`)+
     cell('bpm', `<div class="k">BPM</div><div class="v">${esc(fmtBpm(r.bpm))}</div>`)+
     cell('combo', `<div class="k">最大コンボ数</div><div class="v">${esc(r.c||'?')}</div>`)+
     cell('genre', `<div class="k">ジャンル</div><div class="v"><span class="gchip" style="background:${GENRE_COLOR[r.g]||'#eee'}">${esc(r.g)}</span></div>`)+
-    cell('work', `<div class="k">初出作品</div><div class="v">${r.w?esc(r.w):'不明'}</div>${r.dt?`<div class="k">${esc(r.dt)}</div>`:''}`);
+    cell('work', `<div class="k">初出作品</div><div class="v">${r.w?esc(r.w):'不明'}</div>${r.dt?`<div class="k">${esc(r.dt)}</div>`:''}`)+
+    (withWorks ? cell('ws', worksCell(r)) : '');
+}
+// 収録作品（出題画面用）。多いときは最初の数作品と「ほか N 作品」。全部はマウスを乗せると見られる
+function worksCell(r){
+  const names = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
+  if(!names.length) return '<div class="k">収録作品</div><div class="v">不明</div>';
+  const MAX = 4, shown = names.slice(0, MAX).join('・') + (names.length > MAX ? ` ほか${names.length - MAX}作品` : '');
+  return `<div class="k">収録作品</div><div class="v ws" title="${esc(names.join('・'))}">${esc(shown)}</div>`;
 }
 // 出題中に伏せる項目。出題設定で★やジャンルが1つに決まっているときは、それは初めから表示する
 function quizHidden(){
-  const h = new Set(['lv','bpm','combo','genre','work']);
+  const h = new Set(['lv','bpm','combo','genre','work','ws']);
   if(cfg.lv.length===1) h.delete('lv');
   if(cfg.genre.length===1) h.delete('genre');
   return h;

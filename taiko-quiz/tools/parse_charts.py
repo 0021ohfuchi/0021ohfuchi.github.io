@@ -96,6 +96,20 @@ def find_jobs(index):
     # 画像そのものの誤りの手直し（chart_fixes.json）。曲ページ名 → 手直し
     fixes = load_json('chart_fixes.json', {})
     page_of = {s['href']: s['page'].split('/', 2)[-1] for s in lists}
+    # 同じ画像を使う譜面ページが複数ある（例: 【双打】のページが表の譜面画像を載せている）ので、
+    # 画像ごとに、それを使うページ全部の正しいコンボ数・手直しをまとめる
+    by_img = {}
+    for href, d in details.items():
+        if not d.get('imgs'):
+            continue
+        e = by_img.setdefault(chart_id(d['imgs'][0]), {'combos': set(), 'fix': None})
+        fix = fixes.get(page_of.get(href, ''))
+        if fix and fix.get('combo'):
+            e['combos'].add(str(fix['combo']))  # 一覧の誤りの手直し
+        else:
+            e['combos'] |= combos.get(href, set())
+        if fix and fix.get('remove') and not e['fix']:
+            e['fix'] = fix
     jobs, seen = [], set()
     for href, d in details.items():
         if not d.get('imgs'):
@@ -112,9 +126,8 @@ def find_jobs(index):
         if done or cid in seen:
             continue
         seen.add(cid)
-        fix = fixes.get(page_of.get(href, ''))
-        cs = [str(fix['combo'])] if fix and fix.get('combo') else sorted(combos.get(href, []))  # 一覧の誤りの手直し
-        jobs.append({'id': cid, 'url': url, 'combos': cs, 'fix': fix})
+        e = by_img[cid]
+        jobs.append({'id': cid, 'url': url, 'combos': sorted(e['combos']), 'fix': e['fix']})
     return jobs
 
 

@@ -3585,9 +3585,8 @@
 "combo": 469
 },
 "87d26f6adf52": {
-"ok": false,
-"combo": 479,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 471
 },
 "ce5e30e6333f": {
 "ok": true,

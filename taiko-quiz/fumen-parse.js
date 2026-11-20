@@ -40,7 +40,9 @@
     const P = (x, y) => { const i = (y * W + x) * 4; return [d[i], d[i + 1], d[i + 2]]; };
     const same = (p, q, t) => Math.abs(p[0] - q[0]) <= t && Math.abs(p[1] - q[1]) <= t && Math.abs(p[2] - q[2]) <= t;
     const near = (p, v, t) => same(p, [v, v, v], t);
-    const isRing = p => near(p, 176, 6);
+    // 音符の外側の縁（灰 176）。間隔が半端な所では隣の色と混ざって (153,140,140) のようになるので、くすんだ中間の明るさも縁とみなす
+    const isRing = p => near(p, 176, 6) ||
+      (Math.max(p[0], p[1], p[2]) - Math.min(p[0], p[1], p[2]) < 30 && p[0] + p[1] + p[2] >= 400 && p[0] + p[1] + p[2] <= 560);
     const isWhite = p => p[0] > 235 && p[1] > 235 && p[2] > 235;
     const isBg = p => near(p, 204, 3);
     const cls = p => {
@@ -104,6 +106,25 @@
           const c3 = colorNear(x, y, 1);
           if (c3 === 'd' || c3 === 'k') { const big = isWhite(P(x + 1, y)); cand.push({ x: x + (big ? 10.5 : 7.5), c: c3, big }); }
         }
+      }
+      // 間隔が半端で縁の灰色が隣と混ざって消えている所: 音符の右端の黒い縁（左に音符の色、その間に混ざった明るい画素）から
+      // 音符を見つける（顔の目など、音符の中の黒い画素は両側が音符の色そのままなので除かれる）
+      for (let x = 4; x < W - 2; x++) {
+        const p = P(x, y);
+        // 音符の黒い縁は色味のある暗い色（真っ黒ではない）。混ざった画素はくすんだ色。右隣は次の音符の色
+        // （レーンに描かれた絵の黒い線や肌色を音符と見間違えないように）
+        if (p[0] + p[1] + p[2] >= 345 || p[0] + p[1] + p[2] < 60) continue;
+        const spread = q => Math.max(q[0], q[1], q[2]) - Math.min(q[0], q[1], q[2]);
+        const blend = [P(x - 1, y), P(x - 2, y)].find(q => !cls(q) && q[0] + q[1] + q[2] >= 300 && spread(q) < 70);
+        if (!blend) continue;
+        const c3 = colorNear(x - 2, y, -1);
+        if (c3 !== 'd' && c3 !== 'k') continue;
+        const cr = colorNear(x, y, 1); // 右隣: 次の音符の色、または縁・レーンの灰色（連なりの最後の音符）
+        const grayR = [P(x + 1, y), P(x + 2, y)].some(q => spread(q) < 12 && q[0] + q[1] + q[2] >= 330 && q[0] + q[1] + q[2] <= 560);
+        if (cr !== 'd' && cr !== 'k' && !grayR) continue;
+        if (isWhite(P(x - 1, y)) || isWhite(P(x - 2, y))) continue; // 大音符は白い縁があるので他の方法で見つかる
+        const cx = x - 8.5;
+        if (!cand.some(c => Math.abs(c.x - cx) <= 5)) cand.push({ x: cx, c: c3, big: false }); // 縁から見つかった音符と重複させない
       }
       cand.sort((a, b) => a.x - b.x);
       for (const c of cand) {

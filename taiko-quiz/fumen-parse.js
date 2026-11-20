@@ -45,8 +45,9 @@
     const isBg = p => near(p, 204, 3);
     const cls = p => {
       const [r, g2, b] = p;
-      if (r > 180 && g2 > 180 && r - b > 60) return 'y';             // 連打（黄）
-      if (r > 180 && g2 > 80 && g2 < 180 && b < 80) return 'o';      // 風船（橙）
+      // 連打は (255,239,67)、風船は (255,191,67) くらい。緑の値で分ける
+      if (r > 180 && g2 > 215 && r - b > 60) return 'y';             // 連打（黄）
+      if (r > 180 && g2 > 120 && g2 <= 215 && b < 110) return 'o';  // 風船（橙）
       if (r > 180 && r - g2 > 90 && r - b > 90) return 'd';          // ドン
       if (b > 180 && b - r > 60) return 'k';                         // カッ
       return '';
@@ -113,23 +114,33 @@
         const big = isWhite(P(x + 1, y));
         rowNotes.push({ x: x + (big ? 10.5 : 7.5), c: c3, big, kind: 'roll' });
       }
-      // 頭が見つからない連打・風船（風船は左に尻尾があり縁がない）: 終わりから左へ、黄・橙の帯が続く範囲だけたどる
-      // （数字や縁で数px途切れるのは許す。通常音符や小節線に当たったら止まる）
-      for (const e of rowNotes.filter(n => n.kind === 'end')) {
-        let x = Math.round(e.x), left = x, gap = 0, orange = false;
-        while (x > 0) {
-          const c = cls(P(x, y));
-          if (c === 'y' || c === 'o') { left = x; gap = 0; if (c === 'o') orange = true; }
-          else if (c === 'd' || c === 'k' || ++gap > 4) break;
-          x--;
-        }
-        if (left <= 26) continue; // 前の段から続く連打
-        if (rowNotes.some(n => n.kind === 'roll' && n.x >= left - 2 && n.x <= e.x)) continue;
+      // 黄・橙の帯（連打・風船の胴）を左から探し、頭が見つかっていない帯には頭を足す。帯の色で連打（黄）か風船（橙）かを決める。
+      // 風船の頭は左に尻尾があって縁がなく、直前の音符に隠れることもあるので、縁ではなく帯と中の数字で見つける。
+      // 段の左端から始まる帯は、頭の数字があれば段の初めにある風船、なければ前の段から続く連打・風船とみなす。
+      // （数字や縁で数px途切れるのは許す。通常音符に当たったら帯は終わり）
+      const runs = [];
+      for (let x = 0, cur = null, gap = 0; x < W; x++) {
+        const c = cls(P(x, y));
+        if (c === 'y' || c === 'o') {
+          if (!cur) { cur = { x0: x, x1: x, y: 0, o: 0 }; runs.push(cur); }
+          cur.x1 = x; gap = 0; cur[c]++;
+        } else if (cur && (c === 'd' || c === 'k' || ++gap > 4)) { cur = null; gap = 0; }
+      }
+      for (const rn of runs) {
+        if (rn.x1 - rn.x0 < 10) continue; // 段の初めの黄色い線など
+        const orange = rn.o > rn.y;
+        const end = rowNotes.find(n => n.kind === 'end' && n.x >= rn.x0 && n.x <= rn.x1 + 12);
+        if (end) end.c = orange ? 'o' : 'y';
+        const head = rowNotes.find(n => n.kind === 'roll' && n.x >= rn.x0 - 14 && n.x <= rn.x0 + 24);
+        if (head) { head.c = orange ? 'o' : 'y'; continue; }
+        const num = orange ? readNumber(rn.x0, Math.min(rn.x1, rn.x0 + 40), y) : null;
+        if (rn.x0 <= 26 && !num) continue; // 前の段から続く連打・風船
+        // 音符が上に重なって帯が途切れただけの所に頭を足さないよう、風船は数字があるとき、
+        // 連打は帯の終わりがあるか段の右端まで続くときだけ頭を足す
+        if (orange ? !num : !(end || rn.x1 >= W - 30)) continue;
         // 風船は中の数字の位置を頭の中心にする（左側が他の音符に隠れていても位置がずれない）
-        const num = orange ? readNumber(left, Math.round(e.x), y) : null;
-        const hx = num ? num.cx : left + (orange ? 11.5 : 9);
+        const hx = num ? num.cx : rn.x0 + (orange ? 11.5 : 9);
         rowNotes.push({ x: hx, c: orange ? 'o' : 'y', big: false, kind: 'roll', count: num ? num.value : undefined });
-        if (orange) e.c = 'o';
       }
       // 風船の連打数（頭の中の黒い数字）
       for (const n of rowNotes) {

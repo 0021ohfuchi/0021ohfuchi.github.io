@@ -18,6 +18,7 @@ MAX_IMG = int(os.environ.get('MAX_IMG', '0')) or None
 IMG_DELAY = float(os.environ.get('IMG_DELAY', '3'))
 BATCH = 40
 RETRY_FAILED = os.environ.get('RETRY_FAILED') == '1'
+REPARSE_ALL = os.environ.get('REPARSE_ALL') == '1'
 os.makedirs(IMG_DIR, exist_ok=True)
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -100,7 +101,11 @@ def find_jobs(index):
         cid = chart_id(url)
         # 読み取り済み（成功・失敗とも。画像が変わればIDも変わる）。RETRY_FAILED=1 なら、失敗したものは読み直す
         # （読み取り処理を直したとき用。画像はキャッシュにあるので Wiki にはアクセスしない）
-        done = cid in index and (index[cid].get('ok') or not RETRY_FAILED or index[cid].get('reason') == '404')
+        # REPARSE_ALL=1 なら成功したものも含めて全部読み直す（キャッシュに画像があるものだけ）
+        if REPARSE_ALL and index.get(cid, {}).get('reason') != '404' and os.path.exists(os.path.join(IMG_DIR, cid + '.png')):
+            done = False
+        else:
+            done = cid in index and (index[cid].get('ok') or not RETRY_FAILED or index[cid].get('reason') == '404')
         if done or cid in seen:
             continue
         seen.add(cid)

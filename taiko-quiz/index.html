@@ -1081,24 +1081,30 @@ function doSearch(){
   const hits = nameHits.slice(0, limit);
   box.innerHTML = hits.length || wHits.length ? '' : '<span class="muted">見つかりませんでした</span>';
   const grp = (SORTS[sf.sort]||{}).grp;
-  const addList = list=>{
+  // 作品で探したときは、その作品に入っている譜面だけを出す（同じ曲でも譜面ごとに収録作品が違うことがある。
+  // 例: ウィーアー！は旧基準の(東方神起)だけが中国版限定）
+  const workSet = list=>{ const s = new Set(list.map(w=>w.i)); if(sf.work) s.add(+sf.work); return s; };
+  const addList = (list, ws)=>{
     let last = null;
-    for(const s of list){
+    for(const s0 of list){
+      const cs = ws && ws.size ? s0.charts.filter(c=>(c.ws||[]).some(i=>ws.has(i))) : s0.charts;
+      const s = cs.length && cs.length !== s0.charts.length ? Object.assign({}, s0, {charts: cs}) : s0;
       if(grp){ const g = grp(s); if(g!==last){ last = g; box.insertAdjacentHTML('beforeend', `<div class="sgrp">${esc(g)}</div>`); } }
       const b = document.createElement('button');
-      const lvs = [...new Set(s.charts.filter(c=>c.s!==3).map(c=>c.lv))].sort((a,b)=>b-a).map(v=>'★'+v).join('・');
+      const nl = s.charts.filter(c=>c.s!==3), lvList = nl.length ? nl : s.charts; // 旧基準しか無い曲は旧基準の★を出す
+      const lvs = [...new Set(lvList.map(c=>c.lv))].sort((a,b)=>b-a).map(v=>'★'+v).join('・');
       b.innerHTML = `${esc(s.name)}<small>${lvs}</small>`;
       b.onclick = ()=>{ search.scroll = box.scrollTop; search.song = s; search.idx = 0; showSong(); };
       box.append(b);
     }
   };
   if(hits.length && (filtered || !k)) box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;font-weight:700">${nameHits.length} 曲</div>`);
-  addList(hits);
+  addList(hits, workSet([]));
   if(nameHits.length > hits.length) box.insertAdjacentHTML('beforeend', `<span class="muted">ほか ${nameHits.length-hits.length} 曲（${k?'もっと詳しく入力':'さらに絞り込んで'}ください）</span>`);
   if(wHits.length){
     const inName = nameHits.filter(s=>works.some(w=>s.ws.has(w.i))).length;
     box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">作品「${works.map(w=>esc(w.name)).join('」「')}」の収録曲: ${wHits.length + inName} 曲</div>`);
-    addList(wHits);
+    addList(wHits, workSet(works));
   }
 }
 // 詳細から検索結果（一覧）に戻る。一覧のスクロール位置も戻す
@@ -1108,9 +1114,12 @@ function backToList(){
   $('sList').classList.remove('hidden');
   $('sList').scrollTop = search.scroll;
 }
-function chartLabel(r){
-  const kind = /^【双打】/.test(r.n) ? '双打' : /裏譜面/.test(r.n) ? '裏譜面' : '表譜面';
-  return `${kind} ★${r.lv}${r.s===3?'（旧基準）':''}`;
+// 譜面の切り替えタブの名前。裏譜面が無い曲は「表譜面」と書かず ★×6 のように★だけにする
+function chartLabel(r, hasUra){
+  const old = r.s===3 ? '（旧基準）' : '';
+  if(/^【双打】/.test(r.n)) return `双打 ★×${r.lv}${old}`;
+  if(!hasUra) return `★×${r.lv}${old}`;
+  return `${/裏譜面/.test(r.n) ? '裏譜面' : '表譜面'} ★×${r.lv}${old}`;
 }
 function showSong(){
   const s = search.song, r = s.charts[search.idx];
@@ -1118,7 +1127,7 @@ function showSong(){
   $('sList').classList.add('hidden'); // 譜面を1画面に収めるため、候補一覧は閉じる（「検索結果に戻る」でまた開く）
   const works = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
   d.innerHTML = `<div class="sd-head"><button class="sd-back" id="sdBack" title="検索結果の一覧に戻る（Esc）">← 検索結果に戻る</button><span class="title">${esc(s.name)}</span>${s.yomi?`<span class="muted">${esc(s.yomi)}</span>`:''}
-      <div class="sd-tabs">${s.charts.map((c,i)=>`<button data-i="${i}" class="sm${i===search.idx?' on':''}">${chartLabel(c)}</button>`).join('')}</div>
+      <div class="sd-tabs">${s.charts.map((c,i)=>`<button data-i="${i}" class="sm${i===search.idx?' on':''}">${chartLabel(c, s.charts.some(x=>/裏譜面/.test(x.n)))}</button>`).join('')}</div>
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a></div>
     <div class="info">${infoHTML(r)}</div>
     <div class="sd-works"><span style="border:none;background:none;padding-left:0">収録作品:</span>${works.length?works.map(w=>`<span>${esc(w)}</span>`).join(''):'<span class="muted" style="border:none">不明（取得中の可能性があります）</span>'}</div>

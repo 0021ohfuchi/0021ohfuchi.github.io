@@ -121,7 +121,7 @@ select{font:inherit;font-weight:700;padding:7px 12px;border-radius:999px;border:
 .info>div.hid{cursor:pointer;background:#ffe49a;box-shadow:inset 0 0 0 2px #f5c542}
 .info>div.hid:hover{background:#ffd96b}
 .info>div.hid>.v,.info>div.hid>.k~.k{display:none}
-.info>div.hid .mask{display:inline;font-size:17px;font-weight:800;line-height:1.3;color:#c98a00;min-width:2.5em;text-align:center}
+.info>div.hid .mask{display:inline;font-size:13px;font-weight:800;line-height:1.7;color:#b07800}
 .chart-wrap{border-radius:14px;overflow:hidden;border:3px solid var(--text);background:#cfcfcf;position:relative}
 .chart-wrap.gen{background:#fffaf0;border-color:var(--line)}
 .chart-wrap.gen .chart-scroll{overflow:auto}
@@ -526,7 +526,7 @@ function renderSetup(){
     chip('BGM', cfg.bgm, on=>{cfg.bgm=on; saveCfg(); bgmUpdate();}, '設定画面・出題中に流れる曲'),
     chip('効果音', cfg.se, on=>{cfg.se=on; saveCfg(); if(on) playSE(true);}, '正解・不正解の音'),
     chip('音源', cfg.yt, on=>{cfg.yt=on; saveCfg(); if(!on) stopSong(); bgmUpdate();}, '正解・あきらめた後に、その曲を YouTube で流す'));
-  fBox.insertAdjacentHTML('beforeend', '<span class="muted" style="font-size:13px">YouTubeに公式音源がある場合、正解表示時にYouTubeが再生されます</span>');
+  fBox.insertAdjacentHTML('beforeend', '<span class="muted" style="font-size:13px">音源：YouTubeに公式音源がある場合、正解表示時にYouTubeが再生されます</span>');
   updatePool();
   const best = store.get('best2',null);
   $('bestInfo').textContent = best ? `これまでの最高: ${best.n}問中 ${best.ok}問正解（${best.date}）` : '';
@@ -694,6 +694,7 @@ function nextQ(){
   $('answerArea').classList.remove('hidden');
   $('resultArea').classList.add('hidden');
   $('ans').value=''; $('wrongs').innerHTML=''; hideSugg();
+  window.scrollTo(0,0); // 次の問題はいつも一番上から
   renderChart();
   updateStat();
   if(!IS_TOUCH) setTimeout(()=>$('ans').focus(),50); // スマホでは自動で解答欄に合わせない（キーボードで譜面が隠れるため）
@@ -725,9 +726,17 @@ function renderChart(){
     sc.append(cv); wrap.append(sc); area.append(wrap);
     // 譜面全体が1画面に収まる大きさで描く（下の回答欄のぶんを残す）
     const below = Math.max(64, $('answerArea').classList.contains('hidden') ? $('resultArea').offsetHeight : $('answerArea').offsetHeight);
-    const maxH = Math.max(260, window.innerHeight - wrap.getBoundingClientRect().top - window.scrollY*0 - below - 28);
+    let maxH = Math.max(260, window.innerHeight - wrap.getBoundingClientRect().top - window.scrollY*0 - below - 28);
     sc.style.maxHeight = maxH + 'px';
     FumenParse.renderFumen(cv, f, {maxW: wrap.clientWidth - 2, maxH});
+    // それでもページが画面からはみ出す（スマホで見出しが折り返すときなど）なら、はみ出したぶんだけ譜面を小さくして
+    // ページがスクロールしないようにする
+    const over = document.documentElement.scrollHeight - window.innerHeight;
+    if(over > 0 && maxH - over - 2 >= 200){
+      maxH -= over + 2;
+      sc.style.maxHeight = maxH + 'px';
+      FumenParse.renderFumen(cv, f, {maxW: wrap.clientWidth - 2, maxH});
+    }
   });
 }
 let resizeTimer=0;
@@ -899,7 +908,7 @@ function fmtBpm(b){
 // hide: 伏せておく項目（'lv','bpm','combo','genre','work'）。伏せた項目はタップすると表示する
 function infoHTML(r, hide){
   const cell = (key, inner)=> hide && hide.has(key)
-    ? `<div class="hid" data-k="${key}" title="タップで表示">${inner}<span class="mask">？</span></div>` : `<div>${inner}</div>`;
+    ? `<div class="hid" data-k="${key}" title="タップで表示">${inner}<span class="mask">タップで表示</span></div>` : `<div>${inner}</div>`;
   return cell('lv', `<div class="k">難易度</div><div class="v">★×${r.lv}</div>${r.s===3?'<div class="k">旧基準</div>':''}`)+
     cell('bpm', `<div class="k">BPM</div><div class="v">${esc(fmtBpm(r.bpm))}</div>`)+
     cell('combo', `<div class="k">最大コンボ数</div><div class="v">${esc(r.c||'?')}</div>`)+

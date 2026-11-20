@@ -27,7 +27,7 @@
   for (const job of window.CHART_JOBS || []) {
     try {
       const img = await load(job.file);
-      const f = FumenParse.parseFumenImage(img);
+      const f = FumenParse.applyFix(FumenParse.parseFumenImage(img), job.fix); // 画像の誤りの手直し
       if (!f.ok) { results.push({ id: job.id, ok: false, reason: f.reason }); continue; }
       // 達人のレーンの数か、普通（灰色）・玄人のレーンだけの数のどれかが Wiki の最大コンボ数と一致すれば正しく読めたとみなす
       const hit = (f.combos || [f.combo]).find(c => job.combos.includes(String(c)));

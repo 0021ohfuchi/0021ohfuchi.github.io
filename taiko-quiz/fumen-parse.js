@@ -523,5 +523,25 @@
     };
   }
 
-  global.FumenParse = { parseFumenImage, loadFumen, renderFumen, loadChart };
+  // 画像そのものの誤りを手直しする（tools/chart_fixes.json）。fix.remove: [{bar: 小節番号, c: 'd'|'k', n: 何個目か}]
+  // 読み取り結果 f の音符を消し、音符数（combo / combos）も消した数だけ減らす
+  function applyFix(f, fix) {
+    if (!f || !f.ok || !fix || !fix.remove) return f;
+    let num = 0, removed = 0;
+    const where = []; // 小節番号 → [段, 左端x, 右端x]
+    for (const r of f.rows) { for (let i = 0; i + 1 < r.bars.length; i++) where[++num] = [r, r.bars[i], r.bars[i + 1]]; }
+    for (const rm of fix.remove) {
+      const w = where[rm.bar]; if (!w) continue;
+      const [r, x0, x1] = w;
+      for (const l of r.lanes) {
+        const hits = l.notes.filter(n => n.kind === 'note' && n.c === rm.c && n.x >= x0 - 6 && n.x < x1 - 6).sort((a, b) => a.x - b.x);
+        const t = hits[(rm.n || 1) - 1];
+        if (t) { l.notes.splice(l.notes.indexOf(t), 1); removed = 1; }
+      }
+      if (removed) { f.combo -= 1; if (f.combos) f.combos = f.combos.map(c => c - 1); removed = 0; }
+    }
+    return f;
+  }
+
+  global.FumenParse = { parseFumenImage, loadFumen, renderFumen, loadChart, applyFix };
 })(window);

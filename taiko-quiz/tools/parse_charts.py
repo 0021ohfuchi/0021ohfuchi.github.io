@@ -93,6 +93,9 @@ def find_jobs(index):
             x = re.sub(r'\D', '', x)
             if x:
                 combos.setdefault(s['href'], set()).add(x)
+    # 画像そのものの誤りの手直し（chart_fixes.json）。曲ページ名 → 手直し
+    fixes = load_json('chart_fixes.json', {})
+    page_of = {s['href']: s['page'].split('/', 2)[-1] for s in lists}
     jobs, seen = [], set()
     for href, d in details.items():
         if not d.get('imgs'):
@@ -109,14 +112,14 @@ def find_jobs(index):
         if done or cid in seen:
             continue
         seen.add(cid)
-        jobs.append({'id': cid, 'url': url, 'combos': sorted(combos.get(href, []))})
+        jobs.append({'id': cid, 'url': url, 'combos': sorted(combos.get(href, [])), 'fix': fixes.get(page_of.get(href, ''))})
     return jobs
 
 
 def convert(batch, index, chrome, harness):
     """ヘッドレス Chrome で読み取り、charts/<id>.js を書く。成功数を返す"""
     jobs_js = 'window.CHART_JOBS=' + json.dumps(
-        [{'id': j['id'], 'file': 'cache/img/' + j['id'] + '.png', 'combos': j['combos']} for j in batch]) + ';'
+        [{'id': j['id'], 'file': 'cache/img/' + j['id'] + '.png', 'combos': j['combos'], 'fix': j.get('fix')} for j in batch]) + ';'
     open(os.path.join(HERE, 'cache', 'chart_jobs.js'), 'w', encoding='utf-8').write(jobs_js)
     args = [chrome, '--headless=new', '--disable-gpu', '--allow-file-access-from-files',
             '--virtual-time-budget=600000', '--dump-dom', harness]

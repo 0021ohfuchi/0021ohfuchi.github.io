@@ -260,6 +260,8 @@
       }
       if (laneEnd > 40) addBar(snap(laneEnd + 1 - 24));
       bars.sort((a, b) => a - b);
+      // 音符1つだけのとても短い段（BPM が極端に遅い小節など）は小節線が1本しか見つからないので、レーンの右端を小節の終わりにする
+      if (bars.length === 1 && laneEnd > bars[0] + 6) bars.push(laneEnd + 1);
       // ゴーゴータイム（ラベル領域のピンク）
       const gogo = [];
       const gy = lineY - 1;

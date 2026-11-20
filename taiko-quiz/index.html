@@ -426,7 +426,7 @@ a{color:var(--ka-d);font-weight:700}
 </main>
 
 <script src="data.js"></script>
-<script src="fumen-parse.js?v=20261120c"></script><!-- 変更したら v を変える（スマホに古いファイルが残らないように） -->
+<script src="fumen-parse.js?v=20261120d"></script><!-- 変更したら v を変える（スマホに古いファイルが残らないように） -->
 <script src="bgm.js"></script>
 <!-- 結果発表の画面を画像にする（シェア用） -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
@@ -800,7 +800,7 @@ function submit(){
   $('ans').select();
 }
 $('ansBtn').onclick=submit;
-$('giveupBtn').onclick=()=>{ if(!game.q.done) finishQ(false); };
+$('giveupBtn').onclick=()=>{ if(!game.q.done && confirm('あきらめて答えを見ますか？')) finishQ(false); };
 
 function wikiUrl(r){return WIKI+encodeURIComponent('収録曲/おに/'+r.p).replace(/%2F/g,'/');}
 function finishQ(ok){
@@ -820,11 +820,12 @@ function finishQ(ok){
       <span class="title">${esc(r.n)}</span>
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a>
       <span class="sp"></span>
-      ${last?'':'<button id="endNowBtn">ここで終了</button>'}
       <button class="primary" id="nextBtn">${last?'結果を見る':'次の問題へ'}</button>
+      ${last?'':'<button id="endNowBtn">ここで終了</button>'}
     </div>`;
   $('nextBtn').onclick=nextQ;
-  if(!last) $('endNowBtn').onclick=endGame; // 途中で終了して結果を見る（結果画面からトップに戻れる）
+  // 途中で終了して結果を見る（結果画面からトップに戻れる）。押し間違えないよう確認する
+  if(!last) $('endNowBtn').onclick=()=>{ if(confirm('ここで終了して結果を見ますか？')) endGame(); };
   setTimeout(()=>$('nextBtn').focus({preventScroll:true}),30);
 }
 

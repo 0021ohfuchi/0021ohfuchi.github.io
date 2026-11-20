@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -49,14 +49,16 @@ body.wide .foot{margin:8px 0}
 h2{font-size:20px;margin:0 0 10px;font-weight:800;display:flex;align-items:center;gap:8px}
 h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--don);box-shadow:18px 0 0 var(--ka);margin-right:20px}
 .muted{color:var(--sub);font-size:13px}
-button{font:inherit;font-weight:700;border:none;border-radius:999px;padding:9px 18px;cursor:pointer;background:var(--chip);color:var(--text);
-  box-shadow:0 4px 0 var(--line);transition:transform .08s,box-shadow .08s}
+/* ===== ボタン: サイト全体で同じデザイン（音符のような、こげ茶の縁＋内側の白い縁＋下の影） =====
+   色は 3 種類だけ: ふつう（白）/ primary・選択中（赤＝ドン）/ blue（青＝カッ）。大きさは ふつう・.sm（小）・.big（大）の 3 種類 */
+button{font:inherit;font-size:15px;font-weight:800;line-height:1.4;letter-spacing:.02em;border:2.5px solid #3a2a1e;border-radius:999px;padding:7px 18px;
+  cursor:pointer;background:#fff;color:#3a2a1e;box-shadow:inset 0 0 0 2px #fff,0 4px 0 #3a2a1e;transition:transform .08s,box-shadow .08s}
 button:hover{transform:translateY(-1px)}
-button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
-button.primary{background:var(--don);color:#fff;box-shadow:0 4px 0 var(--don-d)}
-button.primary:active{box-shadow:0 1px 0 var(--don-d)}
-button.blue{background:var(--ka);color:#fff;box-shadow:0 4px 0 var(--ka-d)}
-button.blue:active{box-shadow:0 1px 0 var(--ka-d)}
+button:active{transform:translateY(3px);box-shadow:inset 0 0 0 2px #fff,0 1px 0 #3a2a1e}
+button.primary,button.on{background:#ff4b3e;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.2)}
+button.blue{background:#2fb8e8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.2)}
+button.sm{font-size:13px;padding:4px 14px;box-shadow:inset 0 0 0 2px #fff,0 3px 0 #3a2a1e}
+button.sm:active{box-shadow:inset 0 0 0 2px #fff,0 0 0 #3a2a1e}
 button:disabled{opacity:.45;cursor:default;transform:none}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .chk{display:inline-flex;align-items:center;gap:4px;padding:5px 13px;border-radius:999px;background:#fff;border:2px solid var(--line);font-size:14px;font-weight:700;cursor:pointer;user-select:none;transition:.1s}
@@ -88,20 +90,16 @@ button:disabled{opacity:.45;cursor:default;transform:none}
 #scSetup .chk{background:#fff;border:2.5px solid #3a2a1e;color:#3a2a1e;box-shadow:inset 0 0 0 2px #fff}
 #scSetup .chk.on{background:#ff4b3e;color:#fff;border-color:#3a2a1e;box-shadow:inset 0 0 0 2px #fff;text-shadow:1px 1px 0 rgba(0,0,0,.2)}
 /* すべて・クリアなどのボタン: 青（カッ） */
-#scSetup .setrow .row > button{background:#2fb8e8;color:#fff;border:2.5px solid #3a2a1e;box-shadow:inset 0 0 0 2px #fff,0 3px 0 #3a2a1e;padding:5px 16px;font-size:14px}
-#scSetup .setrow .row > button:active{box-shadow:inset 0 0 0 2px #fff,0 0 0 #3a2a1e;transform:translateY(3px)}
 #scSetup select{border:2.5px solid #3a2a1e}
-/* スタート: 大きな太鼓の面のようなボタン */
-#scSetup #startBtn{width:100%;max-width:420px;height:68px;border-radius:999px;padding:0 24px;font-size:26px;letter-spacing:.12em;
-  background:#ff4b3e;color:#fff;border:3px solid #3a2a1e;
-  box-shadow:inset 0 0 0 3px #fff,0 7px 0 #3a1c0c;text-shadow:2px 2px 0 rgba(0,0,0,.25)}
+/* スタート・曲を検索: 横長の大きなボタン（デザインは共通、大きさだけ） */
+#scSetup #startBtn,#scSetup #searchBtn{width:100%;max-width:420px}
+#scSetup #startBtn{height:68px;padding:0 24px;font-size:26px;letter-spacing:.12em}
 #scSetup #startBtn:disabled{background:#c9b8a8}
-#scSetup #startBtn:active{box-shadow:inset 0 0 0 3px #fff,0 2px 0 #3a1c0c;transform:translateY(5px)}
 .setrow{display:flex;gap:10px;align-items:flex-start;margin:12px 0;flex-wrap:wrap}
 .setrow + .setrow{margin-top:34px} /* ★の数・ジャンル・作品・問題数の間を1行ぶんあける */
 .setrow .row{flex:1;min-width:0}
 select{font:inherit;font-weight:700;padding:7px 12px;border-radius:999px;border:2px solid var(--line);background:#fff;color:var(--text)}
-.big{font-size:19px;padding:13px 34px}
+button.big{font-size:19px;padding:11px 34px}
 .title-card{text-align:center;background:linear-gradient(135deg,#fff 0 60%,#ffeef6)}
 .title-card .logo{font-size:30px;font-weight:800;color:var(--don);text-shadow:3px 3px 0 #ffd36b;margin:4px 0}
 .title-card p{margin:6px 0}
@@ -129,8 +127,6 @@ select{font:inherit;font-weight:700;padding:7px 12px;border-radius:999px;border:
 .chart-scroll{overflow:auto;overscroll-behavior:contain} /* 譜面の端までスクロールしてもページは動かさない */
 html.noscroll,html.noscroll body{overflow:hidden;height:100%;overscroll-behavior:none}
 .chart-tabs{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
-.chart-tabs button{padding:3px 12px;font-size:13px}
-.chart-tabs button.on{background:var(--ka);color:#fff;box-shadow:0 3px 0 var(--ka-d)}
 .answer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 #answerArea,#resultArea{margin-bottom:10px}
 .wrongs:empty{display:none}
@@ -154,7 +150,6 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 }
 /* 曲を検索（出題設定の中、スタートの下） */
 .setup-search{margin-top:18px;padding-top:18px;border-top:3px dashed #e8cfa8;display:flex;justify-content:center}
-#scSetup #searchBtn{width:100%;max-width:420px;border:2.5px solid #3a2a1e;box-shadow:inset 0 0 0 2px #fff,0 4px 0 #3a2a1e}
 /* 出題設定: 1画面に収まるよう、広い画面では左右2段に並べる */
 .setup-grid{display:grid;grid-template-columns:1fr;gap:16px}
 .setup-grid .card{margin-bottom:0;padding:18px 22px}
@@ -162,7 +157,6 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 .setup-grid .row{gap:10px}
 .setup-grid .chk{padding:6px 15px;font-size:15px}
 .setup-grid .lbl{min-width:6em;font-size:16px;padding-top:6px}
-.row.mini button{padding:5px 15px;font-size:14px;box-shadow:0 3px 0 var(--line)}
 /* 広い画面: 左右2列にして、画面の高さいっぱいに使い、項目の間を均等にあける */
 @media (min-width:1000px){
   .setup-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);min-height:calc(100vh - 128px)}
@@ -187,19 +181,19 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 .player-head{display:flex;align-items:center;gap:6px;padding:5px 8px;font-size:12px;font-weight:800;cursor:move;user-select:none;touch-action:none;flex-wrap:wrap}
 .player-head #plLabel{flex:1 1 100%;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .player-head .sp{flex:1}
-.player-head button{padding:1px 8px;font-size:11px;box-shadow:0 2px 0 var(--line);white-space:nowrap;cursor:pointer}
+.player-head button{padding:0 8px;font-size:11px;border-width:2px;box-shadow:inset 0 0 0 1.5px #fff,0 2px 0 #3a2a1e;white-space:nowrap} /* 小さなプレーヤーの中なので、同じデザインをさらに小さく */
 .player-head a{font-size:11px;white-space:nowrap;cursor:pointer}
 .player-body{width:200px;height:200px;background:#000}
 .player-body iframe{width:100%;height:100%;border:0;display:block}
 .player-body .msg{color:#fff;font-size:13px;padding:14px;line-height:1.7}
 .player-body .msg code{background:#333;padding:0 4px;border-radius:4px}
-.help-btn{width:34px;height:34px;padding:0;border-radius:50%;background:#fff;color:var(--don);font-size:20px;font-weight:800;box-shadow:0 3px 0 rgba(0,0,0,.15);flex:none}
+.help-btn{width:36px;height:36px;padding:0;border-radius:50%;color:var(--don);font-size:19px;flex:none;display:inline-flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 2px #fff,0 3px 0 #3a2a1e}
 .modal{position:fixed;inset:0;background:rgba(58,42,30,.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
 .modal-box{background:#fff;border:3px solid var(--line);border-radius:22px;box-shadow:0 6px 0 var(--line);padding:20px 24px;max-width:620px;width:100%;max-height:90vh;overflow-y:auto}
 .modal-box ul{margin:0 0 14px;padding-left:1.2em;font-size:15px;line-height:1.8}
 .search-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .slist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:40vh;overflow-y:auto}
-.slist button{font-size:14px;padding:6px 14px;box-shadow:0 3px 0 var(--line)}
+.slist button{font-size:13px;padding:4px 14px;box-shadow:inset 0 0 0 2px #fff,0 3px 0 #3a2a1e} /* 曲の一覧は .sm と同じ大きさ */
 .slist button small{color:var(--sub);margin-left:6px;font-weight:500}
 .slist .muted{padding:6px 2px}
 .slist .sgrp{flex-basis:100%;margin-top:8px;padding:2px 2px 2px 8px;font-weight:800;font-size:14px;border-left:4px solid var(--don)}
@@ -208,13 +202,9 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 .sfilter label{display:inline-flex;align-items:center;gap:6px}
 .sfilter select{font:inherit;font-weight:500;padding:5px 8px;border:2px solid var(--line);border-radius:10px;background:var(--card,#fff);color:var(--text);max-width:220px}
 .sfilter select.on{border-color:var(--don)}
-.sfilter button{padding:5px 14px;font-size:13px}
-.sd-back{padding:5px 14px;font-size:14px}
 .sd-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0 8px}
 .sd-head .title{font-size:22px;font-weight:800}
 .sd-tabs{display:flex;gap:6px;flex-wrap:wrap}
-.sd-tabs button{padding:4px 14px;font-size:14px}
-.sd-tabs button.on{background:var(--don);color:#fff;box-shadow:0 4px 0 var(--don-d)}
 .sd-works{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
 .sd-works span{background:#fff;border:2px solid var(--line);border-radius:999px;padding:0 10px;font-size:12px;font-weight:700}
 .result-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;min-height:48px}
@@ -234,11 +224,11 @@ table.sum td,table.sum th{padding:7px 6px;border-bottom:2px dotted var(--line);t
 table.sum td.num{text-align:right;white-space:nowrap;font-weight:800}
 a{color:var(--ka-d);font-weight:700}
 .share{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin:4px 0 14px}
-.share button{display:inline-flex;align-items:center;gap:6px;padding:8px 16px}
+.share button{display:inline-flex;align-items:center;gap:6px}
 .share svg{width:16px;height:16px;fill:currentColor}
-.share .sh-x{background:#000;color:#fff;box-shadow:0 4px 0 #555}
-.share .sh-th{background:#fff;color:#000;border:2px solid #000;box-shadow:0 4px 0 #000}
-.share .sh-ig{background:linear-gradient(45deg,#f9a825,#e1306c 50%,#833ab4);color:#fff;box-shadow:0 4px 0 #8a2a5c}
+/* SNS のボタンも形・縁・影は共通。地の色だけ各サービスの色 */
+.share .sh-x{background:#000;color:#fff}
+.share .sh-ig{background:linear-gradient(45deg,#f9a825,#e1306c 50%,#833ab4);color:#fff}
 .total{font-size:52px;font-weight:800;color:var(--don);text-align:center;text-shadow:4px 4px 0 #ffd36b;animation:pop .5s cubic-bezier(.3,1.6,.6,1)}
 .foot{font-size:12px;color:#5a3410;text-align:center;margin:20px 0}
 .foot a{color:#7a2e00}
@@ -247,7 +237,7 @@ a{color:var(--ka-d);font-weight:700}
   main{padding:12px}
   header h1{font-size:18px}
   .title-card .logo{font-size:24px}
-  .big{font-size:17px;padding:12px 26px}
+  button.big{font-size:17px;padding:10px 26px}
   /* スマホ: 譜面をなるべく画面の幅いっぱいに使う */
   body.wide main{padding:6px 4px}
   body.wide #qCard{padding:8px 6px;border-radius:14px}
@@ -302,7 +292,7 @@ a{color:var(--ka-d);font-weight:700}
     </ul>
     <p class="muted" style="font-size:12px;line-height:1.7">
       このコンテンツはファンメイドコンテンツです。ファンメイドコンテンツポリシー（<a href="https://taiko-ch.net/ip_policy/" target="_blank" rel="noopener">https://taiko-ch.net/ip_policy/</a>）のもと制作されています。<br>
-      曲データ・譜面の出典: <a href="https://wikiwiki.jp/taiko-fumen/" target="_blank" rel="noopener">太鼓の達人 譜面とか Wiki</a>（譜面は Wiki の譜面画像を読み取り、このサイトで描き直したものです）
+      曲データ・譜面の出典: <a href="https://wikiwiki.jp/taiko-fumen/" target="_blank" rel="noopener">太鼓の達人 譜面とか Wiki</a>
     </p>
     <div style="text-align:right"><button class="primary" id="helpClose">閉じる</button></div>
   </div>
@@ -315,15 +305,15 @@ a{color:var(--ka-d);font-weight:700}
     <h2>出題設定</h2>
     <div class="setup-cols"><div class="setup-col">
     <div class="setrow"><span class="lbl">★の数</span><div style="flex:1;min-width:0">
-      <div class="row" style="margin-bottom:6px"><button id="lvAll">すべて</button><button id="lvNone">クリア</button></div>
+      <div class="row" style="margin-bottom:6px"><button class="blue sm" id="lvAll">すべて</button><button class="blue sm" id="lvNone">クリア</button></div>
       <div class="row" id="lvBox"></div>
     </div></div>
     <div class="setrow"><span class="lbl">ジャンル</span><div style="flex:1;min-width:0">
-      <div class="row" style="margin-bottom:6px"><button id="gAll">すべて</button><button id="gNone">クリア</button></div>
+      <div class="row" style="margin-bottom:6px"><button class="blue sm" id="gAll">すべて</button><button class="blue sm" id="gNone">クリア</button></div>
       <div class="row" id="genreBox"></div>
     </div></div>
     <div class="setrow"><span class="lbl">作品<br><span class="muted" style="font-weight:500">（収録）</span></span><div style="flex:1;min-width:0">
-      <div class="row" style="margin-bottom:6px"><button id="wAll">すべて</button><button id="wAC">ACのみ</button><button id="wCS">CSのみ</button><button id="wNone">クリア</button></div>
+      <div class="row" style="margin-bottom:6px"><button class="blue sm" id="wAll">すべて</button><button class="blue sm" id="wAC">ACのみ</button><button class="blue sm" id="wCS">CSのみ</button><button class="blue sm" id="wNone">クリア</button></div>
       <div class="muted" style="margin:2px 0 4px">AC</div><div class="row" id="workAC"></div>
       <div class="muted" style="margin:10px 0 4px">CS</div><div class="row" id="workCS"></div>
       <div id="workOSWrap"><div class="muted" style="margin:10px 0 4px">海外</div><div class="row" id="workOS"></div></div>
@@ -392,7 +382,7 @@ a{color:var(--ka-d);font-weight:700}
         <option value="name">名前順</option><option value="lvd">★が多い順</option><option value="lva">★が少ない順</option>
         <option value="genre">ジャンル順</option><option value="work">作品順</option>
       </select></label>
-      <button id="sfReset" title="絞り込みと並び順を元に戻す">リセット</button>
+      <button class="sm" id="sfReset" title="絞り込みと並び順を元に戻す">リセット</button>
     </div>
     <div id="sList" class="slist"></div>
     <div id="sDetail" class="hidden"></div>
@@ -424,7 +414,7 @@ a{color:var(--ka-d);font-weight:700}
 
 <div class="foot">
   このコンテンツはファンメイドコンテンツです。ファンメイドコンテンツポリシー（<a href="https://taiko-ch.net/ip_policy/" target="_blank" rel="noopener">https://taiko-ch.net/ip_policy/</a>）のもと制作されています。<br>
-  曲データ・譜面の出典: <a href="https://wikiwiki.jp/taiko-fumen/" target="_blank" rel="noopener">太鼓の達人 譜面とか Wiki</a>（譜面は Wiki の譜面画像を読み取り、このサイトで描き直したものです）
+  曲データ・譜面の出典: <a href="https://wikiwiki.jp/taiko-fumen/" target="_blank" rel="noopener">太鼓の達人 譜面とか Wiki</a>
 </div>
 </main>
 
@@ -1129,7 +1119,7 @@ function showSong(){
   $('sList').classList.add('hidden'); // 譜面を1画面に収めるため、候補一覧は閉じる（「検索結果に戻る」でまた開く）
   const works = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
   d.innerHTML = `<div class="sd-head"><button class="sd-back" id="sdBack" title="検索結果の一覧に戻る（Esc）">← 検索結果に戻る</button><span class="title">${esc(s.name)}</span>${s.yomi?`<span class="muted">${esc(s.yomi)}</span>`:''}
-      <div class="sd-tabs">${s.charts.map((c,i)=>`<button data-i="${i}" class="${i===search.idx?'on':''}">${chartLabel(c)}</button>`).join('')}</div>
+      <div class="sd-tabs">${s.charts.map((c,i)=>`<button data-i="${i}" class="sm${i===search.idx?' on':''}">${chartLabel(c)}</button>`).join('')}</div>
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a></div>
     <div class="info">${infoHTML(r)}</div>
     <div class="sd-works"><span style="border:none;background:none;padding-left:0">収録作品:</span>${works.length?works.map(w=>`<span>${esc(w)}</span>`).join(''):'<span class="muted" style="border:none">不明（取得中の可能性があります）</span>'}</div>

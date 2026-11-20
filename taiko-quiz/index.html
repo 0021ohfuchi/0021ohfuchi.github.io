@@ -129,11 +129,13 @@ select{font:inherit;font-weight:700;padding:7px 12px;border-radius:999px;border:
 .chart-tabs{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
 .chart-tabs button{padding:3px 12px;font-size:13px}
 .chart-tabs button.on{background:var(--ka);color:#fff;box-shadow:0 3px 0 var(--ka-d)}
-.answer-row{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.answer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#answerArea,#resultArea{margin-bottom:10px}
+.wrongs:empty{display:none}
 .answer-box{position:relative;flex:1;min-width:220px}
 .answer-box input{width:100%;font:inherit;font-weight:700;font-size:18px;padding:9px 18px;border-radius:999px;border:3px solid var(--line);background:#fff;color:var(--text);outline:none}
 .answer-box input:focus{border-color:var(--ka);box-shadow:0 0 0 4px rgba(47,184,232,.2)}
-.sugg{position:absolute;left:0;right:0;bottom:100%;z-index:10;background:#fff;border:3px solid var(--ka);border-radius:16px;margin-bottom:6px;max-height:300px;overflow-y:auto;box-shadow:0 6px 0 rgba(26,143,187,.25)}
+.sugg{position:absolute;left:0;right:0;top:100%;z-index:10;background:#fff;border:3px solid var(--ka);border-radius:16px;margin-top:6px;max-height:300px;overflow-y:auto;box-shadow:0 6px 0 rgba(26,143,187,.25)}
 .sugg div{padding:8px 14px;cursor:pointer;border-bottom:1px solid #e6f6fc;font-weight:700}
 .sugg div:last-child{border-bottom:none}
 .sugg div.sel,.sugg div:hover{background:#e6f6fc}
@@ -213,7 +215,7 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 .sd-tabs button.on{background:var(--don);color:#fff;box-shadow:0 4px 0 var(--don-d)}
 .sd-works{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
 .sd-works span{background:#fff;border:2px solid var(--line);border-radius:999px;padding:0 10px;font-size:12px;font-weight:700}
-.result-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;min-height:48px}
+.result-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;min-height:48px}
 .result-row .mark{font-size:24px;font-weight:800;animation:pop .4s cubic-bezier(.3,1.6,.6,1)}
 .result-row .mark.ok{color:var(--ok)} .result-row .mark.ng{color:var(--ng)}
 .result-row .title{font-size:20px;font-weight:800}
@@ -349,7 +351,7 @@ a{color:var(--ka-d);font-weight:700}
       <div class="info" id="info"></div>
       <span class="score-now" id="qScore"></span>
     </div>
-    <div id="chartArea"></div>
+    <!-- 回答欄・結果の行は譜面の上に置く（スマホでキーボードを出しても入力欄が隠れないように） -->
     <div id="answerArea">
       <div class="answer-row">
         <div class="answer-box">
@@ -362,6 +364,7 @@ a{color:var(--ka-d);font-weight:700}
       <div class="wrongs" id="wrongs"></div>
     </div>
     <div id="resultArea" class="hidden"></div>
+    <div id="chartArea"></div>
   </div>
 </section>
 
@@ -725,8 +728,8 @@ function renderChart(){
     const cv=document.createElement('canvas'); cv.style.display='block'; cv.style.margin='0 auto';
     sc.append(cv); wrap.append(sc); area.append(wrap);
     // 譜面全体が1画面に収まる大きさで描く（下の回答欄のぶんを残す）
-    const below = Math.max(64, $('answerArea').classList.contains('hidden') ? $('resultArea').offsetHeight : $('answerArea').offsetHeight);
-    let maxH = Math.max(260, window.innerHeight - wrap.getBoundingClientRect().top - window.scrollY*0 - below - 28);
+    // 回答欄は譜面の上にあるので、譜面の上端から画面の下端までを使う
+    let maxH = Math.max(260, window.innerHeight - wrap.getBoundingClientRect().top - 28);
     sc.style.maxHeight = maxH + 'px';
     FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH, quizChartExtra()));
     // それでもページが画面からはみ出す（スマホで見出しが折り返すときなど）なら、はみ出したぶんだけ譜面の枠を小さくして
@@ -777,7 +780,9 @@ function submit(){
   if(isCorrect(v,q.r)){finishQ(true); return;}
   playSE(false);
   if(!q.wrong.includes(v)) q.wrong.push(v);
+  const h0 = $('answerArea').offsetHeight;
   $('wrongs').innerHTML = q.wrong.map(w=>`<span>${esc(w)}</span>`).join('');
+  if($('answerArea').offsetHeight !== h0) renderChart(); // 間違えた答えの行が増えたら、譜面を描き直して1画面に収める
   const card=$('qCard'); card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
   $('ans').select();
 }

@@ -316,7 +316,7 @@ a{color:var(--ka-d);font-weight:700}
     </div></div>
     <div class="setrow"><span class="lbl">収録作品</span><div style="flex:1;min-width:0">
       <div class="row" style="margin-bottom:6px"><button class="blue sm" id="wAll">すべて</button><button class="blue sm" id="wAC">ACのみ</button><button class="blue sm" id="wCS">CSのみ</button><button class="blue sm" id="wNone">クリア</button></div>
-      <div class="muted" style="margin:2px 0 4px">AC</div><div class="row" id="workAC"></div>
+      <div id="workAC"></div><!-- AC は旧筐体・新筐体・ニジイロのまとまりごとにしまう -->
       <div id="workCS"></div><!-- 家庭用（CS）はハードごとに見出しを付けて並べる -->
 
       <div id="workOSWrap"><div class="muted" style="margin:10px 0 4px">海外</div><div class="row" id="workOS"></div></div>
@@ -534,6 +534,19 @@ function csHardwares(){
 // そのハードで出ている作品
 function csWorksOf(hw){ return WORKS.filter(w=>w.n>0 && w.kind==='CS' && hwsOf(w).includes(hw)); }
 const HW_ALIAS = []; // 使っていない（複数のハードの作品は w.hw の一覧で扱う）
+// アーケード（AC）の作品のまとまり（ユーザー指定）。作品名で振り分ける
+const AC_GROUPS = [
+  ['AC1～AC14（旧筐体）', n => /^AC\d+/.test(n)],
+  ['AC15（新筐体）', n => /^(新筐体|KATSU-DON|ソライロ|モモイロ|キミドリ|ムラサキ|ホワイト|レッド|イエロー|ブルー|グリーン|ブラジル版限定)/.test(n)],
+  ['AC16（ニジイロ）', n => /^(ニジイロ|中国版限定)/.test(n)],
+];
+function acGroupOf(w){ const g = AC_GROUPS.find(([, f])=>f(w.name)); return g ? g[0] : 'AC その他'; }
+function acGroups(){ const s = new Set(WORKS.filter(w=>w.n>0 && w.kind==='AC').map(acGroupOf)); return AC_GROUPS.map(g=>g[0]).filter(g=>s.has(g)).concat(s.has('AC その他') ? ['AC その他'] : []); }
+function acWorksOf(g){ return WORKS.filter(w=>w.n>0 && w.kind==='AC' && acGroupOf(w)===g); }
+// AC・CS をまとめて: まとまり（タブ）の名前の一覧と、まとまりの中の作品、作品が入っているまとまり
+function allGroups(){ return acGroups().concat(csHardwares()); }
+function groupWorks(g){ return acGroups().includes(g) ? acWorksOf(g) : csWorksOf(g); }
+function groupsOfWork(w){ return w.kind==='AC' ? [acGroupOf(w)] : w.kind==='CS' ? hwsOf(w) : []; }
 function renderSetup(){
   const lvBox=$('lvBox'); lvBox.innerHTML='';
   for(let lv=1;lv<=10;lv++) lvBox.append(chip('★'+lv, cfg.lv.includes(lv), on=>{toggleIn(cfg.lv,lv,on);saveCfg();}));
@@ -541,38 +554,41 @@ function renderSetup(){
   for(const [g] of GENRES) gBox.append(chip(g, cfg.genre.includes(g), on=>{toggleIn(cfg.genre,g,on);saveCfg();}));
   // 複数のハードに出る作品は、押したらほかのハードの中のボタンもそろえるために描き直す
   const workChip = w => chip(w.name, !cfg.worksOff.includes(wkey(w)), on=>{toggleIn(cfg.worksOff,wkey(w),!on);saveCfg(); if(hwsOf(w).length>1) renderSetup();}, `${w.short ? w.short + '　' : ''}おに ${w.n}譜面`);
-  for(const [kind,boxId] of [['AC','workAC'],['OS','workOS']]){
-    const box=$(boxId); box.innerHTML='';
-    for(const w of WORKS.filter(w=>w.n>0 && w.kind===kind)) box.append(workChip(w));
-  }
-  // 家庭用（CS）: ハードのボタンを並べ、タイトルはハードの中にしまう。
-  // ハードを押すと、そのハードのタイトルを表示する（タイトルはまだ選ばれていない状態）。選びたいタイトルを押して選ぶ。
-  // もう一度ハードを押すとタイトルをしまい、そのハードのタイトルも外す（ほかの開いているハードにもあるタイトルは残す）
-  // 開いているハード。初めて（またはこの仕組みより前の設定で）開いたときは、選ばれているタイトルがあるハードを開く
-  if(!Array.isArray(cfg.hwOpen)) cfg.hwOpen = csHardwares().filter(hw=>csWorksOf(hw).some(w=>!cfg.worksOff.includes(wkey(w))));
-  const cs=$('workCS'); cs.innerHTML='';
-  cs.insertAdjacentHTML('beforeend', '<div class="muted" style="margin:10px 0 4px">CS</div>');
-  const hwRow=document.createElement('div'); hwRow.className='row'; cs.append(hwRow);
+  { const box=$('workOS'); box.innerHTML=''; for(const w of WORKS.filter(w=>w.n>0 && w.kind==='OS')) box.append(workChip(w)); }
+  // AC はまとまり（旧筐体・新筐体・ニジイロ）、CS はハードのボタンを並べ、作品はその中にしまう。
+  // まとまりを押すと、その作品を表示する（作品はまだ選ばれていない状態）。選びたい作品を押して選ぶ。
+  // もう一度押すと作品をしまい、その作品も外す（ほかの開いているまとまりにもある作品は残す）
+  // 開いているまとまり。初めて（またはこの仕組みより前の設定で）開いたときは、選ばれている作品があるまとまりを開く
+  const hasSel = g => groupWorks(g).some(w=>!cfg.worksOff.includes(wkey(w)));
+  if(!Array.isArray(cfg.hwOpen)) cfg.hwOpen = allGroups().filter(hasSel);
+  if(!cfg.acGroupInit){ cfg.acGroupInit = true; for(const g of acGroups()) if(hasSel(g) && !cfg.hwOpen.includes(g)) cfg.hwOpen.push(g); }
   const open = cfg.hwOpen;
-  for(const hw of csHardwares()){
-    const ws = csWorksOf(hw), n = ws.reduce((a,w)=>a+w.n,0);
-    hwRow.append(chip(hw, open.includes(hw), on=>{
-      toggleIn(open, hw, on);
-      for(const w of ws){
-        if(hwsOf(w).some(h=>h!==hw && open.includes(h))) continue; // ほかの開いているハードにもある作品はそのまま
-        toggleIn(cfg.worksOff, wkey(w), true); // 開いたとき・しまったとき、どちらも選ばれていない状態にする
-      }
-      saveCfg(); renderSetup();
-    }, `${ws.length}タイトル・おに ${n}譜面`));
-  }
-  for(const hw of csHardwares()){
-    if(!open.includes(hw)) continue;
-    const box=document.createElement('div'); box.className='hw-titles';
-    box.insertAdjacentHTML('beforeend', `<div class="muted" style="margin:0 0 4px">${esc(hw)}</div>`);
-    const row=document.createElement('div'); row.className='row';
-    for(const w of csWorksOf(hw)) row.append(workChip(w));
-    box.append(row); cs.append(box);
-  }
+  const renderGroups = (container, label, groups) => {
+    container.innerHTML='';
+    container.insertAdjacentHTML('beforeend', `<div class="muted" style="margin:10px 0 4px">${label}</div>`);
+    const gRow=document.createElement('div'); gRow.className='row'; container.append(gRow);
+    for(const g of groups){
+      const ws = groupWorks(g), n = ws.reduce((a,w)=>a+w.n,0);
+      gRow.append(chip(g, open.includes(g), on=>{
+        toggleIn(open, g, on);
+        for(const w of ws){
+          if(groupsOfWork(w).some(h=>h!==g && open.includes(h))) continue; // ほかの開いているまとまりにもある作品はそのまま
+          toggleIn(cfg.worksOff, wkey(w), true); // 開いたとき・しまったとき、どちらも選ばれていない状態にする
+        }
+        saveCfg(); renderSetup();
+      }, `${ws.length}作品・おに ${n}譜面`));
+    }
+    for(const g of groups){
+      if(!open.includes(g)) continue;
+      const box=document.createElement('div'); box.className='hw-titles';
+      box.insertAdjacentHTML('beforeend', `<div class="muted" style="margin:0 0 4px">${esc(g)}</div>`);
+      const row=document.createElement('div'); row.className='row';
+      for(const w of groupWorks(g)) row.append(workChip(w));
+      box.append(row); container.append(box);
+    }
+  };
+  renderGroups($('workAC'), 'AC', acGroups());
+  renderGroups($('workCS'), 'CS', csHardwares());
   $('workOSWrap').classList.toggle('hidden', !$('workOS').children.length); // 海外の曲が無いときは見出しごと隠す
   // 取得済みの作品数と、取得する作品の数（画面に出る作品は、まとめ直したり消したりしているので数が違う）
   const wTotal = window.QUIZ_WORKS_TOTAL || 0, wDone = window.QUIZ_WORKS_DONE != null ? window.QUIZ_WORKS_DONE : wTotal;
@@ -597,8 +613,8 @@ function pool(){
 }
 $('gAll').onclick=()=>{cfg.genre=GENRES.map(g=>g[0]);saveCfg();renderSetup();};
 $('gNone').onclick=()=>{cfg.genre=[];saveCfg();renderSetup();};
-$('wAll').onclick=()=>{cfg.worksOff=[];cfg.hwOpen=csHardwares();saveCfg();renderSetup();}; // すべて・CSのみ はハードを全部開き、ACのみ・クリア は全部しまう
-$('wAC').onclick=()=>{cfg.worksOff=WORKS.filter(w=>w.kind!=='AC').map(wkey);cfg.hwOpen=[];saveCfg();renderSetup();};
+$('wAll').onclick=()=>{cfg.worksOff=[];cfg.hwOpen=allGroups();saveCfg();renderSetup();}; // すべて は全部のまとまりを開き、ACのみ・CSのみ はそれぞれのまとまりだけ開き、クリア は全部しまう
+$('wAC').onclick=()=>{cfg.worksOff=WORKS.filter(w=>w.kind!=='AC').map(wkey);cfg.hwOpen=acGroups();saveCfg();renderSetup();};
 $('wCS').onclick=()=>{cfg.worksOff=WORKS.filter(w=>w.kind!=='CS').map(wkey);cfg.hwOpen=csHardwares();saveCfg();renderSetup();};
 $('wNone').onclick=()=>{cfg.worksOff=WORKS.map(wkey);cfg.hwOpen=[];saveCfg();renderSetup();};
 function updatePool(){
@@ -1078,7 +1094,7 @@ const sf = Object.assign({}, SF_DEFAULT, store.get('sf',{}));
   $('sfLv').innerHTML = opt('','すべて') + [10,9,8,7,6,5,4,3,2,1].map(v=>opt(v,'★×'+v)).join('');
   $('sfGenre').innerHTML = opt('','すべて') + GENRES.map(g=>opt(g[0],g[0])).join('');
   // 作品の選択肢: AC、家庭用はハードごと、海外
-  const groups = [['AC', ()=>WORKS.filter(w=>w.n>0 && w.kind==='AC')]].concat(csHardwares().map(hw=>[hw, ()=>csWorksOf(hw)]), [['海外', ()=>WORKS.filter(w=>w.n>0 && w.kind==='OS')]]);
+  const groups = acGroups().map(g=>[g, ()=>acWorksOf(g)]).concat(csHardwares().map(hw=>[hw, ()=>csWorksOf(hw)]), [['海外', ()=>WORKS.filter(w=>w.n>0 && w.kind==='OS')]]);
   $('sfWork').innerHTML = opt('','すべて') + groups.map(([label, f])=>{
     const ws = f();
     return ws.length ? `<optgroup label="${esc(label)}">${ws.map(w=>opt(w.i,w.name)).join('')}</optgroup>` : '';

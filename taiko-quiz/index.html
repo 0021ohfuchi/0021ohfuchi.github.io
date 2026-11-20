@@ -333,7 +333,6 @@ a{color:var(--ka-d);font-weight:700}
     <div class="row" style="margin-top:18px;justify-content:center;flex-direction:column">
       <button class="primary big" id="startBtn">スタート！</button>
       <span class="muted" id="poolInfo"></span>
-      <span class="muted" id="bestInfo"></span>
     </div>
     <!-- 曲を検索（別画面を開くボタンだけ） -->
     <div class="setup-search">
@@ -590,8 +589,6 @@ function renderSetup(){
     chip('音源', cfg.yt, on=>{cfg.yt=on; saveCfg(); if(!on) stopSong(); bgmUpdate();}, '正解・あきらめた後に、その曲を YouTube で流す'));
   fBox.insertAdjacentHTML('beforeend', '<span class="muted" style="font-size:13px">音源：YouTubeに公式音源がある場合、正解表示時にYouTubeが再生されます</span>');
   updatePool();
-  const best = store.get('best2',null);
-  $('bestInfo').textContent = best ? `これまでの最高: ${best.n}問中 ${best.ok}問正解（${best.date}）` : '';
 }
 function saveCfg(){store.set('cfg',cfg); updatePool();}
 function pool(){

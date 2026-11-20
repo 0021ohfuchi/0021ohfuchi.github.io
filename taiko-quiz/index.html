@@ -372,7 +372,6 @@ a{color:var(--ka-d);font-weight:700}
       <div class="answer-box">
         <input id="sq" type="search" autocomplete="off" placeholder="曲名・読み・作品名で検索（例: ゆうがお、Doom、AC14）">
       </div>
-      <button id="sBack">クイズの設定へ</button>
     </div>
     <div class="sfilter" id="sFilter">
       <label>★<select id="sfLv"></select></label>
@@ -1017,7 +1016,6 @@ function matchWorks(k){
 }
 let search = {song:null, idx:0, token:0, scroll:0};
 $('searchBtn').onclick=()=>{ show('scSearch'); if(!IS_TOUCH) $('sq').focus(); doSearch(); };
-$('sBack').onclick=()=>{ renderSetup(); show('scSetup'); };
 $('sq').addEventListener('input', doSearch);
 $('sq').addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.isComposing){ const b=$('sList').querySelector('button'); if(b) b.click(); } });
 

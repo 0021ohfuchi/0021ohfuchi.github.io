@@ -895,13 +895,6 @@ function endGame(){
   $('endSub').textContent = n ? `正解率 ${Math.round(okN/n*100)}%` : '';
   $('endTable').innerHTML = '<tr><th>#</th><th>曲名</th><th>★</th><th class="num">結果</th></tr>' + h.map((x,i)=>
     `<tr><td>${i+1}</td><td><a href="${wikiUrl(x.r)}" target="_blank" rel="noopener">${esc(x.r.n)}</a></td><td>${x.r.lv}</td><td class="num">${x.ok?'⭕':'❌'}</td></tr>`).join('');
-  if(n){
-    const best=store.get('best2',null);
-    if(!best || okN/n > best.ok/best.n){
-      const d=new Date(); store.set('best2',{ok:okN,n,date:`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`});
-      $('endSub').textContent += ' ／ 自己ベスト更新！';
-    }
-  }
   $('shareBox').classList.toggle('hidden', !n);
   show('scEnd');
   shareMsg('');

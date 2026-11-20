@@ -728,24 +728,32 @@ function renderChart(){
     const below = Math.max(64, $('answerArea').classList.contains('hidden') ? $('resultArea').offsetHeight : $('answerArea').offsetHeight);
     let maxH = Math.max(260, window.innerHeight - wrap.getBoundingClientRect().top - window.scrollY*0 - below - 28);
     sc.style.maxHeight = maxH + 'px';
-    FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH));
+    FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH, quizChartExtra()));
     // それでもページが画面からはみ出す（スマホで見出しが折り返すときなど）なら、はみ出したぶんだけ譜面の枠を小さくして
     // ページがスクロールしないようにする
     const over = document.documentElement.scrollHeight - window.innerHeight;
     if(over > 0 && maxH - over - 2 >= 200){
       maxH -= over + 2;
       sc.style.maxHeight = maxH + 'px';
-      FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH));
+      FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH, quizChartExtra()));
     }
-    fitWidth(cv, f, sc, chartOpts(wrap, maxH));
+    fitWidth(cv, f, sc, chartOpts(wrap, maxH, quizChartExtra()));
+    q.redraw = extra=>{ // BPM を表示したときなどに、同じ大きさ・スクロール位置のまま描き直す
+      const top = sc.scrollTop;
+      FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH, quizChartExtra()));
+      fitWidth(cv, f, sc, chartOpts(wrap, maxH, quizChartExtra()));
+      sc.scrollTop = top;
+    };
   });
 }
 // スマホの縦画面: 譜面を段組みせず 1 列で、枠の幅いっぱいに描く（枠の中を縦にスクロールして見る）
 const PHONE_PORTRAIT = matchMedia('(orientation: portrait) and (max-width: 700px)');
-function chartOpts(wrap, maxH){
+function chartOpts(wrap, maxH, extra){
   const maxW = wrap.clientWidth - 2;
-  return PHONE_PORTRAIT.matches ? {maxW, cols: 1} : {maxW, maxH};
+  return Object.assign(PHONE_PORTRAIT.matches ? {maxW, cols: 1} : {maxW, maxH}, extra);
 }
+// 出題中、BPM を伏せている間は譜面の中の BPM の表示も描かない
+function quizChartExtra(){ return {hideBpm: !!$('info').querySelector('.hid[data-k="bpm"]')}; }
 // 描いた結果、縦スクロールバーのぶん横にはみ出したら、その幅に合わせて描き直す
 function fitWidth(cv, f, sc, opts){
   if(sc.scrollWidth > sc.clientWidth + 1) FumenParse.renderFumen(cv, f, Object.assign({}, opts, {maxW: sc.clientWidth - 1}));
@@ -934,8 +942,13 @@ function quizHidden(){
   return h;
 }
 // 伏せた項目をタップ（クリック）で表示する
-$('info').addEventListener('click', e=>{ const d = e.target.closest('.hid'); if(d) d.classList.remove('hid'); });
-function revealInfo(){ $('info').querySelectorAll('.hid').forEach(d=>d.classList.remove('hid')); }
+$('info').addEventListener('click', e=>{ const d = e.target.closest('.hid'); if(d){ d.classList.remove('hid'); if(d.dataset.k==='bpm') redrawQuizChart(); } });
+function revealInfo(){
+  const hadBpm = !!$('info').querySelector('.hid[data-k="bpm"]');
+  $('info').querySelectorAll('.hid').forEach(d=>d.classList.remove('hid'));
+  if(hadBpm) redrawQuizChart();
+}
+function redrawQuizChart(){ if(game && game.q && game.q.redraw) game.q.redraw(); }
 
 /* ---------- 曲を検索 ---------- */
 // 曲（表・裏などをまとめたもの）ごとの譜面一覧

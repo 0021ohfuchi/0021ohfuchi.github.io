@@ -374,14 +374,15 @@
       for (const b of col) {
         const ox = ci * (W + GAP), oy = cy0 - b.y0;
         g.setTransform(dpr * s, 0, 0, dpr * s, dpr * s * ox, dpr * s * oy);
-        drawRow(g, b.r, numStart.get(b.r));
+        drawRow(g, b.r, numStart.get(b.r), opt);
         cy0 += b.h;
       }
     });
     return { height: cssH, width: cssW, scale: s, cols: best.cols.length };
   }
 
-  function drawRow(g, r, numStart) {
+  function drawRow(g, r, numStart, opt) {
+    opt = opt || {};
     const bandTop = r.lineY, bandBot = r.bottom + 7;
     // ゴーゴータイム
     g.fillStyle = '#ffd0d6';
@@ -403,6 +404,7 @@
     // BPM・HS（元画像と同じ位置: BPM は小節番号の上、HS はさらに上）
     g.font = 'bold 7.5px "M PLUS Rounded 1c", sans-serif'; g.textBaseline = 'alphabetic';
     for (const lb of r.labels) {
+      if (lb.kind === 'bpm' && opt.hideBpm) continue; // 出題中に BPM を伏せているときは描かない
       if (lb.kind === 'bpm') { g.fillStyle = '#1f5fd6'; g.fillText('BPM' + lb.value, lb.x + 1.5, r.lineY - 8); }
       else { g.fillStyle = '#e0352b'; g.fillText('HS' + lb.value, lb.x + 1.5, r.lineY - 15); }
     }

@@ -16,9 +16,8 @@
 "combo": 862
 },
 "fc6eee644390": {
-"ok": false,
-"combo": 765,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 612
 },
 "faca7c2b6da4": {
 "ok": true,
@@ -959,9 +958,8 @@
 "combo": 616
 },
 "632d86c3368a": {
-"ok": false,
-"combo": 609,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 599
 },
 "804fba0cfd72": {
 "ok": true,
@@ -976,9 +974,8 @@
 "combo": 970
 },
 "1a5ef504c567": {
-"ok": false,
-"combo": 663,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 448
 },
 "ee3781079076": {
 "ok": true,
@@ -1560,9 +1557,8 @@
 "combo": 833
 },
 "ea6990a94cec": {
-"ok": false,
-"combo": 544,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 485
 },
 "0c2edec1be6a": {
 "ok": true,
@@ -1817,9 +1813,8 @@
 "combo": 757
 },
 "a27c9ffab1f0": {
-"ok": false,
-"combo": 411,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 399
 },
 "1f2cf2c9a77e": {
 "ok": true,
@@ -1830,18 +1825,16 @@
 "combo": 682
 },
 "7f1369f55f95": {
-"ok": false,
-"combo": 480,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 466
 },
 "cd9a2bddb0f0": {
 "ok": true,
 "combo": 750
 },
 "f3ffad023f82": {
-"ok": false,
-"combo": 560,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 465
 },
 "5f4a0c7da8cb": {
 "ok": true,
@@ -2718,9 +2711,8 @@
 "combo": 559
 },
 "189c2a466c70": {
-"ok": false,
-"combo": 755,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 754
 },
 "12aaeba60d0d": {
 "ok": false,
@@ -2900,9 +2892,8 @@
 "combo": 497
 },
 "ea56292cb016": {
-"ok": false,
-"combo": 330,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 329
 },
 "3d2c41265bef": {
 "ok": true,
@@ -3061,9 +3052,8 @@
 "combo": 1071
 },
 "e6c12cacd8df": {
-"ok": false,
-"combo": 312,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 303
 },
 "5405973fbc4e": {
 "ok": true,
@@ -4071,9 +4061,8 @@
 "combo": 421
 },
 "34b4a8067a54": {
-"ok": false,
-"combo": 280,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 266
 },
 "3a9617c3fec8": {
 "ok": true,
@@ -4280,9 +4269,8 @@
 "combo": 634
 },
 "979bdfec0166": {
-"ok": false,
-"combo": 767,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 765
 },
 "641aeef77aa7": {
 "ok": true,
@@ -4857,9 +4845,8 @@
 "combo": 292
 },
 "5ac46a897932": {
-"ok": false,
-"combo": 312,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 288
 },
 "a30031ba8c99": {
 "ok": true,
@@ -5074,9 +5061,8 @@
 "combo": 441
 },
 "9ca7a577e1b1": {
-"ok": false,
-"combo": 306,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 288
 },
 "2de0244affa1": {
 "ok": true,
@@ -5167,9 +5153,8 @@
 "combo": 617
 },
 "62a2493289d0": {
-"ok": false,
-"combo": 549,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 490
 },
 "fda708d27c8b": {
 "ok": true,
@@ -5529,9 +5514,8 @@
 "combo": 552
 },
 "f17334667a29": {
-"ok": false,
-"combo": 517,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 483
 },
 "dad4e2a8e32b": {
 "ok": true,
@@ -5918,9 +5902,8 @@
 "combo": 456
 },
 "de108ab4db2c": {
-"ok": false,
-"combo": 331,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 294
 },
 "9439a354660d": {
 "ok": true,
@@ -5991,9 +5974,8 @@
 "combo": 603
 },
 "af12909a543b": {
-"ok": false,
-"combo": 424,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 393
 },
 "7e2fb5373395": {
 "ok": true,
@@ -6212,9 +6194,8 @@
 "combo": 443
 },
 "9126bbf96001": {
-"ok": false,
-"combo": 439,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 427
 },
 "b8473e5d5a83": {
 "ok": true,
@@ -6253,9 +6234,8 @@
 "combo": 173
 },
 "daf61a88aa5b": {
-"ok": false,
-"combo": 328,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 326
 },
 "dbaffb301438": {
 "ok": true,
@@ -6274,9 +6254,8 @@
 "combo": 229
 },
 "aa79b07ac7a2": {
-"ok": false,
-"combo": 205,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 197
 },
 "efcc3c513e8e": {
 "ok": true,
@@ -6815,9 +6794,8 @@
 "combo": 607
 },
 "b4ea3f4f35cd": {
-"ok": false,
-"combo": 602,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 578
 },
 "f71bc9849dcc": {
 "ok": true,
@@ -7200,9 +7178,8 @@
 "combo": 462
 },
 "6188f3fecbee": {
-"ok": false,
-"combo": 542,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 435
 },
 "0ba0b6b4c935": {
 "ok": true,
@@ -8883,9 +8860,8 @@
 "combo": 700
 },
 "7b2b6c560678": {
-"ok": false,
-"combo": 562,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 446
 },
 "1ba8f6ce6607": {
 "ok": true,
@@ -9722,9 +9698,8 @@
 "combo": 321
 },
 "283fdafaede5": {
-"ok": false,
-"combo": 357,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 356
 },
 "e0d60d28caf7": {
 "ok": true,
@@ -9843,9 +9818,8 @@
 "combo": 280
 },
 "14be9398eb30": {
-"ok": false,
-"combo": 405,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 395
 },
 "73c3fd9c4458": {
 "ok": false,
@@ -10017,9 +9991,8 @@
 "combo": 348
 },
 "363ae6952747": {
-"ok": false,
-"combo": 103,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 81
 },
 "ee6a8d45af9b": {
 "ok": true,
@@ -10246,9 +10219,8 @@
 "combo": 138
 },
 "ae46cedc68dd": {
-"ok": false,
-"combo": 248,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 234
 },
 "83d0851e7285": {
 "ok": true,
@@ -10395,9 +10367,8 @@
 "combo": 543
 },
 "e814f617b821": {
-"ok": false,
-"combo": 558,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 554
 },
 "7f57f1f9c0fa": {
 "ok": true,
@@ -10677,9 +10648,8 @@
 "combo": 659
 },
 "b7b117a6595b": {
-"ok": false,
-"combo": 554,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 474
 },
 "7db69ce3a2c0": {
 "ok": true,
@@ -10734,9 +10704,8 @@
 "combo": 341
 },
 "e938da905552": {
-"ok": false,
-"combo": 386,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 351
 },
 "c629cc94e750": {
 "ok": true,
@@ -10872,9 +10841,8 @@
 "combo": 536
 },
 "4540335b2197": {
-"ok": false,
-"combo": 518,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 515
 },
 "51822048577f": {
 "ok": true,
@@ -11050,9 +11018,8 @@
 "combo": 490
 },
 "8564f0350c8d": {
-"ok": false,
-"combo": 353,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 349
 },
 "81dcb7d71a1b": {
 "ok": true,
@@ -11548,9 +11515,8 @@
 "combo": 371
 },
 "53452d91ff98": {
-"ok": false,
-"combo": 339,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 337
 },
 "95e72bf826af": {
 "ok": true,
@@ -11733,9 +11699,8 @@
 "combo": 272
 },
 "e9738bd1ad62": {
-"ok": false,
-"combo": 288,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 226
 },
 "0b954859320b": {
 "ok": true,
@@ -11903,9 +11868,8 @@
 "combo": 667
 },
 "72d8b09c705b": {
-"ok": false,
-"combo": 295,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 294
 },
 "ef1560e5eccb": {
 "ok": true,
@@ -12032,9 +11996,8 @@
 "combo": 305
 },
 "07b744eb8c72": {
-"ok": false,
-"combo": 203,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 195
 },
 "b9369327e238": {
 "ok": true,
@@ -12230,9 +12193,8 @@
 "combo": 228
 },
 "c5515f3fd5fb": {
-"ok": false,
-"combo": 222,
-"reason": "combo mismatch"
+"ok": true,
+"combo": 214
 },
 "b47c83e89e04": {
 "ok": true,

@@ -17,6 +17,7 @@ UA = 'Mozilla/5.0 (personal taiko quiz builder)'
 MAX_IMG = int(os.environ.get('MAX_IMG', '0')) or None
 IMG_DELAY = float(os.environ.get('IMG_DELAY', '3'))
 BATCH = 40
+RETRY_FAILED = os.environ.get('RETRY_FAILED') == '1'
 os.makedirs(IMG_DIR, exist_ok=True)
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -97,7 +98,10 @@ def find_jobs(index):
             continue
         url = d['imgs'][0]
         cid = chart_id(url)
-        if cid in index or cid in seen:   # 読み取り済み（成功・失敗とも。画像が変わればIDも変わる）
+        # 読み取り済み（成功・失敗とも。画像が変わればIDも変わる）。RETRY_FAILED=1 なら、失敗したものは読み直す
+        # （読み取り処理を直したとき用。画像はキャッシュにあるので Wiki にはアクセスしない）
+        done = cid in index and (index[cid].get('ok') or not RETRY_FAILED or index[cid].get('reason') == '404')
+        if done or cid in seen:
             continue
         seen.add(cid)
         jobs.append({'id': cid, 'url': url, 'combos': sorted(combos.get(href, []))})

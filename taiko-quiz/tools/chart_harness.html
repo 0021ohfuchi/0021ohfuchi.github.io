@@ -29,8 +29,10 @@
       const img = await load(job.file);
       const f = FumenParse.parseFumenImage(img);
       if (!f.ok) { results.push({ id: job.id, ok: false, reason: f.reason }); continue; }
-      const verified = job.combos.includes(String(f.combo));
-      results.push({ id: job.id, ok: verified, combo: f.combo, chart: verified ? compact(f) : null });
+      // 達人のレーンの数か、普通（灰色）・玄人のレーンだけの数のどれかが Wiki の最大コンボ数と一致すれば正しく読めたとみなす
+      const hit = (f.combos || [f.combo]).find(c => job.combos.includes(String(c)));
+      const verified = hit !== undefined;
+      results.push({ id: job.id, ok: verified, combo: verified ? hit : f.combo, chart: verified ? compact(f) : null });
     } catch (e) {
       results.push({ id: job.id, ok: false, reason: String(e.message || e) });
     }

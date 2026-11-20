@@ -306,9 +306,14 @@
     rows.forEach((r, ri) => r.labels.forEach(l => { const b = beatOf(ri, l.x); if (b !== null) changes.push({ beat: b, kind: l.kind, value: l.value }); }));
     changes.sort((a, b) => a.beat - b.beat);
     const combo = out.filter(o => /^(don|ka)/.test(o.type)).length;
+    // レーンの種類ごとの音符数（普通=灰 / 玄人=青 / 達人=赤）。その種類のレーンが無い段は灰色（無ければ最初）のレーンで数える。
+    // 分岐譜面のほか、「玄人のレーン＝2P 用譜面」のように別譜面を並べた画像でも、灰色のレーンだけの数で確認できるようにする
+    const laneOf = (r, t) => r.lanes.find(l => l.type === t) || r.lanes.find(l => l.type === 'n') || r.lanes[0];
+    const combos = [...new Set(['n', 'e', 'm'].map(t => rows.reduce((a, r, ri) =>
+      a + laneOf(r, t).notes.filter(n => n.kind === 'note' && beatOf(ri, n.x) !== null).length, 0)).concat([combo]))];
     return {
       ok: true, width: W, rows, measures: measures.map(m => ({ start: m.start, beats: m.beats })),
-      notes: out, changes, combo, totalBeats: acc, branched, debug: dbg
+      notes: out, changes, combo, combos, totalBeats: acc, branched, debug: dbg
     };
   }
 

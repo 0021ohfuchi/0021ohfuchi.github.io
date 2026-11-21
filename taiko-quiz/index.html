@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>太鼓の達人 曲名当てクイズ</title>
+<script src="i18n.js?v=20261121a"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 4 44 44'%3E%3Ccircle cx='22' cy='26' r='20' fill='%233a2a1e'/%3E%3Ccircle cx='22' cy='26' r='17.5' fill='%23fff'/%3E%3Ccircle cx='22' cy='26' r='15' fill='%23ff4b3e'/%3E%3Cpath d='M18.5 18.5 L28.5 16 V30.2 M18.5 18.5 V32.5' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linejoin='round' stroke-linecap='round'/%3E%3Cellipse cx='15.6' cy='33' rx='3.6' ry='2.8' fill='%23fff' transform='rotate(-20 15.6 33)'/%3E%3Cellipse cx='25.6' cy='30.7' rx='3.6' ry='2.8' fill='%23fff' transform='rotate(-20 25.6 30.7)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -232,6 +233,11 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 .modal{position:fixed;inset:0;background:rgba(58,42,30,.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
 .modal-box{background:#fff;border:3px solid var(--line);border-radius:22px;box-shadow:0 6px 0 var(--line);padding:20px 24px;max-width:620px;width:100%;max-height:90vh;overflow-y:auto}
 .modal-box ul{margin:0 0 14px;padding-left:1.2em;font-size:15px;line-height:1.8}
+.modal-box ul ul{margin:0;font-size:14px}
+/* 日本語 / 英語の切り替え（ホームボタンの左） */
+.lang-tog{display:inline-flex;flex:none;background:#fff;border-radius:999px;padding:3px;box-shadow:0 3px 0 #3a2a1e;border:2px solid #3a2a1e}
+.lang-tog button{border:none;box-shadow:none;background:none;color:var(--don);font-size:12px;font-weight:800;padding:3px 8px;border-radius:999px;min-height:0;line-height:1.2}
+.lang-tog button.on{background:var(--don);color:#fff}
 .search-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .slist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:40vh;overflow-y:auto;padding-bottom:6px} /* 一番下のボタンの影が切れないように */
 .slist button{font-size:13px;padding:4px 14px;box-shadow:inset 0 0 0 2px #fff,0 3px 0 #3a2a1e} /* 曲の一覧は .sm と同じ大きさ */
@@ -315,6 +321,11 @@ a{color:var(--ka-d);font-weight:700}
   .choices button{border-radius:16px;font-size:13px;padding:4px 6px;min-height:40px;line-height:1.3}
   #giveupBtn{font-size:13px;padding:5px 16px}
 }
+@media (max-width:440px){
+  /* 出題中・検索中は、正解数と言語の切り替えが入るので見出しの文字を隠す（右端のボタンがはみ出さないように） */
+  body.wide header h1,header:has(.stat:not(:empty)) h1{display:none}
+  .lang-tog button{padding:2px 6px;font-size:11px}
+}
 @media (max-width:380px){
   header h1{font-size:13px}
   header{gap:6px}
@@ -338,6 +349,7 @@ a{color:var(--ka-d);font-weight:700}
   <h1 id="homeBtn" title="トップへ">太鼓の達人 曲名当てクイズ</h1>
   <div class="sp"></div>
   <div class="stat" id="hdrStat"></div>
+  <div class="lang-tog" id="langTog" title="日本語と英語を切り替え"><button data-l="ja">JA</button><button data-l="en">EN</button></div>
   <button class="help-btn" id="homeIcon" title="トップへ" aria-label="トップへ"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" style="display:block;margin:auto"><path d="M3 11.2 12 3.5l9 7.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.8 10.2V20h4.4v-5.6h3.6V20h4.4v-9.8" fill="currentColor"/></svg></button>
   <button class="help-btn" id="helpBtn" title="あそびかた" aria-label="あそびかた">?</button>
 </header>
@@ -359,13 +371,21 @@ a{color:var(--ka-d);font-weight:700}
   <div class="modal-box" role="dialog" aria-labelledby="helpTitle">
     <h2 id="helpTitle">あそびかた</h2>
     <ul>
-      <li>おに譜面と、★・BPM・最大コンボ数・ジャンル・初出作品が表示されます。どの曲か考えて、曲名を入力しましょう</li>
-      <li>何度でも回答できます。わからないときは「あきらめる」で答えを見られます</li>
-      <li>最後に、何問当てられたかが表示されます</li>
-      <li>ひらがな・カタカナ、英字の大文字・小文字、記号の有無は区別しません。(裏譜面) などのカッコ書きは不要です</li>
-      <li>入力中は曲名の候補が出ます（「入力候補」で表示を切り替えられます）</li>
-      <li>出題設定の「作品」は、選んだ作品のどれかに収録されている譜面から出題します</li>
-      <li>「譜面検索」では、曲ごとの譜面・情報・収録作品を見られます</li>
+      <li>出題設定で ★の数・ジャンル・収録作品・問題数・難易度を選び、「スタート！」を押します</li>
+      <li>おに譜面と、★の数・BPM・最大コンボ数・ジャンル・初出年・収録作品を手がかりに、どの曲か当てましょう</li>
+      <li>難易度
+        <ul>
+          <li>かんたん・ふつう: 4つの中から曲名を選ぶ（ふつうは似た曲が並びます）</li>
+          <li>むずかしい: 曲名を入力して答える</li>
+          <li>おに: 曲名を入力。1問3分の制限時間があり、曲の情報が隠されています（タップで3つまで開けられます）</li>
+        </ul>
+      </li>
+      <li>答えられるのは1問につき1回です。わからないときは「あきらめる」で答えを見られます</li>
+      <li>曲名の入力では、ひらがな・カタカナ、英字の大文字・小文字、記号の有無は区別しません。(裏譜面) などのカッコ書きは不要です。入力中は曲名の候補が出ます</li>
+      <li>譜面は枠の中でスクロールでき、スマホでは2本指で拡大できます</li>
+      <li>正解・あきらめた後は、YouTube に公式音源がある曲なら左下で流れます（「サウンド」で BGM・効果音・音源を切り替えられます）</li>
+      <li>最後に結果発表。マスを押すと問題ごとの答え・使ったヒント・回答時間が見られ、X・Threads・Instagram などでシェアできます</li>
+      <li>「譜面検索」では、曲名・読み・作品名・アーティスト・作曲者・アニメ名などから譜面を探して、譜面・情報・収録作品を見られます</li>
     </ul>
     <p class="muted" style="font-size:12px;line-height:1.7">
       このコンテンツはファンメイドコンテンツです。ファンメイドコンテンツポリシー（<a href="https://taiko-ch.net/ip_policy/" target="_blank" rel="noopener">https://taiko-ch.net/ip_policy/</a>）のもと制作されています。<br>
@@ -1171,6 +1191,7 @@ function shareUrl(){
 function shareText(){
   const h=game.history, n=h.length, okN=correctCount();
   const marks = h.slice(0,30).map(x=>x.ok?'⭕':'❌').join('') + (n>30?'…':'');
+  if(window.LANG==='en') return `Taiko no Tatsujin Song Quiz [${tr(MODES[game.mode].name)}]: ${okN} / ${n} correct! (${Math.round(okN/n*100)}%)\n${marks}\n#TaikoNoTatsujin #太鼓の達人`;
   return `太鼓の達人 曲名当てクイズ【${MODES[game.mode].name}】で ${okN} / ${n} 問正解！（正解率 ${Math.round(okN/n*100)}%）\n${marks}\n#太鼓の達人 #曲名当てクイズ`;
 }
 /* 結果発表の画面の画像（シェアボタン・下のボタンは写さない）。結果画面を出したらすぐ作っておく
@@ -1189,7 +1210,7 @@ function makeShot(){
       c.style.cssText += ';width:540px;max-width:none;min-height:675px;margin:0;box-sizing:border-box;display:flex;flex-direction:column';
       const f = doc.createElement('div');
       f.style.cssText = 'margin-top:auto;padding-top:14px;text-align:center;font-weight:800;color:#5a2e16;font-size:14px';
-      f.textContent = '太鼓の達人 曲名当てクイズ' + (shareUrl() ? '　' + shareUrl().replace(/^https?:\/\//,'') : '');
+      f.textContent = tr('太鼓の達人 曲名当てクイズ') + (shareUrl() ? '　' + shareUrl().replace(/^https?:\/\//,'') : '');
       c.append(f);
       c.querySelectorAll('.total').forEach(e=>e.style.animation='none');
     }
@@ -1680,6 +1701,8 @@ $('plClose').onclick=stopSong; // 閉じたら、その問題ではもう流さ�
 })();
 
 /* ---------- あそびかた ---------- */
+// 日本語 / 英語の切り替え（切り替えるとページを読み込み直す）
+document.querySelectorAll('#langTog button').forEach(b=>{ b.classList.toggle('on', b.dataset.l===window.LANG); b.onclick=()=>{ if(b.dataset.l!==window.LANG) setLang(b.dataset.l); }; });
 $('helpBtn').onclick=()=>$('helpModal').classList.remove('hidden');
 $('homeIcon').onclick=()=>$('homeBtn').click(); // 左上のタイトルと同じ（クイズの途中なら確認してから戻る）
 $('helpClose').onclick=()=>$('helpModal').classList.add('hidden');

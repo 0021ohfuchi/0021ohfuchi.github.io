@@ -219,6 +219,11 @@ def add_en(r):
     base = re.sub(r'\(裏譜面\)$', '', re.sub(r'^【双打】\s*', '', r['n'])).strip()
     plain = re.sub(r'[(（][^()（）]*[)）]', '', base).strip() or base
     en = EN_BY_KEY.get(_enkey(base)) or EN_BY_KEY.get(_enkey(plain))
+    if not en:
+        # 英語名の表では副題付きのことがある（例: 季曲 ～Seasons of Asia～）。曲名＋区切り（空白・～・-・(）で始まる行が 1 つだけならそれを使う
+        cands = [e for j, e in EN_NAMES.items() if any(j.startswith(x) and len(j) > len(x) and j[len(x)] in ' 　～〜-‐(（「"' for x in {base, plain})]
+        if len(cands) == 1:
+            en = cands[0]
     if en and _enkey(en) != _enkey(base):
         r['e'] = en
     if _kks and _JP.search(plain):

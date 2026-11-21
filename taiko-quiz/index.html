@@ -1352,9 +1352,13 @@ async function drawShareCard(){
     // 問題番号の幅（いちばん長い番号に合わせる）と、表示する曲名（英語表示では (裏譜面) を (Ura) に）
     c.font = F(800, Math.round(fs*0.7)); const qw = c.measureText(`${en ? 'Q' : ''}${n}`).width;
     const songLabel = x=>{ const s = dispSong(x.r.n, x.r); return en ? s.replace(/\(裏譜面\)$/, ' (Ura)') : s; };
-    const nameX = r*2 + 24 + qw + 14, nameW = colW - 12 - nameX;
+    // かかった時間は行の右端に小さく（いちばん長い時間の幅だけ曲名の場所を空ける）
+    // 1 分以上は 1:05 のように短く書く
+    const tfs = Math.round(fs*0.66), timeOf = x=>{ const s = (x.ms||0)/1000; return s < 60 ? s.toFixed(1) + (en ? 's' : '秒') : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`; };
+    c.font = F(700, tfs); const tw = Math.max(...h.map(x=>c.measureText(timeOf(x)).width));
+    const nameX = r*2 + 24 + qw + 14, nameW = colW - 12 - nameX - tw - 14;
     let nfs = fs;
-    for(const x of h){ c.font = F(800, nfs); while(nfs > Math.max(16, fs - 10) && c.measureText(songLabel(x)).width > nameW){ nfs--; c.font = F(800, nfs); } }
+    for(const x of h){ c.font = F(800, nfs); while(nfs > Math.max(18, Math.round(fs*0.6)) && c.measureText(songLabel(x)).width > nameW){ nfs--; c.font = F(800, nfs); } }
     h.forEach((x, i)=>{
       const col = Math.floor(i / rows), row = i % rows;
       const x0 = gx + col*(colW + 24), yc = top + row*rowH + rowH/2;
@@ -1365,6 +1369,7 @@ async function drawShareCard(){
       const nx = x0 + nameX;
       const name = fitLine(c, songLabel(x), nameW, nfs, nfs, 800);
       c.fillStyle = x.ok ? '#3a2a1e' : '#8f8378'; c.fillText(name, nx, yc + 1);
+      c.textAlign = 'right'; c.font = F(700, tfs); c.fillStyle = '#9a8573'; c.fillText(timeOf(x), x0 + colW - 14, yc + 1);
     });
   } else {
     // それより多いとき: 音符だけを 1 行 10 個（最初の 50 問まで）

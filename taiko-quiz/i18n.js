@@ -22,7 +22,7 @@
     '出題設定': 'Quiz settings', '★の数': 'Stars', 'ジャンル': 'Genre', '収録作品': 'Included in', '問題数': 'Questions',
     'サウンド': 'Sound', '難易度': 'Difficulty', '難易度の違い': 'About difficulties',
     '選んだ作品のどれかに収録されている譜面から出題します。': 'Questions come from charts included in any of the selected games.',
-    '5問': '5', '10問': '10', '20問': '20', '30問': '30', '50問': '50', '100問': '100',
+    'エンドレス': 'Endless', '5問': '5', '10問': '10', '20問': '20', '30問': '30', '50問': '50', '100問': '100',
     'かんたん': 'Easy', 'ふつう': 'Normal', 'むずかしい': 'Hard', 'おに': 'Extreme',
     '4つの中から正解の曲名を選ぶ。4択はランダム': 'Pick the right title from 4 choices. Choices are random',
     '4つの中から正解の曲名を選ぶ。4択は似た曲から': 'Pick the right title from 4 choices. Choices are similar songs',

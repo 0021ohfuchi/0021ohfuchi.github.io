@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>太鼓の達人 曲名当てクイズ</title>
-<script src="i18n.js?v=20261121h"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
+<script src="i18n.js?v=20261121i"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 4 44 44'%3E%3Ccircle cx='22' cy='26' r='20' fill='%233a2a1e'/%3E%3Ccircle cx='22' cy='26' r='17.5' fill='%23fff'/%3E%3Ccircle cx='22' cy='26' r='15' fill='%23ff4b3e'/%3E%3Cpath d='M18.5 18.5 L28.5 16 V30.2 M18.5 18.5 V32.5' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linejoin='round' stroke-linecap='round'/%3E%3Cellipse cx='15.6' cy='33' rx='3.6' ry='2.8' fill='%23fff' transform='rotate(-20 15.6 33)'/%3E%3Cellipse cx='25.6' cy='30.7' rx='3.6' ry='2.8' fill='%23fff' transform='rotate(-20 25.6 30.7)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -148,10 +148,10 @@ button:disabled{opacity:.45;cursor:default;transform:none}
 .rc-set span{background:#fff1c9;border-radius:999px;padding:2px 12px;font-size:13px;font-weight:800;color:#3a2a1e}
 .rc-set span i{font-style:normal;color:#9a7b5f;font-size:11px;margin-right:6px}
 .rc-main{display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 12px;position:relative}
-.rc-stamp{position:absolute;right:0;top:50%;width:184px;height:66px;margin-top:-33px;border-radius:6px;border:6px solid #d9241c;box-shadow:inset 0 0 0 5px #fff,inset 0 0 0 7px #d9241c;
+.rc-stamp{position:absolute;right:0;top:50%;width:200px;height:66px;margin-top:-33px;border-radius:6px;border:6px solid #d9241c;box-shadow:inset 0 0 0 5px #fff,inset 0 0 0 7px #d9241c;
   background:rgba(255,255,255,.9);color:#d9241c;display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);font-weight:800;text-align:center}
 .rc-stamp.hidden{display:none}
-.rc-stamp b{font-size:30px;line-height:1;white-space:nowrap;letter-spacing:.04em}
+.rc-stamp b{font-size:27px;line-height:1;white-space:nowrap;letter-spacing:.02em}
 .rc-score{flex:1;text-align:center;min-width:0}
 .rc-score .num{display:inline-block;font-size:100px;font-weight:800;color:#ff3d3d;text-shadow:5px 5px 0 #ffd36b;line-height:1;animation:pop .5s cubic-bezier(.3,1.6,.6,1)}
 .rc-score .of{font-size:44px;font-weight:800;color:#3a2a1e;margin-left:8px}
@@ -184,8 +184,9 @@ button:disabled{opacity:.45;cursor:default;transform:none}
   .rc-score .num{font-size:72px}
   .rc-score .of{font-size:32px}
   .rc-cap{font-size:16px}
-  .rc-stamp{width:100px;height:38px;margin-top:-19px;right:-6px;border-radius:4px;border-width:3px;box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 4px #d9241c}
-  .rc-stamp b{font-size:16px}
+  .rc-main{flex-direction:column;gap:6px} /* スマホは正解数と重ならないよう、ハンコは正解数の下に */
+  .rc-stamp{position:static;transform:rotate(-6deg);width:128px;height:38px;margin-top:0;right:auto;border-radius:4px;border-width:3px;box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 4px #d9241c}
+  .rc-stamp b{font-size:17px;letter-spacing:0}
     .rc-stats{gap:6px}
   .rc-stats .v{font-size:18px}
   .rc-stats .k{font-size:11px}
@@ -481,7 +482,7 @@ a{color:var(--ka-d);font-weight:700}
     </div></div>
     </div><div class="setup-col">
     <div class="setrow"><span class="lbl">問題数</span><div class="row">
-      <select id="qCount"><option value="5">5問</option><option value="10" selected>10問</option><option value="20">20問</option><option value="30">30問</option><option value="50">50問</option><option value="100">100問</option><option value="0">すべて</option></select>
+      <select id="qCount"><option value="5">5問</option><option value="10" selected>10問</option><option value="20">20問</option><option value="30">30問</option><option value="50">50問</option><option value="100">100問</option><option value="0">エンドレス</option></select>
       <span class="muted hidden" id="countNote" style="font-size:13px">結果をシェアするときの画像には、曲名が表示されません（20問まで表示）</span>
     </div></div>
     <div class="setrow"><span class="lbl">サウンド</span><div style="flex:1;min-width:0">
@@ -578,7 +579,7 @@ a{color:var(--ka-d);font-weight:700}
       <div class="rc-set" id="rcSet"></div><!-- 出題設定（★の数・ジャンル・収録作品） -->
       <div class="rc-main">
         <div class="rc-score"><div><span class="num" id="endTotal"></span><span class="of" id="rcOf"></span></div><div class="rc-cap">問正解！</div></div>
-        <div class="rc-stamp hidden" id="rcPerfect"><b>全問正解</b></div><!-- 全問正解のときだけ（正解数は中央のまま） -->
+        <div class="rc-stamp hidden" id="rcPerfect"><b>全問正解！</b></div><!-- 全問正解のときだけ（正解数は中央のまま） -->
       </div>
       <div class="rc-stats" id="endSub"></div>
       <div id="endTable"></div>
@@ -830,7 +831,7 @@ function renderSetup(){
   const wTotal = window.QUIZ_WORKS_TOTAL || 0, wDone = window.QUIZ_WORKS_DONE != null ? window.QUIZ_WORKS_DONE : wTotal;
   $('workNote').textContent = wDone < wTotal ? `（作品ごとの収録曲を取得中です: ${wDone}/${wTotal} 作品。まだ表示されていない作品は、取得が終わると追加されます）` : '';
   $('qCount').value = String(cfg.count);
-  $('countNote').classList.toggle('hidden', !(cfg.count === 0 || cfg.count >= 30)); // 30問以上・すべてのときだけ
+  $('countNote').classList.toggle('hidden', !(cfg.count === 0 || cfg.count >= 30)); // 30問以上・エンドレスのときだけ
   const fBox=$('sfxBox'); fBox.innerHTML='';
   fBox.append(
     chip('BGM', cfg.bgm, on=>{cfg.bgm=on; saveCfg(); bgmUpdate();}, '設定画面・出題中に流れる曲'),
@@ -1011,7 +1012,7 @@ function startGame(mode){
   // 同じ曲(表・裏など)は1回のクイズで1度だけ。読み取れない譜面があれば次の候補で補う
   const seen=new Set(), list=[];
   for(const r of p){const k=keyOf(baseName(r)); if(seen.has(k)) continue; seen.add(k); list.push(r);}
-  // 問題数「すべて」は出題候補の全曲（途中で「ここで終了」もできる）
+  // 問題数「エンドレス」は出題候補の全曲（途中で「ここで終了」もできる）
   game = {list, pos:-1, target: cfg.count || Infinity, all:!cfg.count, history:[], ended:false, mode, sum: settingsSummary()};
   show('scQuiz');
   nextQ();
@@ -1317,7 +1318,7 @@ function endGame(){
   $('rcSet').innerHTML = (game.sum || settingsSummary()).map(([k, v])=>`<span><i>${esc(k)}</i>${esc(v)}</span>`).join('');
   $('endTotal').textContent = okN;
   $('rcPerfect').classList.toggle('hidden', !(n && okN===n));
-  $('rcPerfect').innerHTML = window.LANG==='en' ? '<b style="font-size:.8em">PERFECT!</b>' : '<b>全問正解</b>'; $('rcOf').textContent = `/ ${n}`;
+  $('rcPerfect').innerHTML = window.LANG==='en' ? '<b style="font-size:.8em">PERFECT!</b>' : '<b>全問正解！</b>'; $('rcOf').textContent = `/ ${n}`;
   $('endSub').innerHTML = [['正解率', Math.round(acc*100) + '%'], ['合計時間', fmtTime(total)], ['1問あたり', fmtTime(n ? total/n : 0)]]
     .map(([k, v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
   // 問題ごとの結果: 20 問までは音符・番号・曲名・時間を 2 列（スマホは 1 列）、それより多いときは音符だけ。押すとその問題の詳細
@@ -1490,7 +1491,7 @@ async function drawShareCard(){
     c.lineWidth = 8; c.strokeStyle = '#d9241c'; c.stroke();
     rrect(c, -110, -34, 220, 68, 4); c.lineWidth = 3; c.stroke();
     c.fillStyle = '#d9241c'; c.textAlign = 'center';
-    const pt = en ? 'PERFECT!' : '全問正解'; fitText(c, pt, 180, 44, 800); c.fillText(pt, 0, 2);
+    const pt = en ? 'PERFECT!' : '全問正解！'; fitText(c, pt, 196, 44, 800); c.fillText(pt, 0, 2); // 内側の枠（幅 220）に収まる大きさ
     c.restore();
   }
 

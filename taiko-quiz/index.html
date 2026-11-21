@@ -154,7 +154,7 @@ button:disabled{opacity:.45;cursor:default;transform:none}
 .rc-cap{font-size:20px;font-weight:800;color:#3a2a1e}
 .rc-stamp{flex:none;width:124px;height:124px;border-radius:50%;border:6px solid #d9241c;box-shadow:inset 0 0 0 5px #fff,inset 0 0 0 7px #d9241c;background:rgba(255,255,255,.9);
   color:#d9241c;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-12deg);font-weight:800;text-align:center}
-.rc-stamp b{font-size:26px;line-height:1.1;padding:0 8px}
+.rc-stamp b{font-size:26px;line-height:1.1;padding:0 8px;white-space:pre-line}
 .rc-stamp small{font-size:12px;margin-top:2px}
 .rc-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 14px}
 .rc-stats>div{background:#fff1c9;border-radius:16px;padding:6px 4px 8px;text-align:center}
@@ -1335,7 +1335,7 @@ function shareText(){
 }
 /* SNS に貼る結果の画像。Canvas で専用のカードを描く（縦長 4:5、1080×1350）。
    太鼓の赤〜オレンジの背景に、正解数を大きく、正解率に応じた称号のハンコ、問題ごとの結果を音符（正解=ドン、不正解=灰色の×）で並べる */
-const SHARE_RANKS = [[1, '全問正解！', 'PERFECT!'], [0.8, '達人級', 'MASTER'], [0.6, '名人級', 'EXPERT'], [0.4, '玄人級', 'SKILLED'], [0, '修行中', 'TRAINEE']];
+const SHARE_RANKS = [[1, '全問\n正解', 'PERFECT!'], [0.8, '達人級', 'MASTER'], [0.6, '名人級', 'EXPERT'], [0.4, '玄人級', 'SKILLED'], [0, '修行中', 'TRAINEE']];
 const MODE_COLORS = {easy: ['#ff6a4d', '#d9341c'], normal: ['#9ccc48', '#5a9a1c'], hard: ['#3aa6c4', '#1d6f8c'], oni: ['#ee4fa6', '#b31d72']};
 function rrect(c, x, y, w, h, r){ c.beginPath(); c.moveTo(x+r, y); c.arcTo(x+w, y, x+w, y+h, r); c.arcTo(x+w, y+h, x, y+h, r); c.arcTo(x, y+h, x, y, r); c.arcTo(x, y, x+w, y, r); c.closePath(); }
 function drawDon(c, x, y, r, ok){
@@ -1453,8 +1453,11 @@ async function drawShareCard(){
   c.lineWidth = 9; c.strokeStyle = '#d9241c'; c.stroke();
   c.beginPath(); c.arc(0, 0, 84, 0, Math.PI*2); c.lineWidth = 3; c.stroke();
   c.fillStyle = '#d9241c'; c.textAlign = 'center';
-  const rl = en ? rank[2] : rank[1]; fitText(c, rl, 144, 52, 800); c.fillText(rl, 0, -4);
-  c.font = F(800, 20); c.fillText(en ? 'RANK' : '称号', 0, 42);
+  // 称号は改行で 2 行に分けられる（全問／正解）
+  const rl = (en ? rank[2] : rank[1]).split('\n');
+  if(rl.length > 1){ c.font = F(800, 40); rl.forEach((s, i)=>c.fillText(s, 0, -34 + i*42)); }
+  else { fitText(c, rl[0], 144, 52, 800); c.fillText(rl[0], 0, -4); }
+  c.font = F(800, 20); c.fillText(en ? 'RANK' : '称号', 0, rl.length > 1 ? 50 : 42);
   c.restore();
 
   // 正解率・合計時間・1問あたり

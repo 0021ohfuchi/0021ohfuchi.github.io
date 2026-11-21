@@ -26,7 +26,7 @@
     'かんたん': 'Easy', 'ふつう': 'Normal', 'むずかしい': 'Hard', 'おに': 'Extreme',
     '4つの中から正解の曲名を選ぶ。4択はランダム': 'Pick the right title from 4 choices. Choices are random',
     '4つの中から正解の曲名を選ぶ。4択は似た曲から': 'Pick the right title from 4 choices. Choices are similar songs',
-    '曲名を入力して答える': 'Type the song title',
+    '曲名を入力して答える': 'Type the song title', '曲名を入力して答える。': 'Type the song title.',
     '曲名を入力して答える。1問3分の制限時間、曲の情報が隠される（3つまで開ける）': 'Type the song title. 3 minutes per question; song info is hidden (you can reveal up to 3)',
     'スタート！': 'Start!', '譜面検索': 'Chart search',
     '曲名・読み・作品名・アーティスト・作曲者・アニメ名などから譜面を探して、譜面・難易度・BPM・最大コンボ数・ジャンル・収録作品を見られます':

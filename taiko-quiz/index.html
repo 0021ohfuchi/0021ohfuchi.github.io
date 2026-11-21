@@ -1239,6 +1239,30 @@ function fitText(c, text, maxW, size, weight){
   while(c.measureText(text).width > maxW && s > 10){ s -= 2; c.font = `${weight} ${s}px "M PLUS Rounded 1c", sans-serif`; }
   return s;
 }
+// 出題設定の左上と同じアイコン（太鼓の面に音符）。ヘッダーの SVG（viewBox 0 4 44 44）と同じ形を描く
+function drawLogo(c, x, y, size){
+  const s = size / 44;
+  c.save(); c.translate(x - 22*s, y - 26*s); c.scale(s, s);
+  c.shadowColor = 'rgba(0,0,0,.18)'; c.shadowOffsetY = 2;
+  c.beginPath(); c.arc(22, 26, 20, 0, Math.PI*2); c.fillStyle = '#3a2a1e'; c.fill();
+  c.shadowColor = 'transparent';
+  c.beginPath(); c.arc(22, 26, 17.5, 0, Math.PI*2); c.fillStyle = '#fff'; c.fill();
+  c.beginPath(); c.arc(22, 26, 15, 0, Math.PI*2); c.fillStyle = '#ff4b3e'; c.fill();
+  c.strokeStyle = '#fff'; c.lineWidth = 2.6; c.lineJoin = 'round'; c.lineCap = 'round';
+  c.stroke(new Path2D('M18.5 18.5 L28.5 16 V30.2')); c.stroke(new Path2D('M18.5 18.5 V32.5'));
+  c.fillStyle = '#fff';
+  c.beginPath(); c.ellipse(15.6, 33, 3.6, 2.8, -20*Math.PI/180, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(25.6, 30.7, 3.6, 2.8, -20*Math.PI/180, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+// 文字が幅に収まらないときは小さくし、それでも長ければ末尾を … にする
+function fitLine(c, text, maxW, size, minSize, weight){
+  let s = size; c.font = `${weight} ${s}px "M PLUS Rounded 1c", sans-serif`;
+  while(c.measureText(text).width > maxW && s > minSize){ s -= 1; c.font = `${weight} ${s}px "M PLUS Rounded 1c", sans-serif`; }
+  if(c.measureText(text).width <= maxW) return text;
+  let t = text; while(t.length > 1 && c.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+  return t + '…';
+}
 async function drawShareCard(){
   try{ await document.fonts.load('800 40px "M PLUS Rounded 1c"'); await document.fonts.ready; }catch(e){}
   const en = window.LANG === 'en';
@@ -1255,84 +1279,110 @@ async function drawShareCard(){
   for(let row = 0, y = 0; y < H + 60; row++, y += 46) for(let x = (row % 2) * 50; x < W + 100; x += 100) for(const r of [48, 34, 20]){ c.beginPath(); c.arc(x, y, r, Math.PI, 0); c.stroke(); }
   c.restore();
 
-  // タイトル
-  drawDon(c, 128, 112, 58, true);
+  // タイトル（アイコンは出題設定の左上と同じ）
+  drawLogo(c, 120, 104, 132);
   c.textAlign = 'left'; c.fillStyle = '#fff';
   c.save(); c.shadowColor = 'rgba(0,0,0,.25)'; c.shadowOffsetX = 4; c.shadowOffsetY = 4;
-  c.font = F(800, 40); c.fillText(en ? 'Taiko no Tatsujin' : '太鼓の達人', 210, 82);
+  c.font = F(800, 38); c.fillText(en ? 'Taiko no Tatsujin' : '太鼓の達人', 204, 74);
   const title = en ? 'Song Quiz' : '曲名当てクイズ';
-  fitText(c, title, 820, 66, 800); c.fillText(title, 206, 140);
+  fitText(c, title, 820, 64, 800); c.fillText(title, 200, 130);
   c.restore();
 
   // 白いカード
-  const cx = 60, cy = 220, cw = W - 120, ch = H - 220 - 150;
-  c.fillStyle = '#3a2a1e'; rrect(c, cx, cy + 14, cw, ch, 48); c.fill();
-  c.fillStyle = '#fffaf0'; rrect(c, cx, cy, cw, ch, 48); c.fill();
-  c.lineWidth = 8; c.strokeStyle = '#3a2a1e'; rrect(c, cx, cy, cw, ch, 48); c.stroke();
+  const cx = 50, cy = 196, cw = W - 100, ch = H - 196 - 140;
+  c.fillStyle = '#3a2a1e'; rrect(c, cx, cy + 12, cw, ch, 44); c.fill();
+  c.fillStyle = '#fffaf0'; rrect(c, cx, cy, cw, ch, 44); c.fill();
+  c.lineWidth = 8; c.strokeStyle = '#3a2a1e'; rrect(c, cx, cy, cw, ch, 44); c.stroke();
 
   // 難易度の札と日付
   const mc = MODE_COLORS[game.mode] || MODE_COLORS.hard, mname = tr(MODES[game.mode].name);
-  c.font = F(800, 40); const mw = c.measureText(mname).width + 70;
-  const mg = c.createLinearGradient(0, cy + 50, 0, cy + 122); mg.addColorStop(0, mc[0]); mg.addColorStop(1, mc[1]);
-  c.fillStyle = mg; rrect(c, cx + 50, cy + 50, mw, 72, 36); c.fill();
+  c.font = F(800, 34); const mw = c.measureText(mname).width + 60;
+  const mg = c.createLinearGradient(0, cy + 36, 0, cy + 98); mg.addColorStop(0, mc[0]); mg.addColorStop(1, mc[1]);
+  c.fillStyle = mg; rrect(c, cx + 40, cy + 36, mw, 62, 31); c.fill();
   c.lineWidth = 5; c.strokeStyle = '#3a2a1e'; c.stroke();
-  c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(mname, cx + 50 + mw/2, cy + 88);
+  c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(mname, cx + 40 + mw/2, cy + 68);
   const d = new Date();
-  c.textAlign = 'right'; c.fillStyle = '#9a8573'; c.font = F(700, 32);
-  c.fillText(`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`, cx + cw - 50, cy + 88);
+  c.textAlign = 'right'; c.fillStyle = '#9a8573'; c.font = F(700, 30);
+  c.fillText(`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`, cx + cw - 40, cy + 68);
 
-  // 正解数（大きく）
+  // 正解数（大きく）。ハンコ（右）と重ならないよう、左側の幅に収まる大きさにする
   c.textAlign = 'left';
   const big = String(okN), small = ` / ${n}`;
-  // ハンコ（右）と重ならないよう、左側の幅に収まる大きさにする（2〜3 桁のとき）
-  const areaL = cx + 40, areaR = cx + cw - 330;
-  c.font = F(800, 250); let bw = c.measureText(big).width;
-  c.font = F(800, 110); let sw = c.measureText(small).width;
-  const k = Math.min(1, (areaR - areaL) / (bw + sw + 10)), bs = Math.round(250*k), ss = Math.round(110*k);
+  const areaL = cx + 40, areaR = cx + cw - 300;
+  c.font = F(800, 190); let bw = c.measureText(big).width;
+  c.font = F(800, 84); let sw = c.measureText(small).width;
+  const k = Math.min(1, (areaR - areaL) / (bw + sw + 10)), bs = Math.round(190*k), ss = Math.round(84*k);
   bw *= k; sw *= k;
-  const sx = (areaL + areaR)/2 - (bw + sw)/2, by = cy + 300;
-  c.font = F(800, bs); c.fillStyle = '#ffd36b'; c.fillText(big, sx + 10*k, by + 10*k); c.fillStyle = '#ff3d3d'; c.fillText(big, sx, by);
-  c.font = F(800, ss); c.fillStyle = '#3a2a1e'; c.fillText(small, sx + bw + 6, by + 46*k);
-  c.textAlign = 'center'; c.font = F(800, 44); c.fillStyle = '#3a2a1e';
-  c.fillText(en ? 'correct!' : '問正解！', sx + (bw + sw)/2, by + 150);
+  const sx = (areaL + areaR)/2 - (bw + sw)/2, by = cy + 205;
+  c.font = F(800, bs); c.fillStyle = '#ffd36b'; c.fillText(big, sx + 8*k, by + 8*k); c.fillStyle = '#ff3d3d'; c.fillText(big, sx, by);
+  c.font = F(800, ss); c.fillStyle = '#3a2a1e'; c.fillText(small, sx + bw + 6, by + 34*k);
+  c.textAlign = 'center'; c.font = F(800, 36); c.fillStyle = '#3a2a1e';
+  c.fillText(en ? 'correct!' : '問正解！', (areaL + areaR)/2, by + 112);
 
   // 称号のハンコ（右、少し傾ける）
   const rank = SHARE_RANKS.find(x=>acc >= x[0]) || SHARE_RANKS[SHARE_RANKS.length-1];
-  c.save(); c.translate(cx + cw - 175, cy + 330); c.rotate(-0.2);
-  c.beginPath(); c.arc(0, 0, 118, 0, Math.PI*2); c.fillStyle = 'rgba(255,255,255,.9)'; c.fill();
-  c.lineWidth = 10; c.strokeStyle = '#d9241c'; c.stroke();
-  c.beginPath(); c.arc(0, 0, 100, 0, Math.PI*2); c.lineWidth = 3; c.stroke();
+  c.save(); c.translate(cx + cw - 150, cy + 225); c.rotate(-0.2);
+  c.beginPath(); c.arc(0, 0, 100, 0, Math.PI*2); c.fillStyle = 'rgba(255,255,255,.9)'; c.fill();
+  c.lineWidth = 9; c.strokeStyle = '#d9241c'; c.stroke();
+  c.beginPath(); c.arc(0, 0, 84, 0, Math.PI*2); c.lineWidth = 3; c.stroke();
   c.fillStyle = '#d9241c'; c.textAlign = 'center';
-  const rl = en ? rank[2] : rank[1]; fitText(c, rl, 170, 60, 800); c.fillText(rl, 0, -4);
-  c.font = F(800, 22); c.fillText(en ? 'RANK' : '称号', 0, 50);
+  const rl = en ? rank[2] : rank[1]; fitText(c, rl, 144, 52, 800); c.fillText(rl, 0, -4);
+  c.font = F(800, 20); c.fillText(en ? 'RANK' : '称号', 0, 42);
   c.restore();
 
   // 正解率・合計時間・1問あたり
   const stats = [[en ? 'Accuracy' : '正解率', Math.round(acc*100) + '%'], [en ? 'Total time' : '合計時間', tr(fmtTime(total))], [en ? 'Per question' : '1問あたり', tr(fmtTime(n ? total/n : 0))]];
-  const sy = cy + 560, sbw = (cw - 100 - 40)/3;
-  stats.forEach(([k, v], i)=>{
-    const x = cx + 50 + i*(sbw + 20);
-    c.fillStyle = '#fff1c9'; rrect(c, x, sy, sbw, 130, 26); c.fill();
-    c.textAlign = 'center'; c.fillStyle = '#9a7b5f'; c.font = F(700, 28); c.fillText(k, x + sbw/2, sy + 36);
-    c.fillStyle = '#3a2a1e'; fitText(c, v, sbw - 30, 52, 800); c.fillText(v, x + sbw/2, sy + 88);
+  const sy = cy + 360, sbw = (cw - 80 - 40)/3, sh = 104;
+  stats.forEach(([lab, v], i)=>{
+    const x = cx + 40 + i*(sbw + 20);
+    c.fillStyle = '#fff1c9'; rrect(c, x, sy, sbw, sh, 24); c.fill();
+    c.textAlign = 'center'; c.fillStyle = '#9a7b5f'; c.font = F(700, 25); c.fillText(lab, x + sbw/2, sy + 30);
+    c.fillStyle = '#3a2a1e'; fitText(c, v, sbw - 30, 44, 800); c.fillText(v, x + sbw/2, sy + 72);
   });
 
-  // 問題ごとの結果（1 行 10 個の音符）。多いときは小さくし、入りきらなければ最初の 50 問まで
-  const shown = h.slice(0, 50), cols = Math.min(10, Math.max(5, shown.length));
-  const rows = Math.ceil(shown.length / cols), gy0 = sy + 175, gh = cy + ch - 60 - gy0;
-  const cell = Math.min((cw - 100) / cols, gh / Math.max(rows, 1), 110), r = cell * 0.42;
-  const gx0 = W/2 - (cols * cell)/2 + cell/2, gyc = gy0 + (gh - rows*cell)/2 + cell/2;
-  shown.forEach((x, i)=>drawDon(c, gx0 + (i % cols)*cell, gyc + Math.floor(i / cols)*cell, r, x.ok));
-  if(n > 50){ c.fillStyle = '#9a8573'; c.font = F(700, 28); c.textAlign = 'right'; c.fillText(en ? `+${n-50} more` : `ほか ${n-50} 問`, cx + cw - 50, cy + ch - 34); }
+  // 問題ごとの結果
+  const gx = cx + 40, gw = cw - 80, gy0 = sy + sh + 28, gy1 = cy + ch - 34, gh = gy1 - gy0;
+  if(n <= 20){
+    // 20 問まで: 音符（正解=ドン、不正解=×）と曲名を 2 列で並べる（左の列から上→下）
+    const cols = n > 5 ? 2 : 1, rows = Math.ceil(n / cols), colW = (gw - (cols - 1)*24) / cols;
+    const rowH = Math.min(gh / Math.max(rows, 1), 92), r = Math.min(rowH*0.36, 30);
+    const fs = Math.max(18, Math.min(34, Math.round(rowH*0.42)));
+    const top = gy0 + (gh - rows*rowH)/2;
+    // 曲名の文字の大きさは全部そろえる（いちばん長い曲名に合わせて小さくし、それでも入らない曲名だけ末尾を … にする）
+    // 問題番号の幅（いちばん長い番号に合わせる）と、表示する曲名（英語表示では (裏譜面) を (Ura) に）
+    c.font = F(800, Math.round(fs*0.7)); const qw = c.measureText(`${en ? 'Q' : ''}${n}`).width;
+    const songLabel = x=>{ const s = dispSong(x.r.n, x.r); return en ? s.replace(/\(裏譜面\)$/, ' (Ura)') : s; };
+    const nameX = r*2 + 24 + qw + 14, nameW = colW - 12 - nameX;
+    let nfs = fs;
+    for(const x of h){ c.font = F(800, nfs); while(nfs > Math.max(16, fs - 10) && c.measureText(songLabel(x)).width > nameW){ nfs--; c.font = F(800, nfs); } }
+    h.forEach((x, i)=>{
+      const col = Math.floor(i / rows), row = i % rows;
+      const x0 = gx + col*(colW + 24), yc = top + row*rowH + rowH/2;
+      if(row % 2 === 0){ c.fillStyle = 'rgba(255,211,107,.18)'; rrect(c, x0, yc - rowH/2 + 2, colW, rowH - 4, 14); c.fill(); }
+      drawDon(c, x0 + 12 + r, yc, r, x.ok);
+      c.textAlign = 'left'; c.fillStyle = '#9a8573'; c.font = F(800, Math.round(fs*0.7));
+      const qn = `${en ? 'Q' : ''}${i+1}`; const qx = x0 + 24 + r*2; c.fillText(qn, qx, yc);
+      const nx = x0 + nameX;
+      const name = fitLine(c, songLabel(x), nameW, nfs, nfs, 800);
+      c.fillStyle = x.ok ? '#3a2a1e' : '#8f8378'; c.fillText(name, nx, yc + 1);
+    });
+  } else {
+    // それより多いとき: 音符だけを 1 行 10 個（最初の 50 問まで）
+    const shown = h.slice(0, 50), cols = 10, rows = Math.ceil(shown.length / cols);
+    const cell = Math.min(gw / cols, gh / Math.max(rows, 1), 96), r = cell * 0.42;
+    const gx0 = W/2 - (cols * cell)/2 + cell/2, gyc = gy0 + (gh - rows*cell)/2 + cell/2;
+    shown.forEach((x, i)=>drawDon(c, gx0 + (i % cols)*cell, gyc + Math.floor(i / cols)*cell, r, x.ok));
+    if(n > 50){ c.fillStyle = '#9a8573'; c.font = F(700, 26); c.textAlign = 'right'; c.fillText(en ? `+${n-50} more` : `ほか ${n-50} 問`, cx + cw - 40, cy + ch - 22); }
+  }
 
   // 下の帯: 鋲の並んだ太鼓の胴と、サイトの URL
-  const fy = H - 120;
-  c.fillStyle = '#5a2e16'; c.fillRect(0, fy, W, 120);
-  for(let x = 18; x < W; x += 44){ c.beginPath(); c.arc(x, fy + 16, 7, 0, Math.PI*2); c.fillStyle = '#ffd25e'; c.fill(); }
-  c.textAlign = 'center'; c.fillStyle = '#ffd25e'; c.font = F(800, 34);
+  const fy = H - 112;
+  c.fillStyle = '#5a2e16'; c.fillRect(0, fy, W, 112);
+  for(let x = 18; x < W; x += 44){ c.beginPath(); c.arc(x, fy + 15, 7, 0, Math.PI*2); c.fillStyle = '#ffd25e'; c.fill(); }
+  c.textAlign = 'center'; c.fillStyle = '#ffd25e'; c.font = F(800, 32);
   const url = shareUrl() ? shareUrl().replace(/^https?:\/\//, '') : '';
-  c.fillText(url || (en ? 'Taiko no Tatsujin Song Quiz' : '太鼓の達人 曲名当てクイズ'), W/2, fy + 62);
-  c.fillStyle = '#e8cfa8'; c.font = F(700, 24); c.fillText(en ? 'Can you name the song from its chart?' : '譜面を見て、曲名を当てよう！', W/2, fy + 98);
+  c.fillText(url || (en ? 'Taiko no Tatsujin Song Quiz' : '太鼓の達人 曲名当てクイズ'), W/2, fy + 58);
+  c.fillStyle = '#e8cfa8'; c.font = F(700, 23); c.fillText(en ? 'Can you name the song from its chart?' : '譜面を見て、曲名を当てよう！', W/2, fy + 92);
   return cv;
 }
 let shot = null; // {blob, file} または作成中の Promise

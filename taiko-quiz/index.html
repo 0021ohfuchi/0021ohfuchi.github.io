@@ -29,7 +29,6 @@ body{margin:0;color:var(--text);
   background-size:100px 50px;background-attachment:fixed;
   /* スマホの 100vh はアドレスバーのぶん実際より高く、中身が収まっていてもスクロールできてしまうので、見えている高さ（dvh）を使う */
   min-height:100vh;min-height:100dvh;overflow-x:hidden}
-html,body{overscroll-behavior-y:none} /* 端で引っ張ってもページが動かないようにする */
 header{background:linear-gradient(90deg,var(--don),#ff7a3d);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;
   position:relative;box-shadow:0 4px 0 rgba(0,0,0,.08)}
 /* ヘッダーの下に、太鼓の胴の鋲（びょう）が並んだような帯 */
@@ -167,9 +166,7 @@ button.big{font-size:19px;padding:11px 34px}
 .chart-wrap.gen{background:#fffaf0;border-color:var(--line)}
 .chart-wrap.gen .chart-scroll{overflow:auto}
 .chart-scroll{overflow:auto;overscroll-behavior:contain;touch-action:pan-x pan-y} /* 2 本指の拡大は譜面の枠の中だけで行う（attachPinch） */ /* 譜面の端までスクロールしてもページは動かさない */
-/* スマホの出題画面: 譜面の枠を画面に収まる高さで描くので、ページはスクロールしない。
-   overflow:hidden でページを固定すると、隠れたアドレスバーが出せなくなるので固定はしない（引っ張りだけ止める） */
-html.noscroll,html.noscroll body{overscroll-behavior:none}
+/* スマホの出題画面: 譜面の枠を画面に収まる高さで描くので、ページはスクロールしない（固定はしないので、アドレスバーの出し入れや端で引っ張る動きはそのまま） */
 .chart-tabs{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
 .answer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 #answerArea,#resultArea{margin-bottom:10px}

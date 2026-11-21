@@ -1086,12 +1086,15 @@ function renderChoices(r){
     const sim = x=>nameSim(choiceName(x), choiceName(r));
     const score = x=>{
       const s = sim(x);
-      let v = Math.abs(x.lv-r.lv)*2.5 + Math.abs(comboNum(x)-comboNum(r))/35 + bpmGap(x, r)/18
+      let v = Math.abs(x.lv-r.lv)*2.5 + Math.abs(comboNum(x)-comboNum(r))/35 + bpmGap(x, r)/6 + (bpmGap(x, r) > 20 ? 2 : 0) /* BPM は重め */
             + (x.d && r.d ? Math.abs(x.d-r.d)*1.5 : 1) + (x.g===r.g ? 0 : 3) + (x.yr && r.yr ? Math.min(Math.abs(x.yr-r.yr), 10)/4 : 1);
       return v - s*9;
     };
     const near = cands.filter(x=>Math.abs(x.lv-r.lv)<=2 || sim(x)>=0.3).map(x=>[score(x), x]).sort((a,b)=>a[0]-b[0]).map(e=>e[1]);
-    if(near.length >= 3) cands = near.slice(0, 6);
+    // BPM がなるべく近い曲から選ぶ（差が 30 以内の曲が 3 つ以上あれば、その中から）
+    const closeBpm = near.filter(x=>bpmGap(x, r) <= 30);
+    if(closeBpm.length >= 3) cands = closeBpm.slice(0, 6);
+    else if(near.length >= 3) cands = near.slice(0, 6);
   }
   const picked = [], seen = new Set([ans]);
   for(const x of shuffle(cands.slice())){ const k = key(x); if(seen.has(k)) continue; seen.add(k); picked.push(x); if(picked.length===3) break; }

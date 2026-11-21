@@ -359,11 +359,6 @@ a{color:var(--ka-d);font-weight:700}
       <div class="row" style="margin-bottom:6px"><button class="blue sm" id="gAll">すべて</button><button class="blue sm" id="gNone">クリア</button></div>
       <div class="row" id="genreBox"></div>
     </div></div>
-    <div class="setrow"><span class="lbl">収録年</span><div style="flex:1;min-width:0">
-      <div class="row" style="margin-bottom:6px"><button class="blue sm" id="yAll">すべて</button><button class="blue sm" id="yNone">クリア</button></div>
-      <div id="yearBox"></div>
-      <p class="muted" style="margin:8px 0 0">その譜面が初めて登場した年で選びます。</p>
-    </div></div>
     <div class="setrow"><span class="lbl">収録作品</span><div style="flex:1;min-width:0">
       <div class="row" style="margin-bottom:6px"><button class="blue sm" id="wAll">すべて</button><button class="blue sm" id="wNone">クリア</button></div>
       <div id="workAC"></div><!-- AC は旧筐体・新筐体・ニジイロのまとまりごとにしまう -->
@@ -623,47 +618,7 @@ function acWorksOf(g){ return WORKS.filter(w=>w.n>0 && w.kind==='AC' && acGroupO
 function allGroups(){ return acGroups().concat(csHardwares()); }
 function groupWorks(g){ return acGroups().includes(g) ? acWorksOf(g) : csWorksOf(g); }
 function groupsOfWork(w){ return w.kind==='AC' ? [acGroupOf(w)] : w.kind==='CS' ? hwsOf(w) : []; }
-/* 収録年: その譜面が初めて登場した年（r.yr）。年代ごとのタブを開いて 1 年ずつ選ぶ（収録作品のタブと同じ動き） */
-const YEARS = [...new Set(ALL.map(r=>r.yr).filter(Boolean))].sort((a,b)=>a-b);
-const DECADES = [['2000年代～', y=>y<2010], ['2010年代～', y=>y>=2010 && y<2020], ['2020年代～', y=>y>=2020]];
-function decadeYears(name){ const d = DECADES.find(x=>x[0]===name); return d ? YEARS.filter(d[1]) : []; }
-function inYears(r){
-  if(!Array.isArray(cfg.yearOff) || !cfg.yearOff.length) return true;
-  return r.yr ? !cfg.yearOff.includes(r.yr) : false; // 年が分からない譜面は、年をすべて選んでいるときだけ出題する
-}
-function renderYears(){
-  if(!Array.isArray(cfg.yearOff)) cfg.yearOff = [];
-  if(!Array.isArray(cfg.yearOpen)) cfg.yearOpen = DECADES.map(d=>d[0]).filter(n=>decadeYears(n).some(y=>!cfg.yearOff.includes(y)));
-  const box = $('yearBox'); box.innerHTML = '';
-  const row = document.createElement('div'); row.className = 'row'; box.append(row);
-  const decades = DECADES.map(d=>d[0]).filter(n=>decadeYears(n).length);
-  for(const dn of decades){
-    const ys = decadeYears(dn);
-    row.append(chip(dn, cfg.yearOpen.includes(dn), on=>{
-      toggleIn(cfg.yearOpen, dn, on);
-      for(const y of ys) toggleIn(cfg.yearOff, y, true); // 開いたとき・しまったとき、どちらも選ばれていない状態にする
-      saveCfg(); renderSetup();
-    }, `${ys[0]}年〜${ys[ys.length-1]}年`));
-  }
-  for(const dn of decades){
-    if(!cfg.yearOpen.includes(dn)) continue;
-    const ys = decadeYears(dn);
-    const b = document.createElement('div'); b.className = 'hw-titles';
-    b.insertAdjacentHTML('beforeend', `<div class="muted" style="margin:0 0 4px">${esc(dn)}</div>`);
-    const ctl = document.createElement('div'); ctl.className = 'row'; ctl.style.marginBottom = '6px';
-    for(const [label, sel] of [['すべて', true], ['クリア', false]]){
-      const bt = document.createElement('button'); bt.className = 'blue sm'; bt.textContent = label;
-      bt.onclick = ()=>{ for(const y of ys) toggleIn(cfg.yearOff, y, !sel); saveCfg(); renderSetup(); };
-      ctl.append(bt);
-    }
-    b.append(ctl);
-    const yr = document.createElement('div'); yr.className = 'row';
-    for(const y of ys) yr.append(chip(y + '年', !cfg.yearOff.includes(y), on=>{ toggleIn(cfg.yearOff, y, !on); saveCfg(); }, `${ALL.filter(r=>r.yr===y).length}譜面`));
-    b.append(yr); box.append(b);
-  }
-}
 function renderSetup(){
-  renderYears();
   const lvBox=$('lvBox'); lvBox.innerHTML='';
   for(let lv=1;lv<=10;lv++) lvBox.append(chip('★'+lv, cfg.lv.includes(lv), on=>{toggleIn(cfg.lv,lv,on);saveCfg();}));
   const gBox=$('genreBox'); gBox.innerHTML='';
@@ -739,12 +694,9 @@ function pool(){
     (r.s!==3 || r.o1) && // 旧基準の★は同じ譜面の重複なので出さない（旧基準にしか無い昔の曲は出す）
     cfg.lv.includes(r.lv) &&
     (cfg.genre.includes(r.g) || !GENRE_COLOR[r.g]) &&
-    inYears(r) &&
     inWorks(r)
   );
 }
-$('yAll').onclick=()=>{cfg.yearOff=[];cfg.yearOpen=DECADES.map(d=>d[0]);saveCfg();renderSetup();};
-$('yNone').onclick=()=>{cfg.yearOff=YEARS.slice();cfg.yearOpen=[];saveCfg();renderSetup();};
 $('gAll').onclick=()=>{cfg.genre=GENRES.map(g=>g[0]);saveCfg();renderSetup();};
 $('gNone').onclick=()=>{cfg.genre=[];saveCfg();renderSetup();};
 $('wAll').onclick=()=>{cfg.worksOff=[];cfg.hwOpen=allGroups();saveCfg();renderSetup();}; // すべて は全部のまとまりを開いて全作品を選び、クリア は全部しまう

@@ -1060,6 +1060,8 @@ function nextQ(){
 }
 /* 4択: 正解 1 つ＋ほかの曲 3 つ。かんたんは完全ランダム、ふつうは同じジャンルで難易度・最大コンボ数が近い曲から選ぶ */
 const comboNum = r => parseInt(String(r.c||'').match(/\d+/)) || 0;
+// 譜面分岐があるか: 最大コンボ数が分岐ごとに「361・357・348」「976・928」のように並んでいる（双打と、カッコ内の別バージョンの数は除く）
+const hasBranch = r => !/^【双打】/.test(r.n) && /・/.test(String(r.c||'').replace(/\(.*\)/, ''));
 function choiceName(r){ return songName(r); }
 // 曲名の似かた（0〜1）: 2文字ずつの組の重なり。同じ文字で始まる・片方がもう片方を含むときは高め
 function nameSim(a, b){
@@ -1077,6 +1079,8 @@ function renderChoices(r){
   const key = x => norm(choiceName(x)), ans = key(r);
   let cands = DATA.filter(x=>key(x)!==ans && !/^【双打】/.test(x.n));
   if(game.mode==='normal'){
+    // 譜面分岐のある曲なら、4択もすべて譜面分岐のある曲にする（分岐の有無で答えが分からないように）
+    if(hasBranch(r)){ const br = cands.filter(hasBranch); if(br.length >= 3) cands = br; }
     // 間違えやすい曲を選ぶ: 譜面の見た目（★・最大コンボ数・BPM・平均密度）、ジャンル、時期、曲名の似かたを合わせて点数にし、
     // いちばん似ている数曲の中から選ぶ。曲名が似ている曲はジャンルや★が少し違っても候補に入れる
     const sim = x=>nameSim(choiceName(x), choiceName(r));

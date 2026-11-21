@@ -392,8 +392,8 @@ a{color:var(--ka-d);font-weight:700}
       <div class="mode-tip hidden" id="modeTip">
         <div><b class="mode-tag mode-easy">かんたん</b> 4つの中から正解の曲名を選ぶ。4択はランダム</div>
         <div><b class="mode-tag mode-normal">ふつう</b> 4つの中から正解の曲名を選ぶ。4択は似た曲から</div>
-        <div><b class="mode-tag mode-hard">むずかしい</b> 曲名を入力して答える。開ける情報は3つ</div>
-        <div><b class="mode-tag mode-oni">おに</b> 曲名を入力して答える。1問3分の制限時間、開ける情報は1つだけ</div>
+        <div><b class="mode-tag mode-hard">むずかしい</b> 曲名を入力して答える</div>
+        <div><b class="mode-tag mode-oni">おに</b> 曲名を入力して答える。1問3分の制限時間、開ける情報は3つ</div>
         <div class="muted">どの難易度も、答えられるのは 1 回だけです</div>
       </div>
     </div></div>
@@ -1277,7 +1277,7 @@ function worksCell(r){
 }
 // 出題中に伏せる項目。出題設定で★やジャンルが1つに決まっているときは、それは初めから表示する
 function quizHidden(){
-  if(game && (game.mode==='easy' || game.mode==='normal')) return new Set(); // かんたん・ふつうは最初から全部表示
+  if(game && game.mode!=='oni') return new Set(); // おに以外は最初から全部表示
   const h = new Set(['lv','bpm','combo','genre','work','ws']);
   if(cfg.lv.length===1) h.delete('lv');
   if(cfg.genre.length===1) h.delete('genre');
@@ -1286,7 +1286,7 @@ function quizHidden(){
 // 伏せた項目をタップ（クリック）で表示する
 $('info').addEventListener('click', e=>{
   const d = e.target.closest('.hid'); if(!d) return;
-  // むずかしいは 3 つ、おには 1 つまで開ける（答えが出たあとは全部見える）
+  // おには 3 つまで開ける（答えが出たあとは全部見える）
   const playing = game && game.q && !game.q.done;
   if(playing && openLeft() <= 0){ d.classList.add('flash'); setTimeout(()=>d.classList.remove('flash'), 300); return; }
   d.classList.remove('hid');
@@ -1298,7 +1298,7 @@ const HINT_KEYS = [['lv','★の数'], ['bpm','BPM'], ['combo','コンボ'], ['g
 // 時間の表示: 59.9秒 / 2分05秒
 function fmtTime(ms){ const s = ms/1000; if(s < 60) return s.toFixed(1) + '秒'; const m = Math.floor(s/60); return `${m}分${String(Math.floor(s%60)).padStart(2,'0')}秒`; }
 // 開ける情報の残りの数（制限が無い難易度は Infinity）
-const OPEN_LIMIT = {hard: 3, oni: 1};
+const OPEN_LIMIT = {oni: 3};
 function openLeft(){ const lim = game && OPEN_LIMIT[game.mode]; return lim ? lim - ((game.q && game.q.opened) || 0) : Infinity; }
 function updateOpenLeft(){
   const el = $('openLeft'); if(!el) return;

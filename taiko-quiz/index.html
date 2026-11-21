@@ -577,6 +577,24 @@ function stripParen(s){
   return (s||'').replace(/【[^】]*】/g,'').replace(/[(（][^()（）]*[)）]/g,'');
 }
 function keyOf(s){return norm(stripParen(s));}
+/* ローマ字の比べ方: 書き方の違い（shi/si、chi/ti、tsu/tu、fu/hu、ji/zi、ん の m/n、のばす音、小さい っ、は/わ・を/お）を気にしない */
+function canonRo(s){
+  if(!s) return '';
+  s = s.normalize('NFKC').toLowerCase().replace(/[^a-z0-9]/g, '');
+  s = s.replace(/shi/g,'si').replace(/chi/g,'ti').replace(/tsu/g,'tu').replace(/fu/g,'hu').replace(/ji/g,'zi')
+       .replace(/sh/g,'sy').replace(/ch/g,'ty').replace(/j/g,'zy').replace(/c(?=t)/g,'t')
+       .replace(/m(?=[bmp])/g,'n').replace(/ha/g,'wa').replace(/wo/g,'o').replace(/he/g,'e')
+       .replace(/([bdfghkmnprstvwyz])\1+/g,'$1')
+       .replace(/ou/g,'o').replace(/ei/g,'e').replace(/([aiueo])\1+/g,'$1');
+  return s;
+}
+const hasLatin = s=>/[a-z]/i.test((s||'').normalize('NFKC'));
+const roList = r=>(r.ro||'').split('|').filter(Boolean);
+/* 英語表示のときの曲名: 公式の英語名があればそれ（裏譜面なら (Ura) を付ける）、無ければ日本語のまま */
+function dispSong(name, r){
+  if(window.LANG!=='en' || !r || !r.e) return name;
+  return r.e + (/\(裏譜面\)$/.test(name) ? ' (Ura)' : '');
+}
 function baseName(r){return stripParen(r.n).trim() || r.n;}
 
 /* ---------- 曲名候補（画像のない曲も含めて全曲から） ---------- */
@@ -597,8 +615,11 @@ const SONGS = (()=>{
     const b = songName(r);
     const k = songKey(r);
     if(!k) continue;
-    if(!m.has(k)) m.set(k,{name:b, yomi:r.y?stripParen(r.y):'', nk:norm(b), yk:r.y?keyOf(r.y):''});
+    if(!m.has(k)) m.set(k,{name:b, yomi:r.y?stripParen(r.y):'', nk:norm(b), yk:r.y?keyOf(r.y):'', r, en:'', ek:'', ro:'', rk:[]});
     else if(!m.get(k).yomi && r.y){const e=m.get(k); e.yomi=stripParen(r.y); e.yk=keyOf(r.y);}
+    const e = m.get(k);
+    if(r.e && !e.en){ e.en = r.e; e.ek = norm(r.e); }
+    for(const x of roList(r)) if(!e.rk.includes(canonRo(x))){ e.rk.push(canonRo(x)); if(!e.ro) e.ro = x; }
   }
   return [...m.values()].sort((a,b)=>a.name.localeCompare(b.name,'ja'));
 })();
@@ -965,7 +986,7 @@ function renderChoices(r){
   const opts = shuffle([r].concat(picked));
   const box = $('choices'); box.innerHTML = '';
   for(const o of opts){
-    const b = document.createElement('button'); b.textContent = choiceName(o); b.dataset.ok = o===r ? '1' : '';
+    const b = document.createElement('button'); b.textContent = dispSong(choiceName(o), o); b.dataset.ok = o===r ? '1' : '';
     b.onclick = ()=>{
       if(game.q.done) return;
       const ok = o===r;
@@ -1096,8 +1117,15 @@ function isCorrect(input, r){
   if(!a && !b) return false;
   const cands = new Set([keyOf(r.n), norm(r.n), keyOf(baseName(r)), norm(songName(r))]); // songName: 別の曲として扱う旧基準の曲の名前
   if(r.y){cands.add(keyOf(r.y)); cands.add(norm(r.y));}
+  if(r.e){cands.add(norm(r.e)); cands.add(keyOf(r.e));} // 公式の英語名
   cands.delete('');
-  return cands.has(a) || cands.has(b);
+  if(cands.has(a) || cands.has(b)) return true;
+  // ローマ字（読み・曲名から作ったもの。英字の曲名もローマ字の書き方の違いを気にせず比べる）
+  if(!hasLatin(input)) return false;
+  const ci = canonRo(stripParen(input));
+  if(!ci) return false;
+  const ros = roList(r).concat(r.e ? [stripParen(r.e)] : [], hasLatin(baseName(r)) ? [baseName(r)] : []);
+  return ros.some(x=>canonRo(x)===ci);
 }
 function submit(){
   const q=game.q; if(q.done) return;
@@ -1137,7 +1165,7 @@ function finishQ(ok, ngText){
   // 回答欄と同じくらいの高さの1行で表示する（譜面と合わせて1画面に収めるため）
   ra.innerHTML = `<div class="result-row">
       <span class="mark ${ok?'ok':'ng'}">${ok?'正解！':(ngText||'ざんねん…')}</span>
-      <span class="title">${esc(r.n)}</span>
+      <span class="title">${esc(dispSong(r.n, r))}</span>
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a>
       <span class="sp"></span>
       <button class="primary" id="nextBtn">${last?'結果を見る':'次の問題へ'}</button>
@@ -1170,7 +1198,7 @@ function endGame(){
       if(same){ det.classList.add('hidden'); return; }
       b.classList.add('sel');
       det.innerHTML = `<div class="muted">第${i+1}問 ・ ${x.ok?'正解':(x.timeout?'時間切れ':'不正解')} ・ 回答時間 ${fmtTime(x.ms||0)}</div>`+
-        `<div class="t">${esc(x.r.n)}</div><div class="muted">★×${x.r.lv} ・ ${esc(x.r.g)}${x.r.dt?' ・ 初出 '+esc(x.r.dt):x.r.yr?' ・ 初出 '+x.r.yr+'年':''}</div>`+
+        `<div class="t">${esc(dispSong(x.r.n, x.r))}</div><div class="muted">★×${x.r.lv} ・ ${esc(x.r.g)}${x.r.dt?' ・ 初出 '+esc(x.r.dt):x.r.yr?' ・ 初出 '+x.r.yr+'年':''}</div>`+
         `<a href="${wikiUrl(x.r)}" target="_blank" rel="noopener">Wikiで見る</a>`;
       det.classList.remove('hidden');
     };
@@ -1373,6 +1401,11 @@ const SONG_CHARTS = (()=>{
   }
   return [...m.values()].sort((a,b)=>a.name.localeCompare(b.name,'ja'));
 })();
+// 譜面検索で英語名・ローマ字でも探せるように
+for(const s of SONG_CHARTS){
+  s.ek = [...new Set(s.charts.map(c=>c.e).filter(Boolean).map(norm))];
+  s.rk = [...new Set(s.charts.flatMap(roList).map(canonRo))];
+}
 // 入力に合う作品（完全一致があればそれだけ。無ければ前方一致）
 function matchWorks(k){
   if(!k) return [];
@@ -1459,10 +1492,11 @@ function doSearch(){
   const filtered = !!(sf.lv || sf.genre || sf.work);
   if(!k && !filtered && sf.sort==='name'){ box.innerHTML = `<span class="muted">曲名・読み・作品名・アーティスト・作曲者・アニメ名などを入力するか、★・ジャンル・作品で絞り込んでください（全 ${TOTAL_ENTRIES()} 譜面）</span>`; return; }
   let starts=[], incl=[], works=[], wHits=[], mHits=[];
+  const cr = hasLatin($('sq').value) ? canonRo($('sq').value) : '';
   if(k){
     for(const s of SONG_CHARTS){
-      if(s.nk.startsWith(k) || (s.yk && s.yk.startsWith(k))) starts.push(s);
-      else if(s.nk.includes(k) || (s.yk && s.yk.includes(k))) incl.push(s);
+      if(s.nk.startsWith(k) || (s.yk && s.yk.startsWith(k)) || s.ek.some(x=>x.startsWith(k)) || (cr && s.rk.some(x=>x.startsWith(cr)))) starts.push(s);
+      else if(s.nk.includes(k) || (s.yk && s.yk.includes(k)) || s.ek.some(x=>x.includes(k)) || (cr && cr.length>=3 && s.rk.some(x=>x.includes(cr)))) incl.push(s);
     }
     // 作品名でも探す（その作品に収録されている曲。曲名で見つかった曲は除く）
     works = matchWorks(k);
@@ -1501,7 +1535,7 @@ function doSearch(){
     for(const s of list){
       if(grp){ const g = grp(s); if(g!==last){ last = g; box.insertAdjacentHTML('beforeend', `<div class="sgrp">${esc(g)}</div>`); } }
       const b = document.createElement('button');
-      b.innerHTML = `${esc(s.name)}<small>${s.lvText}</small>`;
+      b.innerHTML = `${esc(dispSong(s.name, s.charts[0]))}<small>${s.lvText}</small>`;
       // 詳細では表譜面・裏譜面をまとめてタブで切り替えられるようにする（押した側の譜面から開く）
       b.onclick = ()=>{ search.scroll = box.scrollTop; const all = s.song ? s.song.charts : s.charts;
         search.song = Object.assign({}, s, {name: s.song ? s.song.name : s.name, charts: all}); search.idx = Math.max(0, all.indexOf(s.charts[0])); showSong(); };
@@ -1543,7 +1577,7 @@ function showSong(){
   const d = $('sDetail'); d.classList.remove('hidden');
   $('sList').classList.add('hidden'); // 譜面を1画面に収めるため、候補一覧は閉じる（「検索結果に戻る」でまた開く）
   const works = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
-  d.innerHTML = `<div class="sd-head"><button class="sd-back" id="sdBack" title="検索結果の一覧に戻る（Esc）">← 検索結果に戻る</button><span class="title">${esc(s.name)}</span>${s.yomi?`<span class="muted">${esc(s.yomi)}</span>`:''}
+  d.innerHTML = `<div class="sd-head"><button class="sd-back" id="sdBack" title="検索結果の一覧に戻る（Esc）">← 検索結果に戻る</button><span class="title">${esc(dispSong(s.name, s.charts[search.idx]))}</span>${s.yomi?`<span class="muted">${esc(s.yomi)}</span>`:''}
       <div class="sd-tabs">${s.charts.map((c,i)=>`<button data-i="${i}" class="sm${i===search.idx?' on':''}">${chartLabel(c, s.charts.some(x=>/裏譜面/.test(x.n)), s.charts.every(x=>x.s===3))}</button>`).join('')}</div>
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a></div>
     <div class="info">${infoHTML(r)}</div>
@@ -1580,23 +1614,25 @@ window.addEventListener('resize',()=>{ clearTimeout(resizeTimer); resizeTimer=se
 let suggSel=-1, suggItems=[];
 function hideSugg(){ $('sugg').classList.add('hidden'); suggSel=-1; suggItems=[]; }
 function updateSugg(){
-  const v=$('ans').value; const k=norm(v);
+  const v=$('ans').value; const k=norm(v), cr = hasLatin(v) ? canonRo(v) : '';
   if(!k){hideSugg();return;} // 入力候補は常に表示する
   const starts=[], incl=[];
   for(const s of SONGS){
-    if(s.nk.startsWith(k) || (s.yk && s.yk.startsWith(k))) starts.push(s);
-    else if(k.length>=2 && (s.nk.includes(k) || (s.yk && s.yk.includes(k)))) incl.push(s);
+    if(s.nk.startsWith(k) || (s.yk && s.yk.startsWith(k)) || (s.ek && s.ek.startsWith(k)) || (cr && s.rk.some(x=>x.startsWith(cr)))) starts.push(s);
+    else if(k.length>=2 && (s.nk.includes(k) || (s.yk && s.yk.includes(k)) || (s.ek && s.ek.includes(k)) || (cr && cr.length>=3 && s.rk.some(x=>x.includes(cr))))) incl.push(s);
     if(starts.length>=10) break;
   }
   suggItems = starts.concat(incl).slice(0,10);
   const box=$('sugg');
   if(!suggItems.length){hideSugg();return;}
   suggSel=-1;
-  box.innerHTML = suggItems.map((s,i)=>`<div data-i="${i}">${esc(s.name)}${s.yomi&&norm(s.yomi)!==s.nk?`<small>${esc(s.yomi)}</small>`:''}</div>`).join('');
+  // 英語表示のときは英語名（無ければ日本語の曲名）に、ローマ字を小さく添える
+  const sub = s=> window.LANG==='en' ? (s.en ? s.name : s.ro) : (s.yomi&&norm(s.yomi)!==s.nk ? s.yomi : '');
+  box.innerHTML = suggItems.map((s,i)=>`<div data-i="${i}">${esc(dispSong(s.name, s.r))}${sub(s)?`<small>${esc(sub(s))}</small>`:''}</div>`).join('');
   box.classList.remove('hidden');
   for(const d of box.children) d.onmousedown=e=>{e.preventDefault(); pickSugg(+d.dataset.i);};
 }
-function pickSugg(i){ $('ans').value=suggItems[i].name; hideSugg(); $('ans').focus(); }
+function pickSugg(i){ $('ans').value=dispSong(suggItems[i].name, suggItems[i].r); hideSugg(); $('ans').focus(); }
 $('ans').addEventListener('input',updateSugg);
 $('ans').addEventListener('blur',()=>setTimeout(hideSugg,100));
 $('ans').addEventListener('keydown',e=>{
@@ -1621,7 +1657,7 @@ function playSong(r){
   $('player').classList.remove('hidden');
   if(location.protocol === 'file:'){ loadVideo(); return; } // 埋め込みが動かないので BGM はそのまま
   // BGM をフェードアウトしてから YouTube の曲を流す
-  $('plLabel').textContent = `♪ ${baseName(r)}`;
+  $('plLabel').textContent = `♪ ${dispSong(baseName(r), r)}`;
   $('plBody').innerHTML = '<div class="msg">まもなく再生します…</div>';
   bgmUpdate();
   bgmFadeOut(()=>{ if(player===p) loadVideo(); });
@@ -1645,7 +1681,7 @@ function loadVideo(){
   player.ended = false;
   const r = player.r, id = r.yt[player.i];
   const kind = player.i===0 && r.ytk!=null ? YT_KIND[r.ytk] : '動画';
-  $('plLabel').textContent = `♪ ${baseName(r)}（${kind}）`;
+  $('plLabel').textContent = `♪ ${dispSong(baseName(r), r)}（${kind}）`;
   $('plLabel').title = $('plLabel').textContent;
   $('plOpen').href = 'https://www.youtube.com/watch?v=' + id;
   $('plNext').classList.toggle('hidden', r.yt.length < 2);

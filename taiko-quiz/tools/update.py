@@ -79,7 +79,10 @@ ok &= run('songs', ['scrape_songs.py', os.path.join('cache', 'songs'), 'lists.js
 # 5. 譜面画像を譜面データ（charts/）に変換する（サイトは Wiki の画像を直接読み込まない）
 ok &= run('charts', ['parse_charts.py'], {'MAX_IMG': os.environ.get('MAX_IMG', '300')})
 
-# 6. data.js
+# 6. ナムコオリジナル曲の公式英語名（1 ページだけ。取れなくても前回のものを使うので失敗扱いにしない）
+run('en', ['scrape_en.py'])
+
+# 7. data.js
 ok &= run('build', ['build_data.py'])
 
 sys.exit(0 if ok else 1)

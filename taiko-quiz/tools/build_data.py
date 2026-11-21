@@ -1,6 +1,6 @@
 # lists.json + details.json から ../data.js を生成する
 # 使い方: python build_data.py  (tools フォルダで実行)
-import json, os, re, hashlib
+import json, os, re, hashlib, unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 lists = json.load(open(os.path.join(HERE, 'lists.json'), encoding='utf-8'))
@@ -190,6 +190,49 @@ for s in lists:
     if vids:
         yt_by_page.setdefault(s['page'].split('/', 2)[-1], vids)
 
+# 英語名とローマ字（英語表示と、英語名・ローマ字でも答えられるようにするため）
+#   e : 公式の英語名（ナムコオリジナル曲。tools/en_names.json、scrape_en.py で取得）
+#   ro: 曲名のローマ字（読みがあれば読みから、無ければ曲名から pykakasi で作る。読みの推定なので誤りもある）
+#       複数あるときは「|」で区切る
+_enp = os.path.join(HERE, 'en_names.json')
+EN_NAMES = json.load(open(_enp, encoding='utf-8')) if os.path.exists(_enp) else {}
+def _enkey(s):
+    s = unicodedata.normalize('NFKC', s).lower()
+    return re.sub(r'[\W_]', '', s)  # 記号・空白を除いて比べる
+EN_BY_KEY = {}
+for _jp, _en in EN_NAMES.items():
+    EN_BY_KEY.setdefault(_enkey(_jp), _en)
+try:
+    import pykakasi
+    _kks = pykakasi.kakasi()
+except Exception:  # 入っていなければローマ字は作らない（前の data.js の値も使わない）
+    _kks = None
+_JP = re.compile('[぀-ヿ㐀-鿿]')
+def _romaji(s):
+    parts = []
+    for x in _kks.convert(s):
+        h = x['hepburn'] if _JP.search(x['orig']) else x['orig']
+        if h.strip():
+            parts.append(h.strip())
+    return re.sub(r'\s+', ' ', ' '.join(parts)).strip()
+def add_en(r):
+    base = re.sub(r'\(裏譜面\)$', '', re.sub(r'^【双打】\s*', '', r['n'])).strip()
+    plain = re.sub(r'[(（][^()（）]*[)）]', '', base).strip() or base
+    en = EN_BY_KEY.get(_enkey(base)) or EN_BY_KEY.get(_enkey(plain))
+    if en and _enkey(en) != _enkey(base):
+        r['e'] = en
+    if _kks and _JP.search(plain):
+        ros = []
+        y = re.sub(r'[(（][^()（）]*[)）]', '', r.get('y', '')).strip()
+        # 読みに副題が付いていることがある（例: ほうかんのくげつ はしょう「なげきのひめ」）ので、最初の区切りまでも使う
+        y0 = re.split(r'[\s「『～〜]', y)[0] if y else ''
+        for src in ([y] if y else []) + ([y0] if y0 and y0 != y else []) + [plain]:
+            ro = _romaji(src)
+            if ro and ro not in ros:
+                ros.append(ro)
+        if ros:
+            r['ro'] = '|'.join(ros)
+
 out = []
 for s in lists:
     d = details.get(s['href'], {})
@@ -243,6 +286,7 @@ for s in lists:
             r['ch'] = cid
     if r.get('w') in CS_LABEL:
         r['w'] = CS_LABEL[r['w']]  # 初出作品も家庭用は正式名称で出す
+    add_en(r)
     out.append(r)
 
 js = '// 自動生成: tools/build_data.py\n// 出典: 太鼓の達人 譜面とか Wiki (https://wikiwiki.jp/taiko-fumen/)\n'

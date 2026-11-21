@@ -793,6 +793,9 @@ function show(id){
 
 /* ---------- BGM（設定画面でフォルダ内の mp3 をランダムに流す。一覧は bgm.js） ---------- */
 const BGM_LIST = (window.QUIZ_BGM || []).slice();
+// 画面に出す曲名。ファイル名に使えない文字（? など）を含む曲は、ここで本当の曲名を指定する
+const BGM_TITLES = {'who_are_you_who_are_you.mp3': 'who are you? who are you?'};
+const bgmTitle = f=>BGM_TITLES[f] || f.replace(/\.mp3$/i,'');
 const BGM_VOL = 0.35, BGM_FADE_OUT = 900, BGM_FADE_IN = 1500; // 音量と、フェードの長さ(ms)
 const bgm = {audio:new Audio(), last:-1, blocked:false, fade:0};
 bgm.audio.volume = BGM_VOL;
@@ -831,7 +834,7 @@ function bgmPlay(){
 function bgmLabel(){
   const el=$('bgmNow'); if(!el) return;
   const on = bgmWanted() && bgm.last>=0;
-  el.textContent = !on ? '' : bgm.blocked ? '♪ 画面をタップするとBGMが流れます' : `♪ 再生中: ${BGM_LIST[bgm.last].replace(/\.mp3$/i,'')}`;
+  el.textContent = !on ? '' : bgm.blocked ? '♪ 画面をタップするとBGMが流れます' : `♪ 再生中: ${bgmTitle(BGM_LIST[bgm.last])}`;
 }
 function bgmUpdate(){
   if(!bgmWanted()){ bgmFadeOut(); bgmLabel(); return; }

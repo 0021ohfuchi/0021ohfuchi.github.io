@@ -148,10 +148,10 @@ button:disabled{opacity:.45;cursor:default;transform:none}
 .rc-set span{background:#fff1c9;border-radius:999px;padding:2px 12px;font-size:13px;font-weight:800;color:#3a2a1e}
 .rc-set span i{font-style:normal;color:#9a7b5f;font-size:11px;margin-right:6px}
 .rc-main{display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 12px;position:relative}
-.rc-stamp{position:absolute;right:4px;top:50%;width:120px;height:120px;margin-top:-60px;border-radius:50%;border:6px solid #d9241c;box-shadow:inset 0 0 0 5px #fff,inset 0 0 0 7px #d9241c;
+.rc-stamp{position:absolute;right:0;top:50%;width:190px;height:74px;margin-top:-37px;border-radius:50%;border:6px solid #d9241c;box-shadow:inset 0 0 0 5px #fff,inset 0 0 0 7px #d9241c;
   background:rgba(255,255,255,.9);color:#d9241c;display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);font-weight:800;text-align:center}
 .rc-stamp.hidden{display:none}
-.rc-stamp b{font-size:28px;line-height:1.15}
+.rc-stamp b{font-size:30px;line-height:1;white-space:nowrap;letter-spacing:.04em}
 .rc-score{flex:1;text-align:center;min-width:0}
 .rc-score .num{display:inline-block;font-size:100px;font-weight:800;color:#ff3d3d;text-shadow:5px 5px 0 #ffd36b;line-height:1;animation:pop .5s cubic-bezier(.3,1.6,.6,1)}
 .rc-score .of{font-size:44px;font-weight:800;color:#3a2a1e;margin-left:8px}
@@ -184,8 +184,8 @@ button:disabled{opacity:.45;cursor:default;transform:none}
   .rc-score .num{font-size:72px}
   .rc-score .of{font-size:32px}
   .rc-cap{font-size:16px}
-  .rc-stamp{width:76px;height:76px;margin-top:-38px;right:-2px;border-width:4px;box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 5px #d9241c}
-  .rc-stamp b{font-size:17px}
+  .rc-stamp{width:104px;height:44px;margin-top:-22px;right:-6px;border-width:3px;box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 4px #d9241c}
+  .rc-stamp b{font-size:16px}
     .rc-stats{gap:6px}
   .rc-stats .v{font-size:18px}
   .rc-stats .k{font-size:11px}
@@ -575,7 +575,7 @@ a{color:var(--ka-d);font-weight:700}
       <div class="rc-set" id="rcSet"></div><!-- 出題設定（★の数・ジャンル・収録作品） -->
       <div class="rc-main">
         <div class="rc-score"><div><span class="num" id="endTotal"></span><span class="of" id="rcOf"></span></div><div class="rc-cap">問正解！</div></div>
-        <div class="rc-stamp hidden" id="rcPerfect"><b>全問<br>正解</b></div><!-- 全問正解のときだけ（正解数は中央のまま） -->
+        <div class="rc-stamp hidden" id="rcPerfect"><b>全問正解</b></div><!-- 全問正解のときだけ（正解数は中央のまま） -->
       </div>
       <div class="rc-stats" id="endSub"></div>
       <div id="endTable"></div>
@@ -1290,7 +1290,7 @@ function endGame(){
   $('rcSet').innerHTML = (game.sum || settingsSummary()).map(([k, v])=>`<span><i>${esc(k)}</i>${esc(v)}</span>`).join('');
   $('endTotal').textContent = okN;
   $('rcPerfect').classList.toggle('hidden', !(n && okN===n));
-  $('rcPerfect').innerHTML = window.LANG==='en' ? '<b style="font-size:.8em">PERFECT!</b>' : '<b>全問<br>正解</b>'; $('rcOf').textContent = `/ ${n}`;
+  $('rcPerfect').innerHTML = window.LANG==='en' ? '<b style="font-size:.8em">PERFECT!</b>' : '<b>全問正解</b>'; $('rcOf').textContent = `/ ${n}`;
   $('endSub').innerHTML = [['正解率', Math.round(acc*100) + '%'], ['合計時間', fmtTime(total)], ['1問あたり', fmtTime(n ? total/n : 0)]]
     .map(([k, v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
   // 問題ごとの結果: 20 問までは音符・番号・曲名・時間を 2 列（スマホは 1 列）、それより多いときは音符だけ。押すとその問題の詳細
@@ -1437,7 +1437,7 @@ async function drawShareCard(){
   const big = String(okN), small = ` / ${n}`;
   // 全問正解のときは右にハンコを押すので、正解数は中央のまま、ハンコにかからない幅に収める
   const perfect = n > 0 && okN === n;
-  const areaL = perfect ? cx + 260 : cx + 40, areaR = perfect ? cx + cw - 260 : cx + cw - 40;
+  const areaL = perfect ? cx + 330 : cx + 40, areaR = perfect ? cx + cw - 330 : cx + cw - 40;
   c.font = F(800, 172); let bw = c.measureText(big).width;
   c.font = F(800, 78); let sw = c.measureText(small).width;
   const k = Math.min(1, (areaR - areaL) / (bw + sw + 10)), bs = Math.round(172*k), ss = Math.round(78*k);
@@ -1448,13 +1448,12 @@ async function drawShareCard(){
   c.textAlign = 'center'; c.font = F(800, 36); c.fillStyle = '#3a2a1e';
   c.fillText(en ? 'correct!' : '問正解！', (areaL + areaR)/2, by + 100);
   if(perfect){ // 全問正解のハンコ（右、少し傾ける）
-    c.save(); c.translate(cx + cw - 140, cy + 285); c.rotate(-0.2);
-    c.beginPath(); c.arc(0, 0, 96, 0, Math.PI*2); c.fillStyle = 'rgba(255,255,255,.9)'; c.fill();
-    c.lineWidth = 9; c.strokeStyle = '#d9241c'; c.stroke();
-    c.beginPath(); c.arc(0, 0, 80, 0, Math.PI*2); c.lineWidth = 3; c.stroke();
+    c.save(); c.translate(cx + cw - 172, cy + 280); c.rotate(-0.2);
+    c.beginPath(); c.ellipse(0, 0, 124, 52, 0, 0, Math.PI*2); c.fillStyle = 'rgba(255,255,255,.9)'; c.fill();
+    c.lineWidth = 8; c.strokeStyle = '#d9241c'; c.stroke();
+    c.beginPath(); c.ellipse(0, 0, 110, 40, 0, 0, Math.PI*2); c.lineWidth = 3; c.stroke();
     c.fillStyle = '#d9241c'; c.textAlign = 'center';
-    if(en){ fitText(c, 'PERFECT!', 140, 40, 800); c.fillText('PERFECT!', 0, 2); }
-    else { c.font = F(800, 46); c.fillText('全問', 0, -24); c.fillText('正解', 0, 26); }
+    const pt = en ? 'PERFECT!' : '全問正解'; fitText(c, pt, 180, 44, 800); c.fillText(pt, 0, 2);
     c.restore();
   }
 

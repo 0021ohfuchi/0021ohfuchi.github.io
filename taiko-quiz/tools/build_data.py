@@ -208,13 +208,45 @@ try:
 except Exception:  # 入っていなければローマ字は作らない（前の data.js の値も使わない）
     _kks = None
 _JP = re.compile('[぀-ヿ㐀-鿿]')
+_fxp = os.path.join(HERE, 'romaji_fix.json')
+ROMAJI_FIX = {k: v for k, v in (json.load(open(_fxp, encoding='utf-8')) if os.path.exists(_fxp) else {}).items() if not k.startswith('_')}
 def _romaji(s):
+    # 「･･･」「…」は読まない（pykakasi が前の読みを繰り返してしまう）。文の終わりや記号の前の小さい「っ」も読まない（さっ！→ sa!）
+    s = re.sub(r'[･・]{2,}|…+', ' ', s)
+    s = re.sub(r'[っッ](?=$|[^぀-ヿー])', '', s)
+    s = s.replace('ドラえもん', 'ドラエモン')  # pykakasi が「ドラ えもん」と分けてしまう
+    s = s.replace('％', '%')
     parts = []
     for x in _kks.convert(s):
-        h = x['hepburn'] if _JP.search(x['orig']) else x['orig']
+        o = x['orig'].strip()
+        if not o:
+            continue
+        if o == 'は':
+            h = 'wa'   # 助詞の「は」「へ」（1 文字だけで切り出されたとき）
+        elif o == 'へ':
+            h = 'e'
+        elif len(o) > 1 and o[0] == 'を' and _JP.search(o[1:]):
+            h = 'wo ' + _kks.convert(o[1:])[0]['hepburn'] if len(_kks.convert(o[1:])) == 1 else 'wo ' + ''.join(y['hepburn'] for y in _kks.convert(o[1:]))
+        elif re.fullmatch(r'[㐀-鿿]+の', o):
+            h = ''.join(y['hepburn'] for y in _kks.convert(o[:-1])) + ' no'   # 「上の」→ ue no
+        else:
+            h = x['hepburn'] if _JP.search(o) else o
         if h.strip():
             parts.append(h.strip())
-    return re.sub(r'\s+', ' ', ' '.join(parts)).strip()
+    t = ' '.join(parts)
+    t = unicodedata.normalize('NFKC', t).replace('〜', '~')
+    t = re.sub(r'\s+([!?,.、。~)\]）・])', r'\1', t)   # 記号の前の空白を詰める
+    t = re.sub(r'([(\[（~])\s+', r'\1', t)
+    t = t.replace('、', ', ').replace('。', '.').replace('・', ' ')
+    t = re.sub(r'(\S)~(?=[A-Za-z])', r' ~', t)  # 副題の始まりの ~ の前は空けて区切る
+    return re.sub(r'\s+', ' ', t).strip()
+def _canon(s):
+    s = re.sub(r'[^a-z0-9]', '', s.lower())
+    for a, b in (('shi', 'si'), ('chi', 'ti'), ('tsu', 'tu'), ('fu', 'hu'), ('ji', 'zi'), ('sh', 'sy'), ('ch', 'ty'), ('j', 'zy')):
+        s = s.replace(a, b)
+    s = re.sub(r'm(?=[bmp])', 'n', s).replace('ha', 'wa').replace('wo', 'o').replace('he', 'e')
+    s = re.sub(r'([bdfghkmnprstvwyz])\1+', r'\1', s).replace('ou', 'o').replace('ei', 'e')
+    return re.sub(r'([aiueo])\1+', r'\1', s)
 def add_en(r):
     base = re.sub(r'\(裏譜面\)$', '', re.sub(r'^【双打】\s*', '', r['n'])).strip()
     plain = re.sub(r'[(（][^()（）]*[)）]', '', base).strip() or base
@@ -231,12 +263,22 @@ def add_en(r):
         y = re.sub(r'[(（][^()（）]*[)）]', '', r.get('y', '')).strip()
         # 読みに副題が付いていることがある（例: ほうかんのくげつ はしょう「なげきのひめ」）ので、最初の区切りまでも使う
         y0 = re.split(r'[\s「『～〜]', y)[0] if y else ''
-        for src in ([y] if y else []) + ([y0] if y0 and y0 != y else []) + [plain]:
-            ro = _romaji(src)
+        # 1 つ目は英語表示にも使う: 手直しの表 → 曲名から作ったもの（読みと同じなら単語の区切りがあるので見やすい）→ 読みから作ったもの
+        t_ro = _romaji(plain)
+        y_ros = [_romaji(x) for x in ([y] if y else []) + ([y0] if y0 and y0 != y else [])]
+        first = ROMAJI_FIX.get(base) or ROMAJI_FIX.get(plain)
+        if not first:
+            first = t_ro if not y_ros or any(_canon(t_ro) == _canon(x) for x in y_ros) else y_ros[0]
+            if base != plain and not ROMAJI_FIX.get(plain):
+                first = _romaji(base)  # カッコ書き（例: (ウェディング編)）も英語表示に残す
+        for ro in [first] + y_ros + [t_ro]:
             if ro and ro not in ros:
                 ros.append(ro)
         if ros:
             r['ro'] = '|'.join(ros)
+    elif _kks and _JP.search(base):
+        # 英字の曲名にカッコ書きの日本語が付いている曲（例: Butterfly(倖田來未)）は、カッコの中もローマ字にして英語表示に使う
+        r['ro'] = ROMAJI_FIX.get(base) or _romaji(base)
 
 out = []
 for s in lists:

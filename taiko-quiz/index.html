@@ -660,10 +660,16 @@ function canonRo(s){
 }
 const hasLatin = s=>/[a-z]/i.test((s||'').normalize('NFKC'));
 const roList = r=>(r.ro||'').split('|').filter(Boolean);
-/* 英語表示のときの曲名: 公式の英語名があればそれ（裏譜面なら (Ura) を付ける）、無ければ日本語のまま */
+/* 英語表示のときの曲名: 公式の英語名があればそれ、無ければ曲名のローマ字（単語の頭を大文字に）。裏譜面なら (Ura) を付ける */
+const RO_SMALL = new Set(['no','wo','wa','ni','to','ga','de','e','mo','ya','ka','yori','made','he','na']);
+function roTitle(s){
+  return s.split(' ').map((w, i)=> /[A-Z]/.test(w) || (i > 0 && RO_SMALL.has(w)) ? w : w.replace(/[a-z]/, c=>c.toUpperCase())).join(' ');
+}
 function dispSong(name, r){
-  if(window.LANG!=='en' || !r || !r.e) return name;
-  return r.e + (/\(裏譜面\)$/.test(name) ? ' (Ura)' : '');
+  if(window.LANG!=='en' || !r) return name;
+  const en = r.e || (r.ro ? roTitle(roList(r)[0]) : '');
+  if(!en) return name;
+  return en + (/\(裏譜面\)$/.test(name) ? ' (Ura)' : '');
 }
 function baseName(r){return stripParen(r.n).trim() || r.n;}
 
@@ -1937,7 +1943,7 @@ function updateSugg(){
   if(!suggItems.length){hideSugg();return;}
   suggSel=-1;
   // 英語表示のときは英語名（無ければ日本語の曲名）に、ローマ字を小さく添える
-  const sub = s=> window.LANG==='en' ? (s.en ? s.name : s.ro) : (s.yomi&&norm(s.yomi)!==s.nk ? s.yomi : '');
+  const sub = s=> window.LANG==='en' ? (dispSong(s.name, s.r)!==s.name ? s.name : '') : (s.yomi&&norm(s.yomi)!==s.nk ? s.yomi : ''); // 英語表示では元の曲名を添える
   box.innerHTML = suggItems.map((s,i)=>`<div data-i="${i}">${esc(dispSong(s.name, s.r))}${sub(s)?`<small>${esc(sub(s))}</small>`:''}</div>`).join('');
   box.classList.remove('hidden');
   for(const d of box.children) d.onmousedown=e=>{e.preventDefault(); pickSugg(+d.dataset.i);};

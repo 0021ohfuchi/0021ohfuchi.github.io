@@ -92,35 +92,67 @@ def parse_meta(t):
     return seen[:8]
 
 
-# 今の AC（ニジイロ）では 1 曲が複数のジャンルに入っていることがある。詳細表では「キッズ(メイン)」「アニメ」のように
-# メインのジャンルとほかのジャンルが同じ行に並ぶ。最後の「(メイン)」の行で有効なジャンルを、メインを先頭にして返す
+# 複数のジャンルに入っている曲（版によって違う・今の AC で複数）のジャンル
 GENRE_NAMES = {'ポップス', 'キッズ', 'アニメ', 'ボーカロイド™曲', 'ゲームミュージック', 'バラエティ', 'クラシック', 'ナムコオリジナル', 'どうよう'}
 def parse_genres(t):
+    """今収録されている版でのジャンルを全部返す（一覧のジャンル以外にもあるときだけ使う）。
+    詳細表は版ごとの行で、ジャンルは版によって違うことがある（例: Baby Shark は AC16 ではキッズ、NS2MP・RC・DFMP ではバラエティ）。
+    今の AC（ニジイロ）では 1 曲が複数のジャンルに入り、「キッズ(メイン)」「アニメ」のように同じ行に並ぶ。
+    - AC は最後の AC16 の行（その行で有効なジャンルを全部。AC16 初期の「ゲーム＆バラエティ」などは使わない）
+    - 家庭用・スマホは、今も遊べる作品（NS2・NS2MP・DF・DFMP・RC・PTB）の行
+    rowspan / colspan を展開した表で、行ごとに「版」と「ジャンル」を対応させる"""
     i = t.find('id="h3_content_1_0"')
     j = t.find('</table>', i)
     if i < 0 or j < 0:
         return []
-    rows = re.findall(r'<tr>(.*?)</tr>', t[i:j], flags=re.S)
-    cells = []  # (行番号, 何行続くか, ジャンル, メインか)
-    for k, tr in enumerate(rows):
-        for attr, c in re.findall(r'<td([^>]*background-color[^>]*)>(.*?)</td>', tr, flags=re.S):
-            x = re.sub(r'\s+', '', html.unescape(re.sub(r'<[^>]+>', '', c)))
-            main = '(メイン)' in x
-            x = re.sub(r'\(メイン\)|\*\d+$', '', x).replace('J-POP', 'ポップス')
-            if x in GENRE_NAMES:
-                rs = re.search(r'rowspan="(\d+)"', attr)
-                cells.append((k, int(rs.group(1)) if rs else 1, x, main))
-    mains = [c for c in cells if c[3]]
-    if not mains:
+    grid = {}
+    for r, tr in enumerate(re.findall(r'<tr>(.*?)</tr>', t[i:j], flags=re.S)):
+        col = 0
+        for attr, c in re.findall(r'<t[dh]([^>]*)>(.*?)</t[dh]>', tr, flags=re.S):
+            while (r, col) in grid:
+                col += 1
+            rs = int((re.search(r'rowspan="(\d+)"', attr) or [0, 1])[1])
+            cs = int((re.search(r'colspan="(\d+)"', attr) or [0, 1])[1])
+            text = re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', c))).strip()
+            cell = (text, 'background-color' in attr)
+            for dr in range(rs):
+                for dc in range(cs):
+                    grid[(r + dr, col + dc)] = cell
+            col += cs
+    if not grid:
         return []
-    last = mains[-1][0]
-    rows_main = {c[0] for c in mains}
-    out = [mains[-1][2]]
-    for k, span, g, main in cells:
-        # (メイン) のある行（またはそこから下に続くセル）で、最後の (メイン) の行まで届いているもの
-        if k <= last and k + span - 1 >= last and (k in rows_main or span > 1 and any(r in rows_main for r in range(k, k + span))) and g not in out:
+    nrows = max(k[0] for k in grid) + 1
+    ncols = max(k[1] for k in grid) + 1
+    # 見出しの行から「バージョン」「ジャンル」の列を探す
+    head = next((r for r in range(nrows) if any(grid.get((r, c), ('', 0))[0].startswith('ジャンル') for c in range(ncols))), None)
+    if head is None:
+        return []
+    vcols = [c for c in range(ncols) if grid.get((head, c), ('', 0))[0].startswith('バージョン')]
+    gcols = [c for c in range(ncols) if grid.get((head, c), ('', 0))[0].startswith('ジャンル')]
+    def genre_of(cell):
+        x = re.sub(r'\s+', '', cell[0])
+        x = re.sub(r'\(メイン\)|\*\d+$', '', x).replace('J-POP', 'ポップス')
+        return x if cell[1] and x in GENRE_NAMES else None
+    CUR = re.compile(r'(?<![A-Za-z])(NS2|NS2MP|DF|DFMP|RC|PTB)(?![A-Za-z0-9])')
+    ac_last, cs = None, []
+    for r in range(head + 1, nrows):
+        ver = ' '.join(grid.get((r, c), ('', 0))[0] for c in vcols)
+        gs = []
+        for c in gcols:
+            g = genre_of(grid.get((r, c), ('', 0)))
+            if g and g not in gs:
+                gs.append(g)
+        if not gs:
+            continue
+        if re.search(r'AC16', ver):
+            ac_last = gs
+        if CUR.search(ver.replace('(DL)', ' ')):
+            cs += [g for g in gs if g not in cs]
+    out = []
+    for g in (ac_last or []) + cs:
+        if g not in out:
             out.append(g)
-    return out if len(out) > 1 else []
+    return out  # 1 つでも返す（一覧のジャンルと違えば、build_data.py で両方になる）
 
 def parse(t):
     d = {}

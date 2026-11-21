@@ -1083,6 +1083,10 @@ function renderChoices(r){
   if(game.mode==='normal'){
     // 譜面分岐のある曲なら、4択もすべて譜面分岐のある曲にする（分岐の有無で答えが分からないように）
     if(hasBranch(r)){ const br = cands.filter(hasBranch); if(br.length >= 3) cands = br; }
+    // ジャンルはできるだけ合わせる: 同じジャンルの曲 → 足りなければ、ほかのジャンル（複数ジャンルの曲）が重なる曲
+    { const gsOf = x=>x.gs||[x.g], rg = gsOf(r);
+      const same = cands.filter(x=>x.g===r.g), overlap = cands.filter(x=>gsOf(x).some(g=>rg.includes(g)));
+      if(same.length >= 3) cands = same; else if(overlap.length >= 3) cands = overlap; }
     // 間違えやすい曲を選ぶ: 譜面の見た目（★・最大コンボ数・BPM・平均密度）、ジャンル、時期、曲名の似かたを合わせて点数にし、
     // いちばん似ている数曲の中から選ぶ。曲名が似ている曲はジャンルや★が少し違っても候補に入れる
     const sim = x=>nameSim(choiceName(x), choiceName(r));

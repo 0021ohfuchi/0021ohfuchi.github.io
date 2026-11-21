@@ -1639,7 +1639,22 @@ function infoHTML(r, hide, withWorks){
 function worksCell(r){
   const names = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
   if(!names.length) return '<div class="k">収録作品</div><div class="v">不明</div>';
-  const MAX = 4, shown = names.slice(0, MAX).join('・') + (names.length > MAX ? ` ほか${names.length - MAX}作品` : '');
+  const MAX = 4;
+  let pick = (r.ws||[]).filter(i=>WORKS[i]);
+  if(pick.length > MAX){
+    // 枠に入りきらないときは、同じタブ（AC の旧筐体・新筐体・ニジイロ、家庭用はハード）からは一番新しい作品 1 つだけを代表にして、
+    // いろいろなタブの作品が並ぶようにする。タブが多すぎるときは新しいタブの代表を優先する
+    const tabOf = w=> w.kind==='AC' ? 'AC:' + acGroupOf(w) : w.kind==='CS' ? 'CS:' + hwsOf(w)[0] : 'OS';
+    const rep = new Map(); // タブ → そのタブで一番新しい（WORKS の並びで後ろの）作品
+    for(const i of pick){ const k = tabOf(WORKS[i]); if(!rep.has(k) || i > rep.get(k)) rep.set(k, i); }
+    // AC と家庭用（とその他）から交互に、新しいタブの代表から選ぶ
+    const byKind = k=>[...rep.entries()].filter(([t])=>t.startsWith(k)).map(([, i])=>i).sort((a,b)=>b-a);
+    const lists = [byKind('AC:'), byKind('CS:'), byKind('OS')], chosen = [];
+    while(chosen.length < MAX && lists.some(l=>l.length)) for(const l of lists) if(l.length && chosen.length < MAX) chosen.push(l.shift());
+    pick = chosen.sort((a,b)=>a-b);
+  }
+  const rest = names.length - pick.length;
+  const shown = pick.map(i=>WORKS[i].name).join('・') + (rest > 0 ? ` ほか${rest}作品` : '');
   return `<div class="k">収録作品</div><div class="v ws" title="${esc(names.join('・'))}">${esc(shown)}</div>`;
 }
 // 出題中に伏せる項目。出題設定で★やジャンルが1つに決まっているときは、それは初めから表示する

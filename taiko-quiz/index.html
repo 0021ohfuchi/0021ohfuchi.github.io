@@ -118,6 +118,8 @@ button:disabled{opacity:.45;cursor:default;transform:none}
 .choices button.wrong{background:var(--ng);color:#fff}
 /* おに: 残り時間 */
 .timer{font-weight:800;font-size:15px;background:#b31d72;color:#fff;border-radius:999px;padding:2px 12px;white-space:nowrap}
+.open-left{font-weight:800;font-size:13px;background:#fff3c4;color:#5a2e16;border:2px solid #f5c542;border-radius:999px;padding:1px 10px;white-space:nowrap}
+.open-left.zero{background:#eee;color:#999;border-color:#ccc}
 .timer.low{background:var(--ng);animation:shake .3s}
 .mode-tag{font-weight:800;font-size:13px;color:#fff;border-radius:999px;padding:2px 10px;white-space:nowrap}
 /* 結果発表: 問題ごとの結果のマス（1 行 10 問） */
@@ -388,10 +390,10 @@ a{color:var(--ka-d);font-weight:700}
         <button class="help-btn mode-help" id="modeHelp" title="難易度の違い" aria-label="難易度の違い">i</button>
       </div>
       <div class="mode-tip hidden" id="modeTip">
-        <div><b class="mode-tag mode-easy">かんたん</b> ★の数・BPM などの情報は最初から表示。曲名を 4 つの中から選ぶ（ほかの 3 つはランダム）</div>
-        <div><b class="mode-tag mode-normal">ふつう</b> 情報はタップで表示。曲名を 4 つの中から選ぶ（同じジャンルで、★の数・最大コンボ数が近い曲から）</div>
-        <div><b class="mode-tag mode-hard">むずかしい</b> 情報はタップで表示。曲名を入力して答える</div>
-        <div><b class="mode-tag mode-oni">おに</b> むずかしい ＋ 1問3分の制限時間。情報は 1 つだけ開ける</div>
+        <div><b class="mode-tag mode-easy">かんたん</b> 4つの中から正解の曲名を選ぶ。4択はランダム</div>
+        <div><b class="mode-tag mode-normal">ふつう</b> 4つの中から正解の曲名を選ぶ。4択は似た曲から</div>
+        <div><b class="mode-tag mode-hard">むずかしい</b> 曲名を入力して答える。開ける情報は3つ</div>
+        <div><b class="mode-tag mode-oni">おに</b> 曲名を入力して答える。1問3分の制限時間、開ける情報は1つだけ</div>
         <div class="muted">どの難易度も、答えられるのは 1 回だけです</div>
       </div>
     </div></div>
@@ -916,7 +918,9 @@ function nextQ(){
   $('ansBtn').classList.toggle('hidden', choice);
   if(choice) renderChoices(r);
   // 難易度の印と、おにの残り時間
-  $('qScore').innerHTML = `<span class="mode-tag ${MODES[game.mode].cls}">${MODES[game.mode].name}</span>` + (game.mode==='oni' ? ' <span class="timer" id="timer"></span>' : '');
+  $('qScore').innerHTML = `<span class="mode-tag ${MODES[game.mode].cls}">${MODES[game.mode].name}</span>` +
+    (OPEN_LIMIT[game.mode] ? ' <span class="open-left" id="openLeft"></span>' : '') + (game.mode==='oni' ? ' <span class="timer" id="timer"></span>' : '');
+  updateOpenLeft();
   startTimer();
   window.scrollTo(0,0); // 次の問題はいつも一番上から
   renderChart();
@@ -1273,7 +1277,7 @@ function worksCell(r){
 }
 // 出題中に伏せる項目。出題設定で★やジャンルが1つに決まっているときは、それは初めから表示する
 function quizHidden(){
-  if(game && game.mode==='easy') return new Set(); // かんたんは最初から全部表示
+  if(game && (game.mode==='easy' || game.mode==='normal')) return new Set(); // かんたん・ふつうは最初から全部表示
   const h = new Set(['lv','bpm','combo','genre','work','ws']);
   if(cfg.lv.length===1) h.delete('lv');
   if(cfg.genre.length===1) h.delete('genre');
@@ -1282,17 +1286,25 @@ function quizHidden(){
 // 伏せた項目をタップ（クリック）で表示する
 $('info').addEventListener('click', e=>{
   const d = e.target.closest('.hid'); if(!d) return;
-  // おにで、答えが出る前は 1 つだけ開ける
-  if(game && game.mode==='oni' && game.q && !game.q.done && game.q.opened){ d.classList.add('flash'); setTimeout(()=>d.classList.remove('flash'), 300); return; }
+  // むずかしいは 3 つ、おには 1 つまで開ける（答えが出たあとは全部見える）
+  const playing = game && game.q && !game.q.done;
+  if(playing && openLeft() <= 0){ d.classList.add('flash'); setTimeout(()=>d.classList.remove('flash'), 300); return; }
   d.classList.remove('hid');
-  if(game && game.q && !game.q.done){ game.q.shown.add(d.dataset.k); game.q.opened = (game.q.opened||0) + 1; }
+  if(playing){ game.q.shown.add(d.dataset.k); game.q.opened = (game.q.opened||0) + 1; updateOpenLeft(); }
   if(d.dataset.k==='bpm') redrawQuizChart();
-  if(game && game.mode==='oni' && game.q && !game.q.done) $('info').querySelectorAll('.hid .mask').forEach(m=>m.textContent='開けません');
 });
 // ヒントの項目（結果発表で、どれを表示したかを出す）
 const HINT_KEYS = [['lv','★の数'], ['bpm','BPM'], ['combo','コンボ'], ['genre','ジャンル'], ['work','初出年'], ['ws','収録']];
 // 時間の表示: 59.9秒 / 2分05秒
 function fmtTime(ms){ const s = ms/1000; if(s < 60) return s.toFixed(1) + '秒'; const m = Math.floor(s/60); return `${m}分${String(Math.floor(s%60)).padStart(2,'0')}秒`; }
+// 開ける情報の残りの数（制限が無い難易度は Infinity）
+const OPEN_LIMIT = {hard: 3, oni: 1};
+function openLeft(){ const lim = game && OPEN_LIMIT[game.mode]; return lim ? lim - ((game.q && game.q.opened) || 0) : Infinity; }
+function updateOpenLeft(){
+  const el = $('openLeft'); if(!el) return;
+  const left = openLeft(); el.textContent = `開ける情報 残り${left}`; el.classList.toggle('zero', left<=0);
+  if(left<=0) $('info').querySelectorAll('.hid .mask').forEach(m=>m.textContent='開けません');
+}
 function revealInfo(){
   const hadBpm = !!$('info').querySelector('.hid[data-k="bpm"]');
   $('info').querySelectorAll('.hid').forEach(d=>d.classList.remove('hid'));

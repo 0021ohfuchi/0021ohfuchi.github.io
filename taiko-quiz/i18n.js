@@ -90,7 +90,7 @@
     '譜面を読み込み中…': 'Loading chart…', '正解！': 'Correct!', 'ざんねん…': 'Too bad…', '時間切れ…': "Time's up…",
     'Wikiで見る': 'View on Wiki', '結果を見る': 'See results', '次の問題へ': 'Next question', 'ここで終了': 'Finish here',
     // 結果
-    '結果発表': 'Results', 'すべて（海外の曲を含む）': 'All (incl. overseas)', '問正解！': 'correct!', '称号': 'RANK', '1問あたり': 'Per question',
+    '結果発表': 'Results', '更新履歴': 'Changelog', 'ドンダフルフェスティバルを選択時に、ミュージックパスを含めるかどうかのチェックボックスを表示するようにしました': 'Added a checkbox to include Music Pass songs when Rhythm Festival is selected', 'すべて（海外の曲を含む）': 'All (incl. overseas)', '問正解！': 'correct!', '称号': 'RANK', '1問あたり': 'Per question',
     '全問\n正解': 'PERFECT!', '達人級': 'MASTER', '名人級': 'EXPERT', '玄人級': 'SKILLED', '修行中': 'TRAINEE', '正解率': 'Accuracy', '合計時間': 'Total time', '正解': 'Correct', '不正解': 'Wrong', '時間切れ': "Time's up",
     '結果をシェア': 'Share your result',
     '結果をシェアするときの画像には、曲名が表示されません': 'Song titles are not shown in the shared result image',

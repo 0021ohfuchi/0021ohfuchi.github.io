@@ -96,15 +96,21 @@ button:disabled{opacity:.45;cursor:default;transform:none}
 #scSetup select{border:2.5px solid #3a2a1e}
 /* スタート・曲を検索: 横長の大きなボタン（デザインは共通、大きさだけ） */
 #scSetup #searchBtn{width:100%;max-width:420px}
-/* スタート: かんたん・ふつう・むずかしい・おに の 4 つ（色は本家の難易度の札に合わせる） */
-.mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:520px}
-#scSetup .mode-btn{height:64px;padding:0 4px;font-size:17px;letter-spacing:.04em;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.35)}
-#scSetup .mode-btn small{display:block;font-size:10px;font-weight:700;letter-spacing:0;opacity:.95}
+#scSetup #startBtn{width:100%;max-width:420px;height:68px;padding:0 24px;font-size:26px;letter-spacing:.12em}
+#scSetup #startBtn:disabled{background:#c9b8a8}
+/* 難易度: かんたん・ふつう・むずかしい・おに（色は本家の難易度の札に合わせる）。選んでいないものは薄くする */
+.mode-row{display:flex;align-items:center;gap:8px}
+.mode-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;flex:1;max-width:460px}
+#scSetup .mode-btn{padding:8px 2px;font-size:15px;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.35);opacity:.45}
+#scSetup .mode-btn.on{opacity:1;box-shadow:inset 0 0 0 2px #fff,0 4px 0 #3a2a1e,0 0 0 3px #ffd25e}
+.mode-help{border:2.5px solid #3a2a1e;font-family:serif;font-style:italic}
+.mode-tip{margin-top:8px;font-size:13px;line-height:1.7;border:2px dashed #e8cfa8;border-radius:12px;padding:8px 10px;background:#fff}
+.mode-tip .mode-tag{margin-right:4px}
 .mode-easy{background:linear-gradient(#ff6a4d,#d9341c)!important}
 .mode-normal{background:linear-gradient(#9ccc48,#5a9a1c)!important}
 .mode-hard{background:linear-gradient(#3aa6c4,#1d6f8c)!important}
 .mode-oni{background:linear-gradient(#ee4fa6,#b31d72)!important}
-#scSetup .mode-btn:disabled{background:#c9b8a8!important}
+
 /* 4択の選択肢 */
 .choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:1;min-width:0}
 .choices button{white-space:normal;text-align:center;font-size:15px;min-height:44px}
@@ -342,13 +348,18 @@ a{color:var(--ka-d);font-weight:700}
   <div class="card">
     <h2>出題設定</h2>
     <div class="setup-cols"><div class="setup-col">
-    <div class="setrow"><span class="lbl">難易度</span><div style="flex:1;min-width:0">
+    <div class="setrow"><span class="lbl">★の数</span><div style="flex:1;min-width:0">
       <div class="row" style="margin-bottom:6px"><button class="blue sm" id="lvAll">すべて</button><button class="blue sm" id="lvNone">クリア</button></div>
       <div class="row" id="lvBox"></div>
     </div></div>
     <div class="setrow"><span class="lbl">ジャンル</span><div style="flex:1;min-width:0">
       <div class="row" style="margin-bottom:6px"><button class="blue sm" id="gAll">すべて</button><button class="blue sm" id="gNone">クリア</button></div>
       <div class="row" id="genreBox"></div>
+    </div></div>
+    <div class="setrow"><span class="lbl">収録年</span><div style="flex:1;min-width:0">
+      <div class="row" style="margin-bottom:6px"><button class="blue sm" id="yAll">すべて</button><button class="blue sm" id="yNone">クリア</button></div>
+      <div id="yearBox"></div>
+      <p class="muted" style="margin:8px 0 0">その譜面が初めて登場した年で選びます。</p>
     </div></div>
     <div class="setrow"><span class="lbl">収録作品</span><div style="flex:1;min-width:0">
       <div class="row" style="margin-bottom:6px"><button class="blue sm" id="wAll">すべて</button><button class="blue sm" id="wNone">クリア</button></div>
@@ -366,13 +377,26 @@ a{color:var(--ka-d);font-weight:700}
       <div class="row" id="sfxBox"></div>
       <p id="bgmNow" style="margin:6px 0 0;font-weight:700;color:#5a2e16"></p>
     </div></div>
-    <div class="row" style="margin-top:18px;justify-content:center;flex-direction:column">
-      <div class="mode-grid" id="modeGrid">
-        <button class="big mode-btn mode-easy" data-mode="easy" title="情報は最初から表示・4択">かんたん<small>情報あり・4択</small></button>
-        <button class="big mode-btn mode-normal" data-mode="normal" title="情報はタップで表示・似た曲から4択">ふつう<small>似た曲の4択</small></button>
-        <button class="big mode-btn mode-hard" data-mode="hard" title="曲名を入力">むずかしい<small>曲名を入力</small></button>
-        <button class="big mode-btn mode-oni" data-mode="oni" title="1問3分・回答は1回・情報は1つだけ">おに<small>3分・1回・情報1つ</small></button>
+    <div class="setrow"><span class="lbl">難易度</span><div style="flex:1;min-width:0">
+      <div class="mode-row">
+        <div class="mode-grid" id="modeGrid">
+          <button class="mode-btn mode-easy" data-mode="easy">かんたん</button>
+          <button class="mode-btn mode-normal" data-mode="normal">ふつう</button>
+          <button class="mode-btn mode-hard" data-mode="hard">むずかしい</button>
+          <button class="mode-btn mode-oni" data-mode="oni">おに</button>
+        </div>
+        <button class="help-btn mode-help" id="modeHelp" title="難易度の違い" aria-label="難易度の違い">i</button>
       </div>
+      <div class="mode-tip hidden" id="modeTip">
+        <div><b class="mode-tag mode-easy">かんたん</b> ★の数・BPM などの情報は最初から表示。曲名を 4 つの中から選ぶ（ほかの 3 つはランダム）</div>
+        <div><b class="mode-tag mode-normal">ふつう</b> 情報はタップで表示。曲名を 4 つの中から選ぶ（同じジャンルで、★の数・最大コンボ数が近い曲から）</div>
+        <div><b class="mode-tag mode-hard">むずかしい</b> 情報はタップで表示。曲名を入力して答える</div>
+        <div><b class="mode-tag mode-oni">おに</b> むずかしい ＋ 1問3分の制限時間。情報は 1 つだけ開ける</div>
+        <div class="muted">どの難易度も、答えられるのは 1 回だけです</div>
+      </div>
+    </div></div>
+    <div class="row" style="margin-top:18px;justify-content:center;flex-direction:column">
+      <button class="primary big" id="startBtn">スタート！</button>
       <span class="muted" id="poolInfo"></span>
     </div>
     <!-- 曲を検索（別画面を開くボタンだけ） -->
@@ -597,7 +621,47 @@ function acWorksOf(g){ return WORKS.filter(w=>w.n>0 && w.kind==='AC' && acGroupO
 function allGroups(){ return acGroups().concat(csHardwares()); }
 function groupWorks(g){ return acGroups().includes(g) ? acWorksOf(g) : csWorksOf(g); }
 function groupsOfWork(w){ return w.kind==='AC' ? [acGroupOf(w)] : w.kind==='CS' ? hwsOf(w) : []; }
+/* 収録年: その譜面が初めて登場した年（r.yr）。年代ごとのタブを開いて 1 年ずつ選ぶ（収録作品のタブと同じ動き） */
+const YEARS = [...new Set(ALL.map(r=>r.yr).filter(Boolean))].sort((a,b)=>a-b);
+const DECADES = [['2000年代～', y=>y<2010], ['2010年代～', y=>y>=2010 && y<2020], ['2020年代～', y=>y>=2020]];
+function decadeYears(name){ const d = DECADES.find(x=>x[0]===name); return d ? YEARS.filter(d[1]) : []; }
+function inYears(r){
+  if(!Array.isArray(cfg.yearOff) || !cfg.yearOff.length) return true;
+  return r.yr ? !cfg.yearOff.includes(r.yr) : false; // 年が分からない譜面は、年をすべて選んでいるときだけ出題する
+}
+function renderYears(){
+  if(!Array.isArray(cfg.yearOff)) cfg.yearOff = [];
+  if(!Array.isArray(cfg.yearOpen)) cfg.yearOpen = DECADES.map(d=>d[0]).filter(n=>decadeYears(n).some(y=>!cfg.yearOff.includes(y)));
+  const box = $('yearBox'); box.innerHTML = '';
+  const row = document.createElement('div'); row.className = 'row'; box.append(row);
+  const decades = DECADES.map(d=>d[0]).filter(n=>decadeYears(n).length);
+  for(const dn of decades){
+    const ys = decadeYears(dn);
+    row.append(chip(dn, cfg.yearOpen.includes(dn), on=>{
+      toggleIn(cfg.yearOpen, dn, on);
+      for(const y of ys) toggleIn(cfg.yearOff, y, true); // 開いたとき・しまったとき、どちらも選ばれていない状態にする
+      saveCfg(); renderSetup();
+    }, `${ys[0]}年〜${ys[ys.length-1]}年`));
+  }
+  for(const dn of decades){
+    if(!cfg.yearOpen.includes(dn)) continue;
+    const ys = decadeYears(dn);
+    const b = document.createElement('div'); b.className = 'hw-titles';
+    b.insertAdjacentHTML('beforeend', `<div class="muted" style="margin:0 0 4px">${esc(dn)}</div>`);
+    const ctl = document.createElement('div'); ctl.className = 'row'; ctl.style.marginBottom = '6px';
+    for(const [label, sel] of [['すべて', true], ['クリア', false]]){
+      const bt = document.createElement('button'); bt.className = 'blue sm'; bt.textContent = label;
+      bt.onclick = ()=>{ for(const y of ys) toggleIn(cfg.yearOff, y, !sel); saveCfg(); renderSetup(); };
+      ctl.append(bt);
+    }
+    b.append(ctl);
+    const yr = document.createElement('div'); yr.className = 'row';
+    for(const y of ys) yr.append(chip(y + '年', !cfg.yearOff.includes(y), on=>{ toggleIn(cfg.yearOff, y, !on); saveCfg(); }, `${ALL.filter(r=>r.yr===y).length}譜面`));
+    b.append(yr); box.append(b);
+  }
+}
 function renderSetup(){
+  renderYears();
   const lvBox=$('lvBox'); lvBox.innerHTML='';
   for(let lv=1;lv<=10;lv++) lvBox.append(chip('★'+lv, cfg.lv.includes(lv), on=>{toggleIn(cfg.lv,lv,on);saveCfg();}));
   const gBox=$('genreBox'); gBox.innerHTML='';
@@ -673,9 +737,12 @@ function pool(){
     (r.s!==3 || r.o1) && // 旧基準の★は同じ譜面の重複なので出さない（旧基準にしか無い昔の曲は出す）
     cfg.lv.includes(r.lv) &&
     (cfg.genre.includes(r.g) || !GENRE_COLOR[r.g]) &&
+    inYears(r) &&
     inWorks(r)
   );
 }
+$('yAll').onclick=()=>{cfg.yearOff=[];cfg.yearOpen=DECADES.map(d=>d[0]);saveCfg();renderSetup();};
+$('yNone').onclick=()=>{cfg.yearOff=YEARS.slice();cfg.yearOpen=[];saveCfg();renderSetup();};
 $('gAll').onclick=()=>{cfg.genre=GENRES.map(g=>g[0]);saveCfg();renderSetup();};
 $('gNone').onclick=()=>{cfg.genre=[];saveCfg();renderSetup();};
 $('wAll').onclick=()=>{cfg.worksOff=[];cfg.hwOpen=allGroups();saveCfg();renderSetup();}; // すべて は全部のまとまりを開いて全作品を選び、クリア は全部しまう
@@ -683,7 +750,7 @@ $('wNone').onclick=()=>{cfg.worksOff=WORKS.map(wkey);cfg.hwOpen=[];saveCfg();ren
 function updatePool(){
   const n = pool().length;
   $('poolInfo').textContent = `出題候補: ${n} 譜面`;
-  document.querySelectorAll('.mode-btn').forEach(b=>b.disabled = n===0);
+  $('startBtn').disabled = n===0;
 }
 $('lvAll').onclick=()=>{cfg.lv=[1,2,3,4,5,6,7,8,9,10];saveCfg();renderSetup();};
 $('lvNone').onclick=()=>{cfg.lv=[];saveCfg();renderSetup();};
@@ -812,7 +879,12 @@ function startGame(mode){
   show('scQuiz');
   nextQ();
 }
-document.querySelectorAll('.mode-btn').forEach(b=>b.onclick=()=>startGame(b.dataset.mode));
+// 難易度ボタンは選ぶだけ（スタート！で始める）。選んだ難易度は覚えておく
+function renderModes(){ document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('on', b.dataset.mode===(cfg.mode||'hard'))); }
+document.querySelectorAll('.mode-btn').forEach(b=>b.onclick=()=>{ cfg.mode=b.dataset.mode; saveCfg(); renderModes(); });
+$('modeHelp').onclick=()=>$('modeTip').classList.toggle('hidden');
+renderModes();
+$('startBtn').onclick=()=>startGame(cfg.mode||'hard');
 $('againBtn').onclick=()=>startGame(game && game.mode);
 $('backBtn').onclick=()=>{renderSetup();show('scSetup');};
 
@@ -1007,7 +1079,7 @@ function submit(){
   hideSugg();
   if(isCorrect(v,q.r)){finishQ(true); return;}
   playSE(false);
-  if(game.mode==='oni'){ finishQ(false); return; } // おには回答が 1 回だけ。間違えたら答えを出す
+  if(game.mode==='oni' || game.mode==='hard'){ finishQ(false); return; } // 回答は 1 回だけ。間違えたら答えを出す
   if(!q.wrong.includes(v)) q.wrong.push(v);
   const h0 = $('answerArea').offsetHeight;
   $('wrongs').innerHTML = q.wrong.map(w=>`<span>${esc(w)}</span>`).join('');
@@ -1072,7 +1144,7 @@ function endGame(){
       if(same){ det.classList.add('hidden'); return; }
       b.classList.add('sel');
       det.innerHTML = `<div class="muted">第${i+1}問 ・ ${x.ok?'正解':(x.timeout?'時間切れ':'不正解')} ・ 回答時間 ${fmtTime(x.ms||0)}</div>`+
-        `<div class="t">${esc(x.r.n)}</div><div class="muted">★×${x.r.lv} ・ ${esc(x.r.g)}${x.r.w?' ・ 初出 '+esc(x.r.w):''}</div>`+
+        `<div class="t">${esc(x.r.n)}</div><div class="muted">★×${x.r.lv} ・ ${esc(x.r.g)}${x.r.dt?' ・ 初出 '+esc(x.r.dt):x.r.yr?' ・ 初出 '+x.r.yr+'年':''}</div>`+
         `<a href="${wikiUrl(x.r)}" target="_blank" rel="noopener">Wikiで見る</a>`;
       det.classList.remove('hidden');
     };
@@ -1185,11 +1257,11 @@ function fmtBpm(b){
 function infoHTML(r, hide, withWorks){
   const cell = (key, inner)=> hide && hide.has(key)
     ? `<div class="hid" data-k="${key}" title="タップで表示">${inner}<span class="mask">タップで表示</span></div>` : `<div>${inner}</div>`;
-  return cell('lv', `<div class="k">難易度</div><div class="v">★×${r.lv}</div>`)+ /* 旧基準かどうかは出さない（出題される旧基準の譜面は、旧基準にしか無い曲だけ） */
+  return cell('lv', `<div class="k">★の数</div><div class="v">★×${r.lv}</div>`)+ /* 旧基準かどうかは出さない（出題される旧基準の譜面は、旧基準にしか無い曲だけ） */
     cell('bpm', `<div class="k">BPM</div><div class="v">${esc(fmtBpm(r.bpm))}</div>`)+
     cell('combo', `<div class="k">最大コンボ数</div><div class="v">${esc(r.c||'?')}</div>`)+
     cell('genre', `<div class="k">ジャンル</div><div class="v"><span class="gchip" style="background:${GENRE_COLOR[r.g]||'#eee'}">${esc(r.g)}</span></div>`)+
-    cell('work', `<div class="k">初出作品</div><div class="v">${r.w?esc(r.w):'不明'}</div>${r.dt?`<div class="k">${esc(r.dt)}</div>`:''}`)+
+    cell('work', `<div class="k">初出年</div><div class="v">${r.dt?esc(r.dt):r.yr?r.yr+'年':'不明'}</div>`)+ /* 初めて登場した日（分からなければ年） */
     (withWorks ? cell('ws', worksCell(r)) : '');
 }
 // 収録作品（出題画面用）。多いときは最初の数作品と「ほか N 作品」。全部はマウスを乗せると見られる
@@ -1218,7 +1290,7 @@ $('info').addEventListener('click', e=>{
   if(game && game.mode==='oni' && game.q && !game.q.done) $('info').querySelectorAll('.hid .mask').forEach(m=>m.textContent='開けません');
 });
 // ヒントの項目（結果発表で、どれを表示したかを出す）
-const HINT_KEYS = [['lv','難易度'], ['bpm','BPM'], ['combo','コンボ'], ['genre','ジャンル'], ['work','初出'], ['ws','収録']];
+const HINT_KEYS = [['lv','★の数'], ['bpm','BPM'], ['combo','コンボ'], ['genre','ジャンル'], ['work','初出年'], ['ws','収録']];
 // 時間の表示: 59.9秒 / 2分05秒
 function fmtTime(ms){ const s = ms/1000; if(s < 60) return s.toFixed(1) + '秒'; const m = Math.floor(s/60); return `${m}分${String(Math.floor(s%60)).padStart(2,'0')}秒`; }
 function revealInfo(){

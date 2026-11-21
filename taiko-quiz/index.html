@@ -1445,7 +1445,9 @@ function doSearch(){
       if(grp){ const g = grp(s); if(g!==last){ last = g; box.insertAdjacentHTML('beforeend', `<div class="sgrp">${esc(g)}</div>`); } }
       const b = document.createElement('button');
       b.innerHTML = `${esc(s.name)}<small>${s.lvText}</small>`;
-      b.onclick = ()=>{ search.scroll = box.scrollTop; search.song = s; search.idx = 0; showSong(); };
+      // 詳細では表譜面・裏譜面をまとめてタブで切り替えられるようにする（押した側の譜面から開く）
+      b.onclick = ()=>{ search.scroll = box.scrollTop; const all = s.song ? s.song.charts : s.charts;
+        search.song = Object.assign({}, s, {name: s.song ? s.song.name : s.name, charts: all}); search.idx = Math.max(0, all.indexOf(s.charts[0])); showSong(); };
       box.append(b);
     }
   };

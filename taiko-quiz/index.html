@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>太鼓の達人 曲名当てクイズ</title>
-<script src="i18n.js?v=20261121e"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
+<script src="i18n.js?v=20261121f"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 4 44 44'%3E%3Ccircle cx='22' cy='26' r='20' fill='%233a2a1e'/%3E%3Ccircle cx='22' cy='26' r='17.5' fill='%23fff'/%3E%3Ccircle cx='22' cy='26' r='15' fill='%23ff4b3e'/%3E%3Cpath d='M18.5 18.5 L28.5 16 V30.2 M18.5 18.5 V32.5' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linejoin='round' stroke-linecap='round'/%3E%3Cellipse cx='15.6' cy='33' rx='3.6' ry='2.8' fill='%23fff' transform='rotate(-20 15.6 33)'/%3E%3Cellipse cx='25.6' cy='30.7' rx='3.6' ry='2.8' fill='%23fff' transform='rotate(-20 25.6 30.7)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -133,6 +133,64 @@ button:disabled{opacity:.45;cursor:default;transform:none}
 .qgrid button b{display:block;font-size:18px}
 .qgrid button.ok b{color:var(--ok)} .qgrid button.ng b{color:var(--ng)}
 .qgrid button.sel{background:#ffd36b}
+/* 結果発表: 結果画像と同じデザイン（赤〜オレンジの背景に白いカード、正解数・称号のハンコ・数字・問題ごとの結果） */
+.rc{position:relative;overflow:hidden;max-width:820px;margin:0 auto 18px;padding:16px 18px 24px;border-radius:28px;border:3px solid #3a2a1e;box-shadow:0 6px 0 #3a2a1e;
+  background:radial-gradient(circle at 50% 100%,transparent 0 17px,rgba(255,255,255,.13) 17px 20px,transparent 20px 31px,rgba(255,255,255,.13) 31px 34px,transparent 34px 45px,rgba(255,255,255,.13) 45px 48px,transparent 48px) 0 0/100px 46px,
+    linear-gradient(135deg,#ff3d3d,#ff9a3d)}
+.rc-title{display:flex;align-items:center;gap:12px;color:#fff;margin:0 4px 14px}
+.rc-title .logo-icon{width:56px;height:56px}
+.rc-title b{font-size:32px;font-weight:800;letter-spacing:.06em;text-shadow:3px 3px 0 rgba(0,0,0,.22)}
+.rc-card{background:#fffaf0;border:4px solid #3a2a1e;border-radius:24px;box-shadow:0 7px 0 #3a2a1e;padding:16px 20px 18px}
+.rc-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rc-mode{color:#fff;font-weight:800;font-size:17px;padding:3px 18px;border-radius:999px;border:3px solid #3a2a1e;text-shadow:1px 1px 0 rgba(0,0,0,.3)}
+.rc-date{color:#9a8573;font-weight:700;font-size:15px}
+.rc-main{display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 12px}
+.rc-score{flex:1;text-align:center;min-width:0}
+.rc-score .num{display:inline-block;font-size:100px;font-weight:800;color:#ff3d3d;text-shadow:5px 5px 0 #ffd36b;line-height:1;animation:pop .5s cubic-bezier(.3,1.6,.6,1)}
+.rc-score .of{font-size:44px;font-weight:800;color:#3a2a1e;margin-left:8px}
+.rc-cap{font-size:20px;font-weight:800;color:#3a2a1e}
+.rc-stamp{flex:none;width:124px;height:124px;border-radius:50%;border:6px solid #d9241c;box-shadow:inset 0 0 0 5px #fff,inset 0 0 0 7px #d9241c;background:rgba(255,255,255,.9);
+  color:#d9241c;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-12deg);font-weight:800;text-align:center}
+.rc-stamp b{font-size:26px;line-height:1.1;padding:0 8px}
+.rc-stamp small{font-size:12px;margin-top:2px}
+.rc-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 14px}
+.rc-stats>div{background:#fff1c9;border-radius:16px;padding:6px 4px 8px;text-align:center}
+.rc-stats .k{font-size:12px;color:#9a7b5f;font-weight:700}
+.rc-stats .v{font-size:26px;font-weight:800;color:#3a2a1e;line-height:1.25}
+/* 問題ごとの結果: 20 問までは音符・番号・曲名・時間（2 列、左の列から上→下）。押すと詳細 */
+.rc-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:column;gap:4px 14px}
+#scEnd .rc-list button{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;box-shadow:none;border-radius:12px;padding:4px 10px 4px 6px;
+  text-align:left;font-size:15px;min-height:0;color:#3a2a1e;letter-spacing:0;transform:none}
+#scEnd .rc-list button.alt{background:rgba(255,211,107,.2)}
+#scEnd .rc-list button.sel{background:#ffd36b}
+.rc-list .don{width:30px;height:30px;flex:none}
+.rc-list .no{flex:none;min-width:1.8em;color:#9a8573;font-size:12px;font-weight:800}
+.rc-list .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800}
+.rc-list .ng .nm{color:#8f8378}
+.rc-list .tm{flex:none;color:#9a8573;font-size:12px;font-weight:700}
+/* 21 問以上は音符だけ */
+.rc-notes{display:grid;grid-template-columns:repeat(10,minmax(0,42px));justify-content:center;gap:4px} /* 結果画像と同じ 1 行 10 個 */
+#scEnd .rc-notes button{background:none;border:none;box-shadow:none;padding:2px;min-height:0;border-radius:50%;transform:none}
+#scEnd .rc-notes button.sel{background:#ffd36b}
+.rc-notes .don{width:100%;height:auto;display:block}
+@media (max-width:560px){
+  .rc{padding:12px 10px 18px;border-radius:22px}
+  .rc-title .logo-icon{width:44px;height:44px}
+  .rc-title b{font-size:24px}
+  .rc-card{padding:12px 12px 14px;border-radius:18px}
+  .rc-score .num{font-size:72px}
+  .rc-score .of{font-size:32px}
+  .rc-cap{font-size:16px}
+  .rc-stamp{width:96px;height:96px;border-width:5px}
+  .rc-stamp b{font-size:19px}
+  .rc-stats{gap:6px}
+  .rc-stats .v{font-size:18px}
+  .rc-stats .k{font-size:11px}
+  .rc-list{grid-template-columns:minmax(0,1fr);grid-auto-flow:row}
+  #scEnd .rc-list button.alt{background:none}
+  #scEnd .rc-list button:nth-child(odd){background:rgba(255,211,107,.2)}
+  #scEnd .rc-list button.sel{background:#ffd36b}
+}
 .qdetail{border:2px dashed var(--line);border-radius:14px;padding:10px 14px;margin:8px 0;font-size:14px}
 .qdetail .t{font-size:18px;font-weight:800}
 .setrow{display:flex;gap:10px;align-items:flex-start;margin:12px 0;flex-wrap:wrap}
@@ -506,11 +564,22 @@ a{color:var(--ka-d);font-weight:700}
 
 <!-- ===== 結果 ===== -->
 <section id="scEnd" class="hidden">
+  <!-- 結果発表（SNS に貼る結果画像と同じデザイン） -->
+  <div class="rc">
+    <div class="rc-title" id="rcTitle"><b>結果発表</b></div>
+    <div class="rc-card">
+      <div class="rc-top"><span class="rc-mode" id="rcMode"></span><span class="rc-date" id="rcDate"></span></div>
+      <div class="rc-main">
+        <div class="rc-score"><div><span class="num" id="endTotal"></span><span class="of" id="rcOf"></span></div><div class="rc-cap">問正解！</div></div>
+        <div class="rc-stamp"><b id="rcRank"></b><small>称号</small></div>
+      </div>
+      <div class="rc-stats" id="endSub"></div>
+      <div id="endTable"></div>
+      <div class="qdetail hidden" id="endDetail"></div>
+    </div>
+  </div>
   <div class="card">
-    <h2>結果発表</h2>
-    <div class="total" id="endTotal"></div>
-    <div class="end-stats" id="endSub"></div>
-    <div class="share" id="shareBox" data-html2canvas-ignore>
+    <div class="share" id="shareBox">
       <span class="muted">結果をシェア</span>
       <button class="sh-x" id="shareX" title="X（旧Twitter）でシェア"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.8l-5.3-6.9L4.8 22H1.7l8.1-9.3L1.5 2h6.9l4.8 6.4L18.9 2zm-1.2 18h1.9L7.4 3.9h-2L17.7 20z"/></svg>X</button>
       <button class="sh-th" id="shareTh" title="Threads でシェア"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.3 11.1c-.1 0-.2-.1-.3-.1-.2-3.1-1.9-4.9-4.7-4.9h-.1c-1.7 0-3.1.7-3.9 2l1.5 1c.6-.9 1.6-1.1 2.4-1.1 1 0 1.7.3 2.2.9.3.4.6 1 .7 1.7-.8-.1-1.6-.2-2.5-.1-2.5.1-4.1 1.6-4 3.6.1 1 .6 1.9 1.4 2.5.7.5 1.7.7 2.7.7 1.3-.1 2.3-.6 3-1.5.5-.7.9-1.6 1-2.7.6.4 1.1.9 1.3 1.5.5 1 .5 2.7-.9 4.1-1.2 1.2-2.7 1.8-4.9 1.8-2.4 0-4.3-.8-5.5-2.3-1.1-1.4-1.7-3.5-1.7-6.1s.6-4.7 1.7-6.1C6.9 4.4 8.7 3.6 11.1 3.6c2.5 0 4.3.8 5.6 2.3.6.8 1.1 1.7 1.4 2.8l1.8-.5c-.4-1.4-1-2.6-1.8-3.6C16.5 2.7 14.1 1.7 11.1 1.7 8.1 1.7 5.8 2.7 4.3 4.6 2.9 6.4 2.2 8.9 2.2 12s.7 5.6 2.1 7.4c1.5 1.9 3.8 2.9 6.8 2.9 2.7 0 4.6-.7 6.2-2.3 2.1-2.1 2-4.7 1.3-6.3-.5-1.1-1.4-2-2.6-2.6h1.3zm-4.6 4.4c-1.1.1-2.2-.4-2.3-1.4 0-.8.5-1.6 2.3-1.7h.6c.6 0 1.2.1 1.8.2-.2 2.4-1.3 2.9-2.4 2.9z"/></svg>Threads</button>
@@ -518,9 +587,7 @@ a{color:var(--ka-d);font-weight:700}
       <button id="shareMore" class="hidden" title="ほかのアプリでシェア">その他</button>
       <div class="muted" id="shareMsg" style="flex-basis:100%;text-align:center;min-height:1.4em"></div>
     </div>
-    <div class="qgrid" id="endTable"></div>
-    <div class="qdetail hidden" id="endDetail" data-html2canvas-ignore></div>
-    <div class="row" style="justify-content:center;margin-top:16px" data-html2canvas-ignore>
+    <div class="row" style="justify-content:center;margin-top:8px">
       <button class="primary big" id="againBtn">同じ設定でもう一度</button>
       <button class="big" id="backBtn">トップに戻る</button>
     </div>
@@ -1183,17 +1250,26 @@ function endGame(){
   stopSong(); stopTimer();
   game.ended=true;
   const h=game.history, n=h.length, okN=correctCount();
-  $('endTotal').textContent = `${okN} / ${n} 問正解`;
-  const total = h.reduce((a,x)=>a+(x.ms||0),0);
-  $('endSub').innerHTML = n ? `<div><div class="k">難易度</div><div class="v"><span class="mode-tag ${MODES[game.mode].cls}" style="font-size:20px">${MODES[game.mode].name}</span></div></div>`+
-    `<div><div class="k">正解率</div><div class="v">${Math.round(okN/n*100)}%</div></div><div><div class="k">合計時間</div><div class="v">${fmtTime(total)}</div></div>` : '';
-  // 問題ごとの結果のマス（1 行 10 問）。押すとその問題の詳細（曲名・時間・Wiki へのリンク）
-  const g = $('endTable'); g.innerHTML = '';
-  g.style.gridTemplateColumns = `repeat(${Math.max(1, Math.min(10, n))}, minmax(0,80px))`; // 1 行 10 問まで
+  const total = h.reduce((a,x)=>a+(x.ms||0),0), acc = n ? okN/n : 0, d = new Date();
+  // 結果画像と同じ: 難易度の札・日付・正解数・称号のハンコ・正解率／合計時間／1問あたり
+  if(!$('rcTitle').querySelector('.logo-icon')) $('rcTitle').prepend(document.querySelector('header .logo-icon').cloneNode(true));
+  $('rcMode').textContent = MODES[game.mode].name; $('rcMode').className = 'rc-mode ' + MODES[game.mode].cls;
+  $('rcDate').textContent = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+  $('endTotal').textContent = okN; $('rcOf').textContent = `/ ${n}`;
+  $('rcRank').textContent = (SHARE_RANKS.find(x=>acc >= x[0]) || SHARE_RANKS[SHARE_RANKS.length-1])[1];
+  $('endSub').innerHTML = [['正解率', Math.round(acc*100) + '%'], ['合計時間', fmtTime(total)], ['1問あたり', fmtTime(n ? total/n : 0)]]
+    .map(([k, v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  // 問題ごとの結果: 20 問までは音符・番号・曲名・時間を 2 列（スマホは 1 列）、それより多いときは音符だけ。押すとその問題の詳細
+  const g = $('endTable'), many = n > 20; g.innerHTML = '';
+  g.className = many ? 'rc-notes' : 'rc-list';
+  const rows = Math.ceil(n / 2); g.style.gridTemplateRows = many ? '' : `repeat(${rows}, auto)`;
   const det = $('endDetail'); det.classList.add('hidden');
   h.forEach((x,i)=>{
     const b = document.createElement('button'); b.className = x.ok ? 'ok' : 'ng';
-    b.innerHTML = `問${i+1}<b>${x.ok?'⭕':'❌'}</b>`;
+    b.title = dispSong(x.r.n, x.r);
+    if(many) b.innerHTML = donSVG(x.ok);
+    else { b.innerHTML = `${donSVG(x.ok)}<span class="no">${i+1}</span><span class="nm">${esc(dispSong(x.r.n, x.r))}</span><span class="tm">${shortTime(x.ms||0)}</span>`;
+      if((i % rows) % 2 === 0) b.classList.add('alt'); }
     b.onclick = ()=>{
       const same = b.classList.contains('sel');
       g.querySelectorAll('button').forEach(y=>y.classList.remove('sel'));
@@ -1358,7 +1434,7 @@ async function drawShareCard(){
     const songLabel = x=>{ const s = dispSong(x.r.n, x.r); return en ? s.replace(/\(裏譜面\)$/, ' (Ura)') : s; };
     // かかった時間は行の右端に小さく（いちばん長い時間の幅だけ曲名の場所を空ける）
     // 1 分以上は 1:05 のように短く書く
-    const tfs = Math.round(fs*0.66), timeOf = x=>{ const s = (x.ms||0)/1000; return s < 60 ? s.toFixed(1) + (en ? 's' : '秒') : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`; };
+    const tfs = Math.round(fs*0.66), timeOf = x=>shortTime(x.ms||0);
     c.font = F(700, tfs); const tw = Math.max(...h.map(x=>c.measureText(timeOf(x)).width));
     const nameX = r*2 + 24 + qw + 14, nameW = colW - 12 - nameX - tw - 14;
     let nfs = fs;
@@ -1516,6 +1592,13 @@ $('info').addEventListener('click', e=>{
 // ヒントの項目（結果発表で、どれを表示したかを出す）
 const HINT_KEYS = [['lv','★の数'], ['bpm','BPM'], ['combo','コンボ'], ['genre','ジャンル'], ['work','初出年'], ['ws','収録']];
 // 時間の表示: 59.9秒 / 2分05秒
+// 結果の時間を短く（1 分未満は 8.3秒、1 分以上は 1:05）
+function shortTime(ms){ const s = ms/1000; return s < 60 ? s.toFixed(1) + (window.LANG==='en' ? 's' : '秒') : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`; }
+// 結果の音符（正解=赤いドン、不正解=灰色の×）
+function donSVG(ok){
+  return `<svg class="don" viewBox="0 0 40 40" aria-label="${ok?'正解':'不正解'}"><circle cx="20" cy="20" r="19" fill="#3a2a1e"/><circle cx="20" cy="20" r="16.3" fill="#fff"/><circle cx="20" cy="20" r="13.7" fill="${ok?'#ff4b3e':'#b9b1a8'}"/>`+
+    (ok ? '<circle cx="20" cy="20" r="6.6" fill="none" stroke="#fff" stroke-width="3.2"/>' : '<path d="M14.6 14.6l10.8 10.8M25.4 14.6L14.6 25.4" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>') + '</svg>';
+}
 function fmtTime(ms){ const s = ms/1000; if(s < 60) return s.toFixed(1) + '秒'; const m = Math.floor(s/60); return `${m}分${String(Math.floor(s%60)).padStart(2,'0')}秒`; }
 // 開ける情報の残りの数（制限が無い難易度は Infinity）
 const OPEN_LIMIT = {oni: 3};

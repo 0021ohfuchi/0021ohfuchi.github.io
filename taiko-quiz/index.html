@@ -335,7 +335,7 @@ a{color:var(--ka-d);font-weight:700}
       <li>ひらがな・カタカナ、英字の大文字・小文字、記号の有無は区別しません。(裏譜面) などのカッコ書きは不要です</li>
       <li>入力中は曲名の候補が出ます（「入力候補」で表示を切り替えられます）</li>
       <li>出題設定の「作品」は、選んだ作品のどれかに収録されている譜面から出題します</li>
-      <li>「曲検索」では、曲ごとの譜面・情報・収録作品を見られます</li>
+      <li>「譜面検索」では、曲ごとの譜面・情報・収録作品を見られます</li>
     </ul>
     <p class="muted" style="font-size:12px;line-height:1.7">
       このコンテンツはファンメイドコンテンツです。ファンメイドコンテンツポリシー（<a href="https://taiko-ch.net/ip_policy/" target="_blank" rel="noopener">https://taiko-ch.net/ip_policy/</a>）のもと制作されています。<br>
@@ -398,8 +398,8 @@ a{color:var(--ka-d);font-weight:700}
     </div>
     <!-- 曲を検索（別画面を開くボタンだけ） -->
     <div class="setup-search">
-      <button class="blue big" id="searchBtn">曲検索</button>
-      <p class="muted" style="margin:8px 0 0;text-align:center;flex-basis:100%">曲名・読み・作品名・アーティスト・作曲者・アニメ名などから曲を探して、譜面・難易度・BPM・最大コンボ数・ジャンル・収録作品を見られます</p>
+      <button class="blue big" id="searchBtn">譜面検索</button>
+      <p class="muted" style="margin:8px 0 0;text-align:center;flex-basis:100%">曲名・読み・作品名・アーティスト・作曲者・アニメ名などから譜面を探して、譜面・難易度・BPM・最大コンボ数・ジャンル・収録作品を見られます</p>
     </div>
     </div></div>
   </div>
@@ -1393,6 +1393,11 @@ function sortSongs(list){
   const c = SORTS[sf.sort] || SORTS.name;
   return c.cmp ? list.slice().sort((a,b)=>c.cmp(a,b) || a.name.localeCompare(b.name,'ja')) : list;
 }
+// 全譜面数（一覧の数え方と同じ: 曲ごとに表譜面と裏譜面を別に数える）
+const TOTAL_ENTRIES = ()=> TOTAL_ENTRIES.n ??= SONG_CHARTS.reduce((n,s)=>{
+  const ura = s.charts.filter(c=>/裏譜面/.test(c.n) && !/^【双打】/.test(c.n) && !SEPARATE_OLD.has(c.n)).length;
+  return n + (ura ? 1 : 0) + (s.charts.length > ura ? 1 : 0);
+}, 0);
 const SEARCH_MAX = 5000; // 絞り込みだけのときは全曲を出す
 function doSearch(){
   const k = norm($('sq').value);
@@ -1400,7 +1405,7 @@ function doSearch(){
   box.classList.remove('hidden');
   $('sDetail').classList.add('hidden'); // 検索し直したら一覧に戻る
   const filtered = !!(sf.lv || sf.genre || sf.work);
-  if(!k && !filtered && sf.sort==='name'){ box.innerHTML = `<span class="muted">曲名・読み・作品名・アーティスト・作曲者・アニメ名などを入力するか、★・ジャンル・作品で絞り込んでください（全 ${SONG_CHARTS.length} 曲）</span>`; return; }
+  if(!k && !filtered && sf.sort==='name'){ box.innerHTML = `<span class="muted">曲名・読み・作品名・アーティスト・作曲者・アニメ名などを入力するか、★・ジャンル・作品で絞り込んでください（全 ${TOTAL_ENTRIES()} 譜面）</span>`; return; }
   let starts=[], incl=[], works=[], wHits=[], mHits=[];
   if(k){
     for(const s of SONG_CHARTS){
@@ -1432,7 +1437,7 @@ function doSearch(){
         w0: ws2.size ? Math.min(...ws2) : 1e9});
     });
   }).filter(sfPass));
-  const songCount = list=>new Set(list.map(e=>e.song)).size; // 曲数は表・裏をまとめて数える
+  const songCount = list=>list.length; // 数は譜面（一覧のボタン。表譜面と裏譜面は別に数える）
   const nameHits = entries(starts.concat(incl), workSet([]));
   const wEnt = entries(wHits, workSet(works));
   const limit = k ? 80 : SEARCH_MAX;
@@ -1451,17 +1456,17 @@ function doSearch(){
       box.append(b);
     }
   };
-  if(hits.length && (filtered || !k)) box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;font-weight:700">${songCount(nameHits)} 曲</div>`);
+  if(hits.length && (filtered || !k)) box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;font-weight:700">${songCount(nameHits)} 譜面</div>`);
   addList(hits);
   if(nameHits.length > hits.length) box.insertAdjacentHTML('beforeend', `<span class="muted">ほか ${nameHits.length-hits.length} 件（${k?'もっと詳しく入力':'さらに絞り込んで'}ください）</span>`);
   if(wEnt.length){
     const inName = songCount(nameHits.filter(s=>works.some(w=>s.ws.has(w.i))));
-    box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">作品「${works.map(w=>esc(w.name)).join('」「')}」の収録曲: ${songCount(wEnt) + inName} 曲</div>`);
+    box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">作品「${works.map(w=>esc(w.name)).join('」「')}」の収録譜面: ${songCount(wEnt) + inName} 譜面</div>`);
     addList(wEnt);
   }
   const mEnt = entries(mHits, workSet([]));
   if(mEnt.length){
-    box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">アーティスト・作曲者・アニメ名などで見つかった曲: ${songCount(mEnt)} 曲</div>`);
+    box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">アーティスト・作曲者・アニメ名などで見つかった譜面: ${songCount(mEnt)} 譜面</div>`);
     addList(mEnt.slice(0, 120));
     if(mEnt.length > 120) box.insertAdjacentHTML('beforeend', `<span class="muted">ほか ${mEnt.length-120} 件</span>`);
   } else if(k && !META_READY && !hits.length && !wEnt.length) box.innerHTML = '<span class="muted">曲の情報を読み込み中です…</span>';

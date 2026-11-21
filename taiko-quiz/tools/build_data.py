@@ -222,7 +222,7 @@ def add_en(r):
     if not en:
         # 英語名の表では副題付きのことがある（例: 季曲 ～Seasons of Asia～）。曲名＋区切り（空白・～・-・(）で始まる行が 1 つだけならそれを使う
         cands = [e for j, e in EN_NAMES.items() if any(j.startswith(x) and len(j) > len(x) and j[len(x)] in ' 　～〜-‐(（「"' for x in {base, plain})]
-        if len(cands) == 1:
+        if len(set(cands)) == 1:
             en = cands[0]
     if en and _enkey(en) != _enkey(base):
         r['e'] = en

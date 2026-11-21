@@ -1,12 +1,16 @@
 # ナムコオリジナル曲の公式英語名を取得して en_names.json（日本語の曲名 → 英語名）に保存する
 # 出典: 太鼓の達人 wiki「収録曲/ナムコオリジナル/英語」（ユーザー指定のページ。NS2/DF・PTB・RC などの公式表記）
-# 1 ページだけ取得する。取れなかったときは前回の en_names.json をそのまま使う。
-import html, json, os, re, sys, urllib.request
+# 取れなかったページがあっても、前回の en_names.json の名前は残す。
+import html, json, os, re, sys, time, urllib.parse, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, 'en_names.json')
-URL = ('https://wikiwiki.jp/he8_hw2jo/%E5%8F%8E%E9%8C%B2%E6%9B%B2/%E3%83%8A%E3%83%A0%E3%82%B3%E3%82%AA%E3%83%AA'
-       '%E3%82%B8%E3%83%8A%E3%83%AB/%E8%8B%B1%E8%AA%9E/%E3%83%86%E3%82%B9%E3%83%88')
+# 1) 譜面とか Wiki「収録曲/ナムコオリジナル/英語/…」（行ごとに分かれたページ。ユーザー指定）
+# 2) 別の太鼓 Wiki のまとめページ（1 で足りない曲を補う）
+FUMEN = 'https://wikiwiki.jp/taiko-fumen/' + urllib.parse.quote('収録曲/ナムコオリジナル/英語/')
+URLS = [FUMEN + urllib.parse.quote(x) for x in ('英数字', 'あ・か行', 'さ・た行', 'な～わ行')] + [
+    'https://wikiwiki.jp/he8_hw2jo/%E5%8F%8E%E9%8C%B2%E6%9B%B2/%E3%83%8A%E3%83%A0%E3%82%B3%E3%82%AA%E3%83%AA'
+    '%E3%82%B8%E3%83%8A%E3%83%AB/%E8%8B%B1%E8%AA%9E/%E3%83%86%E3%82%B9%E3%83%88']
 UA = 'Mozilla/5.0 (personal taiko quiz builder)'
 
 
@@ -33,16 +37,24 @@ def parse(t):
 
 
 def main():
-    try:
-        with urllib.request.urlopen(urllib.request.Request(URL, headers={'User-Agent': UA}), timeout=60) as r:
-            t = r.read().decode('utf-8')
-    except Exception as e:
-        print('en: fetch failed, keep previous', e)
-        return
-    names = parse(t)
-    if len(names) < 100:  # ページの作りが変わったなど。前のデータを残す
+    old = json.load(open(OUT, encoding='utf-8')) if os.path.exists(OUT) else {}
+    names = {}
+    for k, url in enumerate(URLS):
+        if k:
+            time.sleep(15)  # Wiki に負荷をかけないよう間をあける
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': UA}), timeout=60) as r:
+                t = r.read().decode('utf-8')
+        except Exception as e:
+            print('en: fetch failed', url, e)
+            continue
+        for jp, en in parse(t).items():
+            names.setdefault(jp, en)  # 先に読んだページ（譜面とか Wiki）を優先
+    if len(names) < 100:  # 取れなかった・ページの作りが変わったなど。前のデータを残す
         print('en: too few rows, keep previous', len(names))
         return
+    for jp, en in old.items():
+        names.setdefault(jp, en)
     json.dump(names, open(OUT, 'w', encoding='utf-8'), ensure_ascii=False, indent=0, sort_keys=True)
     print('en names', len(names))
 

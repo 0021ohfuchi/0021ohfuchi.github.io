@@ -984,11 +984,12 @@ function worksSummary(){
   const on = w=>!cfg.worksOff.includes(wkey(w));
   const base = WORKS.filter(w=>w.n>0 && w.kind!=='OS'), osOn = WORKS.some(w=>w.n>0 && w.kind==='OS' && on(w));
   if(base.every(on)) return 'すべて' + (osOn ? '（海外の曲を含む）' : '');
-  // まとまり（AC の旧筐体・新筐体・ニジイロ、家庭用のハード）が全部選ばれていればその名前、そうでなければ作品名（家庭用は略称）
+  // AC はまとまり（旧筐体・新筐体・ニジイロ）が全部選ばれていればその名前、そうでなければ作品名。
+  // 家庭用はハード名ではなく作品のタイトル名（正式名称）で書く
   const items = [], done = new Set();
   for(const [g, ws] of acGroups().map(g=>[g, acWorksOf(g)]).concat(csHardwares().map(hw=>[hw, csWorksOf(hw)]))){
-    if(ws.length && ws.every(on)){ items.push(g); ws.forEach(w=>done.add(w)); continue; }
-    for(const w of ws) if(on(w) && !done.has(w)){ items.push(w.short || w.name); done.add(w); }
+    if(ws.length > 1 && ws.every(on) && acGroups().includes(g)){ items.push(g); ws.forEach(w=>done.add(w)); continue; }
+    for(const w of ws) if(on(w) && !done.has(w)){ items.push(w.name); done.add(w); }
   }
   if(osOn) items.push('海外の曲');
   return moreText(items, 3) || '-';
@@ -1420,17 +1421,27 @@ async function drawShareCard(){
 
   // 出題設定（★の数・ジャンル・収録作品）を横に並べる。入りきらなければ文字を小さくする
   const sums = (game.sum || settingsSummary()).map(([k2, v2])=>[tr(k2), tr(v2)]);
-  let sfs = 26;
-  const chipW = f=>sums.map(([k2, v2])=>{ c.font = F(700, Math.round(f*0.75)); const a = c.measureText(k2).width; c.font = F(800, f); return a + 10 + c.measureText(v2).width + 36; });
-  while(sfs > 16 && chipW(sfs).reduce((a, b)=>a + b, 0) + 12*2 > cw - 80) sfs--;
-  { let ws = chipW(sfs), x = W/2 - (ws.reduce((a, b)=>a + b, 0) + 12*2)/2; const yy = cy + 140;
-    sums.forEach(([k2, v2], i)=>{
-      const v3 = fitLine(c, v2, Math.min(ws[i], cw - 80) - 46, sfs, sfs, 800);
+  const chipW = (list, f)=>list.map(([k2, v2])=>{ c.font = F(700, Math.round(f*0.75)); const a = c.measureText(k2).width; c.font = F(800, f); return a + 10 + c.measureText(v2).width + 36; });
+  const rowW = (list, f)=>chipW(list, f).reduce((a, b)=>a + b, 0) + 12*(list.length - 1), maxRow = cw - 80;
+  // 1 行に入らなければ 2 行（★の数・ジャンル／収録作品）にする。それでも長い枠は末尾を … で省く
+  let sfs = 26; while(sfs > 20 && rowW(sums, sfs) > maxRow) sfs--;
+  const rowsOfSet = rowW(sums, sfs) <= maxRow ? [sums] : [sums.slice(0, 2), sums.slice(2)];
+  if(rowsOfSet.length > 1) sfs = 24;
+  const setShift = (rowsOfSet.length - 1) * 50; // 2 行のときは下の段をずらす
+  rowsOfSet.forEach((list, ri)=>{
+    const ws = chipW(list, sfs), over = rowW(list, sfs) - maxRow;
+    if(over > 0) ws[ws.length-1] = Math.max(200, ws[ws.length-1] - over);
+    const yy = cy + 140 + ri*50;
+    let x = W/2 - (ws.reduce((a, b)=>a + b, 0) + 12*(list.length - 1))/2;
+    list.forEach(([k2, v2], i)=>{
+      c.font = F(700, Math.round(sfs*0.75)); const kw = c.measureText(k2).width;
+      const v3 = fitLine(c, v2, ws[i] - kw - 46, sfs, sfs, 800);
       c.fillStyle = '#fff1c9'; rrect(c, x, yy - 22, ws[i], 44, 22); c.fill();
       c.textAlign = 'left'; c.font = F(700, Math.round(sfs*0.75)); c.fillStyle = '#9a7b5f'; c.fillText(k2, x + 18, yy + 1);
-      const kw = c.measureText(k2).width; c.font = F(800, sfs); c.fillStyle = '#3a2a1e'; c.fillText(v3, x + 18 + kw + 10, yy + 1);
+      c.font = F(800, sfs); c.fillStyle = '#3a2a1e'; c.fillText(v3, x + 18 + kw + 10, yy + 1);
       x += ws[i] + 12;
-    }); }
+    });
+  });
 
   // 正解数（大きく）。ハンコ（右）と重ならないよう、左側の幅に収まる大きさにする
   c.textAlign = 'left';
@@ -1442,13 +1453,13 @@ async function drawShareCard(){
   c.font = F(800, 78); let sw = c.measureText(small).width;
   const k = Math.min(1, (areaR - areaL) / (bw + sw + 10)), bs = Math.round(172*k), ss = Math.round(78*k);
   bw *= k; sw *= k;
-  const sx = (areaL + areaR)/2 - (bw + sw)/2, by = cy + 268;
+  const sx = (areaL + areaR)/2 - (bw + sw)/2, by = cy + 268 + setShift;
   c.font = F(800, bs); c.fillStyle = '#ffd36b'; c.fillText(big, sx + 8*k, by + 8*k); c.fillStyle = '#ff3d3d'; c.fillText(big, sx, by);
   c.font = F(800, ss); c.fillStyle = '#3a2a1e'; c.fillText(small, sx + bw + 6, by + 34*k);
   c.textAlign = 'center'; c.font = F(800, 36); c.fillStyle = '#3a2a1e';
   c.fillText(en ? 'correct!' : '問正解！', (areaL + areaR)/2, by + 100);
   if(perfect){ // 全問正解のハンコ（右、少し傾ける）
-    c.save(); c.translate(cx + cw - 172, cy + 280); c.rotate(-0.2);
+    c.save(); c.translate(cx + cw - 172, cy + 280 + setShift); c.rotate(-0.2);
     rrect(c, -122, -46, 244, 92, 8); c.fillStyle = 'rgba(255,255,255,.9)'; c.fill();
     c.lineWidth = 8; c.strokeStyle = '#d9241c'; c.stroke();
     rrect(c, -110, -34, 220, 68, 4); c.lineWidth = 3; c.stroke();
@@ -1459,7 +1470,7 @@ async function drawShareCard(){
 
   // 正解率・合計時間・1問あたり
   const stats = [[en ? 'Accuracy' : '正解率', Math.round(acc*100) + '%'], [en ? 'Total time' : '合計時間', tr(fmtTime(total))], [en ? 'Per question' : '1問あたり', tr(fmtTime(n ? total/n : 0))]];
-  const sy = cy + 400, sbw = (cw - 80 - 40)/3, sh = 104;
+  const sy = cy + 400 + setShift, sbw = (cw - 80 - 40)/3, sh = 104;
   stats.forEach(([lab, v], i)=>{
     const x = cx + 40 + i*(sbw + 20);
     c.fillStyle = '#fff1c9'; rrect(c, x, sy, sbw, sh, 24); c.fill();

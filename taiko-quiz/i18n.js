@@ -131,7 +131,7 @@
     'このコンテンツはファンメイドコンテンツです。ファンメイドコンテンツポリシー（': 'This is fan-made content, created under the Fan-Made Content Policy (',
     '）のもと制作されています。': ').',
     '曲データ・譜面の出典:': 'Song data and charts:',
-    'バグ報告はこちら：': 'Bug reports: ',
+    'バグ報告はこちら：X': 'Bug reports: X', '／ YouTube': '/ YouTube',
     '曲データ（data.js）を読み込めませんでした。そのため作品・譜面が表示されません。ダウンロードしたファイルを直接開くと読み込めないことがあります（特にスマホ）。公開ページ（GitHub Pages など）か、パソコンの start_server.bat から開いてください。':
       'Could not load the song data (data.js). Open the published page, or start_server.bat on a PC.',
   };

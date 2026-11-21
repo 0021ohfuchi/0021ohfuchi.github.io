@@ -167,7 +167,9 @@ button.big{font-size:19px;padding:11px 34px}
 .chart-wrap.gen{background:#fffaf0;border-color:var(--line)}
 .chart-wrap.gen .chart-scroll{overflow:auto}
 .chart-scroll{overflow:auto;overscroll-behavior:contain;touch-action:pan-x pan-y} /* 2 本指の拡大は譜面の枠の中だけで行う（attachPinch） */ /* 譜面の端までスクロールしてもページは動かさない */
-html.noscroll,html.noscroll body{overflow:hidden;height:100%;overscroll-behavior:none}
+/* スマホの出題画面: 譜面の枠を画面に収まる高さで描くので、ページはスクロールしない。
+   overflow:hidden でページを固定すると、隠れたアドレスバーが出せなくなるので固定はしない（引っ張りだけ止める） */
+html.noscroll,html.noscroll body{overscroll-behavior:none}
 .chart-tabs{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
 .answer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 #answerArea,#resultArea{margin-bottom:10px}
@@ -299,17 +301,27 @@ a{color:var(--ka-d);font-weight:700}
   #scSetup .setrow > div{width:100%}
   /* 問題: 第○問と難易度の印を1行目、情報をその下に全幅で */
   .qtop .info{order:3;flex-basis:100%}
-  .info>div{white-space:normal;max-width:100%;padding:3px 10px}
-  .info .v{font-size:15px}
+  /* 情報は2列にまとめて高さを詰める（収録作品は2列ぶん使う） */
+  .info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+  .info>div{white-space:normal;max-width:100%;padding:2px 10px;min-width:0;flex-direction:column;align-items:flex-start;gap:0;border-radius:12px}
+  .info>div[data-k="ws"]{flex-direction:row;align-items:baseline;gap:6px}
+  .info>div[data-k="ws"]{grid-column:1/-1}
+  .info .v{font-size:14px}
+  .info .k{font-size:10px}
+  .gchip{font-size:13px;padding:0 6px}
+  .qtop{margin-bottom:6px;gap:6px}
+  body.wide main{padding-top:22px!important}
   .info .v.ws{max-width:none}
   .info .k{flex:none;white-space:nowrap}
   /* 4択は全幅の2列、あきらめるはその下。長い曲名でも楕円にならないよう角丸は小さめ */
   .answer-row .choices{flex-basis:100%}
-  .choices button{border-radius:16px;font-size:14px;padding:6px 8px}
+  .choices button{border-radius:16px;font-size:13px;padding:4px 6px;min-height:40px;line-height:1.3}
+  #giveupBtn{font-size:13px;padding:5px 16px}
 }
 @media (max-width:380px){
   header h1{font-size:13px}
   header{gap:6px}
+  .gchip{font-size:11px}
 }
 </style>
 </head>
@@ -990,13 +1002,14 @@ function renderChart(){
     sc.append(cv); wrap.append(sc); area.append(wrap);
     // 譜面全体が1画面に収まる大きさで描く（下の回答欄のぶんを残す）
     // 回答欄は譜面の上にあるので、譜面の上端から画面の下端までを使う
-    let maxH = Math.max(260, window.innerHeight - wrap.getBoundingClientRect().top - 28);
+    const narrow = window.innerWidth <= 560; // スマホは譜面の枠をもう少し小さくしてもよい（ページをスクロールさせないため）
+    let maxH = Math.max(narrow ? 180 : 260, window.innerHeight - wrap.getBoundingClientRect().top - (narrow ? 16 : 28));
     sc.style.maxHeight = maxH + 'px';
     FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH, quizChartExtra()));
     // それでもページが画面からはみ出す（スマホで見出しが折り返すときなど）なら、はみ出したぶんだけ譜面の枠を小さくして
     // ページがスクロールしないようにする
     const over = document.documentElement.scrollHeight - window.innerHeight;
-    if(over > 0 && maxH - over - 2 >= 200){
+    if(over > 0 && maxH - over - 2 >= (narrow ? 150 : 200)){
       maxH -= over + 2;
       sc.style.maxHeight = maxH + 'px';
       FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH, quizChartExtra()));
@@ -1252,7 +1265,7 @@ function fmtBpm(b){
 // hide: 伏せておく項目（'lv','bpm','combo','genre','work'）。伏せた項目はタップすると表示する
 function infoHTML(r, hide, withWorks){
   const cell = (key, inner)=> hide && hide.has(key)
-    ? `<div class="hid" data-k="${key}" title="タップで表示">${inner}<span class="mask">タップで表示</span></div>` : `<div>${inner}</div>`;
+    ? `<div class="hid" data-k="${key}" title="タップで表示">${inner}<span class="mask">タップで表示</span></div>` : `<div data-k="${key}">${inner}</div>`;
   return cell('lv', `<div class="k">★の数</div><div class="v">★×${r.lv}</div>`)+ /* 旧基準かどうかは出さない（出題される旧基準の譜面は、旧基準にしか無い曲だけ） */
     cell('bpm', `<div class="k">BPM</div><div class="v">${esc(fmtBpm(r.bpm))}</div>`)+
     cell('combo', `<div class="k">最大コンボ数</div><div class="v">${esc(r.c||'?')}</div>`)+

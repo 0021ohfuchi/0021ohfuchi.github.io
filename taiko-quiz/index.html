@@ -238,9 +238,6 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 .slist button{font-size:13px;padding:4px 14px;box-shadow:inset 0 0 0 2px #fff,0 3px 0 #3a2a1e} /* 曲の一覧は .sm と同じ大きさ */
 .slist button small{color:var(--sub);margin-left:6px;font-weight:500}
 .slist .muted{padding:6px 2px}
-.slist button .smeta{display:block;margin:0;font-size:11px;text-align:left;max-width:22em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sd-meta{margin:4px 0 8px;padding:6px 10px;border:2px dashed #e8cfa8;border-radius:12px;background:#fff;font-size:13px;line-height:1.7}
-.sd-meta div::before{content:'・'}
 .slist .sgrp{flex-basis:100%;margin-top:8px;padding:2px 2px 2px 8px;font-weight:800;font-size:14px;border-left:4px solid var(--don)}
 .slist .sgrp:first-child{margin-top:0}
 .sfilter{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:10px;font-size:14px;font-weight:700}
@@ -1442,13 +1439,12 @@ function doSearch(){
   const hits = nameHits.slice(0, limit);
   box.innerHTML = hits.length || wEnt.length || mHits.length ? '' : '<span class="muted">見つかりませんでした</span>';
   const grp = (SORTS[sf.sort]||{}).grp;
-  const addList = (list, withMeta)=>{
+  const addList = list=>{
     let last = null;
     for(const s of list){
       if(grp){ const g = grp(s); if(g!==last){ last = g; box.insertAdjacentHTML('beforeend', `<div class="sgrp">${esc(g)}</div>`); } }
       const b = document.createElement('button');
       b.innerHTML = `${esc(s.name)}<small>${s.lvText}</small>`;
-      if(withMeta){ const i = s.song.mk.findIndex(x=>x.includes(k)); if(i>=0){ b.insertAdjacentHTML('beforeend', `<small class="smeta">${esc(s.song.meta[i])}</small>`); b.title = s.song.meta[i]; } }
       b.onclick = ()=>{ search.scroll = box.scrollTop; search.song = s; search.idx = 0; showSong(); };
       box.append(b);
     }
@@ -1464,7 +1460,7 @@ function doSearch(){
   const mEnt = entries(mHits, workSet([]));
   if(mEnt.length){
     box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">アーティスト・作曲者・アニメ名などで見つかった曲: ${songCount(mEnt)} 曲</div>`);
-    addList(mEnt.slice(0, 120), true);
+    addList(mEnt.slice(0, 120));
     if(mEnt.length > 120) box.insertAdjacentHTML('beforeend', `<span class="muted">ほか ${mEnt.length-120} 件</span>`);
   } else if(k && !META_READY && !hits.length && !wEnt.length) box.innerHTML = '<span class="muted">曲の情報を読み込み中です…</span>';
 }
@@ -1493,7 +1489,6 @@ function showSong(){
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a></div>
     <div class="info">${infoHTML(r)}</div>
     <div class="sd-works"><span style="border:none;background:none;padding-left:0">収録作品:</span>${works.length?works.map(w=>`<span>${esc(w)}</span>`).join(''):'<span class="muted" style="border:none">不明（取得中の可能性があります）</span>'}</div>
-    ${s.song && s.song.meta && s.song.meta.length ? `<div class="sd-meta">${s.song.meta.map(x=>`<div>${esc(x)}</div>`).join('')}</div>` : ''}
     <div id="sChart"></div>`;
   d.querySelectorAll('.sd-tabs button').forEach(b=>b.onclick=()=>{ search.idx=+b.dataset.i; showSong(); });
   $('sdBack').onclick=backToList;

@@ -90,7 +90,8 @@
     'Wikiで見る': 'View on Wiki', '結果を見る': 'See results', '次の問題へ': 'Next question', 'ここで終了': 'Finish here',
     // 結果
     '結果発表': 'Results', '正解率': 'Accuracy', '合計時間': 'Total time', '正解': 'Correct', '不正解': 'Wrong', '時間切れ': "Time's up",
-    '結果をシェア': 'Share your result', 'X（旧Twitter）でシェア': 'Share on X', 'Threads でシェア': 'Share on Threads',
+    '結果をシェア': 'Share your result',
+    '共有メニューで X を選んでください（結果の画像が添付されます）': 'Choose X in the share menu (the result image will be attached)', 'X（旧Twitter）でシェア': 'Share on X', 'Threads でシェア': 'Share on Threads',
     'Instagram でシェア': 'Share on Instagram', 'ほかのアプリでシェア': 'Share with another app',
     '同じ設定でもう一度': 'Play again', 'トップに戻る': 'Back to top',
     '結果の画像をコピーしました。投稿画面で貼り付け（Ctrl+V）してください': 'Result image copied. Paste it (Ctrl+V) into your post',

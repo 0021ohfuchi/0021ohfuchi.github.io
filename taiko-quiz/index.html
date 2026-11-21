@@ -1105,8 +1105,10 @@ function renderChoices(r){
     if(sameBr.length >= 3) near = sameBr;
     if(near.length >= 3) cands = near.slice(0, 6);
   }
+  // ふつう: 同じシリーズの曲（例: 季曲・蓄勢・春遊、Blue Rose Ruin・Red Rose Evangel）があれば優先して選択肢に入れる
+  const series = game.mode==='normal' && r.sr ? shuffle(DATA.filter(x=>x.sr===r.sr && key(x)!==ans && !/^【双打】/.test(x.n))) : [];
   const picked = [], seen = new Set([ans]);
-  for(const x of shuffle(cands.slice())){ const k = key(x); if(seen.has(k)) continue; seen.add(k); picked.push(x); if(picked.length===3) break; }
+  for(const x of series.concat(shuffle(cands.slice()))){ const k = key(x); if(seen.has(k)) continue; seen.add(k); picked.push(x); if(picked.length===3) break; }
   const opts = shuffle([r].concat(picked));
   const box = $('choices'); box.innerHTML = '';
   for(const o of opts){

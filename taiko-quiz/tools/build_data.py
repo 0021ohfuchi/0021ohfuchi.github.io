@@ -280,6 +280,21 @@ def add_en(r):
         # 英字の曲名にカッコ書きの日本語が付いている曲（例: Butterfly(倖田來未)）は、カッコの中もローマ字にして英語表示に使う
         r['ro'] = ROMAJI_FIX.get(base) or _romaji(base)
 
+# シリーズもの（例: 「Seasons of Asia」シリーズ第4弾、Roseシリーズ第3弾）。曲ページの説明から取り出し、ふつうの 4 択で優先して出す
+# 裏譜面・双打のページには書かれていないことが多いので、表のページ（カッコ書きを除いた名前）のシリーズも使う
+_SERIES_RE = re.compile(r'(?:「([^」]+)」|([A-Za-z0-9ぁ-んァ-ヶー一-龯!！?？\-]{2,20}?))シリーズ(?:の)?第(\d+)弾')
+_series_by_page = {}
+for s in lists:
+    for line in details.get(s['href'], {}).get('meta', []):
+        m = _SERIES_RE.search(line)
+        if m:
+            _series_by_page[s['page'].split('/', 2)[-1]] = m.group(1) or m.group(2)
+            break
+def _page_base(pg):
+    return re.sub(r'\(裏譜面\)$', '', re.sub(r'^【双打】\s*', '', pg)).strip()
+def series_of(pg):
+    return _series_by_page.get(pg) or _series_by_page.get(_page_base(pg))
+
 out = []
 for s in lists:
     d = details.get(s['href'], {})
@@ -338,6 +353,9 @@ for s in lists:
         gs = [r['g']] + [x for x in d['genres'] if x != r['g']]
         if len(gs) > 1:
             r['gs'] = gs
+    sr = series_of(r['p'])
+    if sr:
+        r['sr'] = sr
     add_en(r)
     out.append(r)
 

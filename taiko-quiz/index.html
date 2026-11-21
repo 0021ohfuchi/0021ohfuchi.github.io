@@ -1081,26 +1081,29 @@ function renderChoices(r){
   const key = x => norm(choiceName(x)), ans = key(r);
   let cands = DATA.filter(x=>key(x)!==ans && !/^【双打】/.test(x.n));
   if(game.mode==='normal'){
-    // 譜面分岐のある曲なら、4択もすべて譜面分岐のある曲にする（分岐の有無で答えが分からないように）
-    if(hasBranch(r)){ const br = cands.filter(hasBranch); if(br.length >= 3) cands = br; }
-    // ジャンルはできるだけ合わせる: 同じジャンルの曲 → 足りなければ、ほかのジャンル（複数ジャンルの曲）が重なる曲
+    // 4択の選び方（優先する順: ジャンル → BPM → 譜面分岐）。それぞれ、条件に合う曲が 3 曲以上あるときだけ絞り込む
+    // 1) ジャンル: 同じジャンルの曲 → 足りなければ、ほかのジャンル（複数ジャンルの曲）が重なる曲
     { const gsOf = x=>x.gs||[x.g], rg = gsOf(r);
       const same = cands.filter(x=>x.g===r.g), overlap = cands.filter(x=>gsOf(x).some(g=>rg.includes(g)));
       if(same.length >= 3) cands = same; else if(overlap.length >= 3) cands = overlap; }
-    // 間違えやすい曲を選ぶ: 譜面の見た目（★・最大コンボ数・BPM・平均密度）、ジャンル、時期、曲名の似かたを合わせて点数にし、
-    // いちばん似ている数曲の中から選ぶ。曲名が似ている曲はジャンルや★が少し違っても候補に入れる
+    // 間違えやすい順に並べる: 譜面の見た目（★・最大コンボ数・BPM・平均密度）、譜面分岐、時期、曲名の似かたを合わせた点数
     const sim = x=>nameSim(choiceName(x), choiceName(r));
     const score = x=>{
       const s = sim(x);
       let v = Math.abs(x.lv-r.lv)*2.5 + Math.abs(comboNum(x)-comboNum(r))/35 + bpmGap(x, r)/6 + (bpmGap(x, r) > 20 ? 2 : 0) /* BPM は重め */
-            + (x.d && r.d ? Math.abs(x.d-r.d)*1.5 : 1) + (x.g===r.g ? 0 : 3) + (x.yr && r.yr ? Math.min(Math.abs(x.yr-r.yr), 10)/4 : 1);
+            + (hasBranch(x)===hasBranch(r) ? 0 : 1.5)
+            + (x.d && r.d ? Math.abs(x.d-r.d)*1.5 : 1) + (x.yr && r.yr ? Math.min(Math.abs(x.yr-r.yr), 10)/4 : 1);
       return v - s*9;
     };
-    const near = cands.filter(x=>Math.abs(x.lv-r.lv)<=2 || sim(x)>=0.3).map(x=>[score(x), x]).sort((a,b)=>a[0]-b[0]).map(e=>e[1]);
-    // BPM がなるべく近い曲から選ぶ（差が 30 以内の曲が 3 つ以上あれば、その中から）
+    let near = cands.filter(x=>Math.abs(x.lv-r.lv)<=2 || sim(x)>=0.3).map(x=>[score(x), x]).sort((a,b)=>a[0]-b[0]).map(e=>e[1]);
+    if(near.length < 3) near = cands.map(x=>[score(x), x]).sort((a,b)=>a[0]-b[0]).map(e=>e[1]);
+    // 2) BPM: 差が 30 以内の曲
     const closeBpm = near.filter(x=>bpmGap(x, r) <= 30);
-    if(closeBpm.length >= 3) cands = closeBpm.slice(0, 6);
-    else if(near.length >= 3) cands = near.slice(0, 6);
+    if(closeBpm.length >= 3) near = closeBpm;
+    // 3) 譜面分岐: 正解に分岐があれば分岐のある曲、無ければ分岐のない曲（分岐の有無で答えが分からないように）
+    const sameBr = near.filter(x=>hasBranch(x)===hasBranch(r));
+    if(sameBr.length >= 3) near = sameBr;
+    if(near.length >= 3) cands = near.slice(0, 6);
   }
   const picked = [], seen = new Set([ans]);
   for(const x of shuffle(cands.slice())){ const k = key(x); if(seen.has(k)) continue; seen.add(k); picked.push(x); if(picked.length===3) break; }

@@ -286,6 +286,11 @@ for s in lists:
             r['ch'] = cid
     if r.get('w') in CS_LABEL:
         r['w'] = CS_LABEL[r['w']]  # 初出作品も家庭用は正式名称で出す
+    # 今の AC で複数のジャンルに入っている曲は、そのジャンルを全部（一覧のジャンルを先頭に）
+    if d.get('genres'):
+        gs = [r['g']] + [x for x in d['genres'] if x != r['g']]
+        if len(gs) > 1:
+            r['gs'] = gs
     add_en(r)
     out.append(r)
 

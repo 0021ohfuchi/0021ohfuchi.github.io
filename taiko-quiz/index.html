@@ -1309,7 +1309,7 @@ function endGame(){
       if(same){ det.classList.add('hidden'); return; }
       b.classList.add('sel');
       det.innerHTML = `<div class="muted">第${i+1}問 ・ ${x.ok?'正解':(x.timeout?'時間切れ':'不正解')} ・ 回答時間 ${fmtTime(x.ms||0)}</div>`+
-        `<div class="t">${esc(dispSong(x.r.n, x.r))}</div><div class="muted">★×${x.r.lv} ・ ${esc(x.r.g)}${x.r.dt?' ・ 初出 '+esc(x.r.dt):x.r.yr?' ・ 初出 '+x.r.yr+'年':''}</div>`+
+        `<div class="t">${esc(dispSong(x.r.n, x.r))}</div><div class="muted">★×${x.r.lv} ・ ${esc((x.r.gs||[x.r.g]).join('・'))}${x.r.dt?' ・ 初出 '+esc(x.r.dt):x.r.yr?' ・ 初出 '+x.r.yr+'年':''}</div>`+
         `<a href="${wikiUrl(x.r)}" target="_blank" rel="noopener">Wikiで見る</a>`;
       det.classList.remove('hidden');
     };
@@ -1610,7 +1610,7 @@ function infoHTML(r, hide, withWorks){
   return cell('lv', `<div class="k">★の数</div><div class="v">★×${r.lv}</div>`)+ /* 旧基準かどうかは出さない（出題される旧基準の譜面は、旧基準にしか無い曲だけ） */
     cell('bpm', `<div class="k">BPM</div><div class="v">${esc(fmtBpm(r.bpm))}</div>`)+
     cell('combo', `<div class="k">最大コンボ数</div><div class="v">${esc(r.c||'?')}</div>`)+
-    cell('genre', `<div class="k">ジャンル</div><div class="v"><span class="gchip" style="background:${GENRE_COLOR[r.g]||'#eee'}">${esc(r.g)}</span></div>`)+
+    cell('genre', `<div class="k">ジャンル</div><div class="v">${(r.gs||[r.g]).map(g=>`<span class="gchip" style="background:${GENRE_COLOR[g]||'#eee'}">${esc(g)}</span>`).join(' ')}</div>`) /* 複数のジャンルに入っている曲は全部 */+
     cell('work', `<div class="k">初出年</div><div class="v">${r.dt?esc(r.dt):r.yr?r.yr+'年':'不明'}</div>`)+ /* 初めて登場した日（分からなければ年） */
     (withWorks ? cell('ws', worksCell(r)) : '');
 }

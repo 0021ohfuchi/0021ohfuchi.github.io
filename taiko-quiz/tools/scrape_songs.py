@@ -92,6 +92,36 @@ def parse_meta(t):
     return seen[:8]
 
 
+# 今の AC（ニジイロ）では 1 曲が複数のジャンルに入っていることがある。詳細表では「キッズ(メイン)」「アニメ」のように
+# メインのジャンルとほかのジャンルが同じ行に並ぶ。最後の「(メイン)」の行で有効なジャンルを、メインを先頭にして返す
+GENRE_NAMES = {'ポップス', 'キッズ', 'アニメ', 'ボーカロイド™曲', 'ゲームミュージック', 'バラエティ', 'クラシック', 'ナムコオリジナル', 'どうよう'}
+def parse_genres(t):
+    i = t.find('id="h3_content_1_0"')
+    j = t.find('</table>', i)
+    if i < 0 or j < 0:
+        return []
+    rows = re.findall(r'<tr>(.*?)</tr>', t[i:j], flags=re.S)
+    cells = []  # (行番号, 何行続くか, ジャンル, メインか)
+    for k, tr in enumerate(rows):
+        for attr, c in re.findall(r'<td([^>]*background-color[^>]*)>(.*?)</td>', tr, flags=re.S):
+            x = re.sub(r'\s+', '', html.unescape(re.sub(r'<[^>]+>', '', c)))
+            main = '(メイン)' in x
+            x = re.sub(r'\(メイン\)|\*\d+$', '', x).replace('J-POP', 'ポップス')
+            if x in GENRE_NAMES:
+                rs = re.search(r'rowspan="(\d+)"', attr)
+                cells.append((k, int(rs.group(1)) if rs else 1, x, main))
+    mains = [c for c in cells if c[3]]
+    if not mains:
+        return []
+    last = mains[-1][0]
+    rows_main = {c[0] for c in mains}
+    out = [mains[-1][2]]
+    for k, span, g, main in cells:
+        # (メイン) のある行（またはそこから下に続くセル）で、最後の (メイン) の行まで届いているもの
+        if k <= last and k + span - 1 >= last and (k in rows_main or span > 1 and any(r in rows_main for r in range(k, k + span))) and g not in out:
+            out.append(g)
+    return out if len(out) > 1 else []
+
 def parse(t):
     d = {}
     i = t.find('id="body"')
@@ -173,6 +203,9 @@ def parse(t):
     meta = parse_meta(t)
     if meta:
         d['meta'] = meta
+    genres = parse_genres(t)
+    if genres:
+        d['genres'] = genres
     return d
 
 

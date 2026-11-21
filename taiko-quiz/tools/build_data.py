@@ -140,7 +140,7 @@ CS_INFO = [  # (略称, 正式名称, ハード)
     ('PS4 1', '太鼓の達人 セッションでドドンがドン！', 'PS4'),
     ('NS1', '太鼓の達人 Nintendo Switchば〜じょん！', 'Switch'),
     ('NS RPG', '太鼓の達人 ドコどんRPGパック！', 'Switch'),
-    ('NS2', '太鼓の達人 ドンダフルフェスティバル', 'Switch'),
+    ('NS2', '太鼓の達人 ドンダフルフェスティバル（スイッチ版）', 'Switch'),
     # 複数のハードで出ている作品は、ハードを並べて書く（画面ではそれぞれのハードの中に出る）
     ('Xbox1', '太鼓の達人 The Drum Master!', ['Xbox One', 'Xbox Series X|S', 'Windows']),
     ('DF', '太鼓の達人 ドンダフルフェスティバル', ['PS5', 'Xbox Series X|S', 'Windows', 'Steam']),

@@ -95,9 +95,37 @@ button:disabled{opacity:.45;cursor:default;transform:none}
 /* すべて・クリアなどのボタン: 青（カッ） */
 #scSetup select{border:2.5px solid #3a2a1e}
 /* スタート・曲を検索: 横長の大きなボタン（デザインは共通、大きさだけ） */
-#scSetup #startBtn,#scSetup #searchBtn{width:100%;max-width:420px}
-#scSetup #startBtn{height:68px;padding:0 24px;font-size:26px;letter-spacing:.12em}
-#scSetup #startBtn:disabled{background:#c9b8a8}
+#scSetup #searchBtn{width:100%;max-width:420px}
+/* スタート: かんたん・ふつう・むずかしい・おに の 4 つ（色は本家の難易度の札に合わせる） */
+.mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:520px}
+#scSetup .mode-btn{height:64px;padding:0 4px;font-size:17px;letter-spacing:.04em;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.35)}
+#scSetup .mode-btn small{display:block;font-size:10px;font-weight:700;letter-spacing:0;opacity:.95}
+.mode-easy{background:linear-gradient(#ff6a4d,#d9341c)!important}
+.mode-normal{background:linear-gradient(#9ccc48,#5a9a1c)!important}
+.mode-hard{background:linear-gradient(#3aa6c4,#1d6f8c)!important}
+.mode-oni{background:linear-gradient(#ee4fa6,#b31d72)!important}
+#scSetup .mode-btn:disabled{background:#c9b8a8!important}
+/* 4択の選択肢 */
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:1;min-width:0}
+.choices button{white-space:normal;text-align:center;font-size:15px;min-height:44px}
+.choices button.correct{background:var(--ok);color:#fff}
+.choices button.wrong{background:var(--ng);color:#fff}
+/* おに: 残り時間 */
+.timer{font-weight:800;font-size:15px;background:#b31d72;color:#fff;border-radius:999px;padding:2px 12px;white-space:nowrap}
+.timer.low{background:var(--ng);animation:shake .3s}
+.mode-tag{font-weight:800;font-size:13px;color:#fff;border-radius:999px;padding:2px 10px;white-space:nowrap}
+/* 結果発表: 問題ごとの結果のマス（1 行 10 問） */
+.end-stats{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin:4px 0 12px}
+.end-stats div{text-align:center}
+.end-stats .k{font-size:13px;color:var(--sub);font-weight:700}
+.end-stats .v{font-size:34px;font-weight:800;color:#3a2a1e;line-height:1.2}
+.qgrid{display:grid;gap:6px;margin:6px 0;justify-content:center}
+.qgrid button{padding:4px 0;font-size:12px;line-height:1.3;border-radius:12px;min-width:0}
+.qgrid button b{display:block;font-size:18px}
+.qgrid button.ok b{color:var(--ok)} .qgrid button.ng b{color:var(--ng)}
+.qgrid button.sel{background:#ffd36b}
+.qdetail{border:2px dashed var(--line);border-radius:14px;padding:10px 14px;margin:8px 0;font-size:14px}
+.qdetail .t{font-size:18px;font-weight:800}
 .setrow{display:flex;gap:10px;align-items:flex-start;margin:12px 0;flex-wrap:wrap}
 .setrow + .setrow{margin-top:34px} /* ★の数・ジャンル・作品・問題数の間を1行ぶんあける */
 .setrow .row{flex:1;min-width:0}
@@ -111,7 +139,7 @@ button.big{font-size:19px;padding:11px 34px}
 /* 問題 */
 .qtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .qno{font-weight:800;font-size:15px;background:var(--text);color:#fff;border-radius:999px;padding:2px 12px}
-.score-now{margin-left:auto;font-weight:800;color:#fff;background:var(--pink);border-radius:999px;padding:2px 12px}
+.score-now{margin-left:auto;display:flex;gap:6px;align-items:center} /* 難易度の印と、おにの残り時間 */
 .score-now:empty{display:none}
 /* 問題の情報は1行に並べる（譜面に高さを使うため） */
 .info{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
@@ -129,7 +157,7 @@ button.big{font-size:19px;padding:11px 34px}
 .chart-wrap{border-radius:14px;overflow:hidden;border:3px solid var(--text);background:#cfcfcf;position:relative}
 .chart-wrap.gen{background:#fffaf0;border-color:var(--line)}
 .chart-wrap.gen .chart-scroll{overflow:auto}
-.chart-scroll{overflow:auto;overscroll-behavior:contain} /* 譜面の端までスクロールしてもページは動かさない */
+.chart-scroll{overflow:auto;overscroll-behavior:contain;touch-action:pan-x pan-y} /* 2 本指の拡大は譜面の枠の中だけで行う（attachPinch） */ /* 譜面の端までスクロールしてもページは動かさない */
 html.noscroll,html.noscroll body{overflow:hidden;height:100%;overscroll-behavior:none}
 .chart-tabs{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
 .answer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -339,7 +367,12 @@ a{color:var(--ka-d);font-weight:700}
       <p id="bgmNow" style="margin:6px 0 0;font-weight:700;color:#5a2e16"></p>
     </div></div>
     <div class="row" style="margin-top:18px;justify-content:center;flex-direction:column">
-      <button class="primary big" id="startBtn">スタート！</button>
+      <div class="mode-grid" id="modeGrid">
+        <button class="big mode-btn mode-easy" data-mode="easy" title="情報は最初から表示・4択">かんたん<small>情報あり・4択</small></button>
+        <button class="big mode-btn mode-normal" data-mode="normal" title="情報はタップで表示・似た曲から4択">ふつう<small>似た曲の4択</small></button>
+        <button class="big mode-btn mode-hard" data-mode="hard" title="曲名を入力">むずかしい<small>曲名を入力</small></button>
+        <button class="big mode-btn mode-oni" data-mode="oni" title="1問3分・回答は1回・情報は1つだけ">おに<small>3分・1回・情報1つ</small></button>
+      </div>
       <span class="muted" id="poolInfo"></span>
     </div>
     <!-- 曲を検索（別画面を開くボタンだけ） -->
@@ -362,7 +395,8 @@ a{color:var(--ka-d);font-weight:700}
     <!-- 回答欄・結果の行は譜面の上に置く（スマホでキーボードを出しても入力欄が隠れないように） -->
     <div id="answerArea">
       <div class="answer-row">
-        <div class="answer-box">
+        <div class="choices hidden" id="choices"></div>
+        <div class="answer-box" id="ansInput">
           <input id="ans" type="text" autocomplete="off" placeholder="曲名を入力（Enterで回答）">
           <div class="sugg hidden" id="sugg"></div>
         </div>
@@ -404,7 +438,7 @@ a{color:var(--ka-d);font-weight:700}
   <div class="card">
     <h2>結果発表</h2>
     <div class="total" id="endTotal"></div>
-    <p class="muted" style="text-align:center" id="endSub"></p>
+    <div class="end-stats" id="endSub"></div>
     <div class="share" id="shareBox" data-html2canvas-ignore>
       <span class="muted">結果をシェア</span>
       <button class="sh-x" id="shareX" title="X（旧Twitter）でシェア"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.8l-5.3-6.9L4.8 22H1.7l8.1-9.3L1.5 2h6.9l4.8 6.4L18.9 2zm-1.2 18h1.9L7.4 3.9h-2L17.7 20z"/></svg>X</button>
@@ -413,7 +447,8 @@ a{color:var(--ka-d);font-weight:700}
       <button id="shareMore" class="hidden" title="ほかのアプリでシェア">その他</button>
       <div class="muted" id="shareMsg" style="flex-basis:100%;text-align:center;min-height:1.4em"></div>
     </div>
-    <table class="sum" id="endTable"></table>
+    <div class="qgrid" id="endTable"></div>
+    <div class="qdetail hidden" id="endDetail" data-html2canvas-ignore></div>
     <div class="row" style="justify-content:center;margin-top:16px" data-html2canvas-ignore>
       <button class="primary big" id="againBtn">同じ設定でもう一度</button>
       <button class="big" id="backBtn">トップに戻る</button>
@@ -648,7 +683,7 @@ $('wNone').onclick=()=>{cfg.worksOff=WORKS.map(wkey);cfg.hwOpen=[];saveCfg();ren
 function updatePool(){
   const n = pool().length;
   $('poolInfo').textContent = `出題候補: ${n} 譜面`;
-  $('startBtn').disabled = n===0;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.disabled = n===0);
 }
 $('lvAll').onclick=()=>{cfg.lv=[1,2,3,4,5,6,7,8,9,10];saveCfg();renderSetup();};
 $('lvNone').onclick=()=>{cfg.lv=[];saveCfg();renderSetup();};
@@ -755,25 +790,30 @@ function playSE(ok){
     }
   }catch(e){}
 }
-$('homeBtn').onclick=()=>{ if(game && !game.ended && game.history.length && !confirm('クイズを中断してトップに戻りますか？')) return; stopSong(); game=null; $('hdrStat').textContent=''; renderSetup(); show('scSetup'); };
+$('homeBtn').onclick=()=>{ if(game && !game.ended && game.history.length && !confirm('クイズを中断してトップに戻りますか？')) return; stopSong(); stopTimer(); game=null; $('hdrStat').textContent=''; renderSetup(); show('scSetup'); };
 
 /* ---------- ゲーム ---------- */
 let game = null;
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-function startGame(){
+// 難易度（モード）: easy=かんたん（情報は最初から表示・ランダムな4択）、normal=ふつう（情報はタップで表示・似た曲の4択）、
+// hard=むずかしい（曲名を入力）、oni=おに（むずかしい＋1問3分・回答は1回・情報は1つだけ表示できる）
+const MODES = {easy:{name:'かんたん', cls:'mode-easy'}, normal:{name:'ふつう', cls:'mode-normal'}, hard:{name:'むずかしい', cls:'mode-hard'}, oni:{name:'おに', cls:'mode-oni'}};
+const ONI_LIMIT = 3*60*1000;
+function startGame(mode){
+  mode = MODES[mode] ? mode : (game && game.mode) || 'hard';
   const p = shuffle(pool().slice());
   // 同じ曲(表・裏など)は1回のクイズで1度だけ。読み取れない譜面があれば次の候補で補う
   const seen=new Set(), list=[];
   for(const r of p){const k=keyOf(baseName(r)); if(seen.has(k)) continue; seen.add(k); list.push(r);}
   // 問題数「すべて」は出題候補の全曲（途中で「ここで終了」もできる）
-  game = {list, pos:-1, target: cfg.count || Infinity, all:!cfg.count, history:[], ended:false};
+  game = {list, pos:-1, target: cfg.count || Infinity, all:!cfg.count, history:[], ended:false, mode};
   show('scQuiz');
   nextQ();
 }
-$('startBtn').onclick=startGame;
-$('againBtn').onclick=startGame;
+document.querySelectorAll('.mode-btn').forEach(b=>b.onclick=()=>startGame(b.dataset.mode));
+$('againBtn').onclick=()=>startGame(game && game.mode);
 $('backBtn').onclick=()=>{renderSetup();show('scSetup');};
 
 function correctCount(){ return game.history.filter(x=>x.ok).length; }
@@ -797,10 +837,63 @@ function nextQ(){
   $('answerArea').classList.remove('hidden');
   $('resultArea').classList.add('hidden');
   $('ans').value=''; $('wrongs').innerHTML=''; hideSugg();
+  // かんたん・ふつうは曲名の入力欄の代わりに 4 択の選択肢を出す
+  const choice = game.mode==='easy' || game.mode==='normal';
+  $('ansInput').classList.toggle('hidden', choice);
+  $('choices').classList.toggle('hidden', !choice);
+  $('ansBtn').classList.toggle('hidden', choice);
+  if(choice) renderChoices(r);
+  // 難易度の印と、おにの残り時間
+  $('qScore').innerHTML = `<span class="mode-tag ${MODES[game.mode].cls}">${MODES[game.mode].name}</span>` + (game.mode==='oni' ? ' <span class="timer" id="timer"></span>' : '');
+  startTimer();
   window.scrollTo(0,0); // 次の問題はいつも一番上から
   renderChart();
   updateStat();
-  if(!IS_TOUCH) setTimeout(()=>$('ans').focus(),50); // スマホでは自動で解答欄に合わせない（キーボードで譜面が隠れるため）
+  if(!IS_TOUCH && !choice) setTimeout(()=>$('ans').focus(),50); // スマホでは自動で解答欄に合わせない（キーボードで譜面が隠れるため）
+}
+/* 4択: 正解 1 つ＋ほかの曲 3 つ。かんたんは完全ランダム、ふつうは同じジャンルで難易度・最大コンボ数が近い曲から選ぶ */
+const comboNum = r => parseInt(String(r.c||'').match(/\d+/)) || 0;
+function choiceName(r){ return songName(r); }
+function renderChoices(r){
+  const key = x => norm(choiceName(x)), ans = key(r);
+  let cands = DATA.filter(x=>key(x)!==ans && !/^【双打】/.test(x.n));
+  if(game.mode==='normal'){
+    const same = cands.filter(x=>x.g===r.g && Math.abs(x.lv-r.lv)<=1);
+    // 難易度・最大コンボ数が近い順に並べ、近いほうから少し多めに取ってその中から選ぶ
+    same.sort((a,b)=>(Math.abs(a.lv-r.lv)*150 + Math.abs(comboNum(a)-comboNum(r))) - (Math.abs(b.lv-r.lv)*150 + Math.abs(comboNum(b)-comboNum(r))));
+    if(same.length >= 3) cands = same.slice(0, 12);
+  }
+  const picked = [], seen = new Set([ans]);
+  for(const x of shuffle(cands.slice())){ const k = key(x); if(seen.has(k)) continue; seen.add(k); picked.push(x); if(picked.length===3) break; }
+  const opts = shuffle([r].concat(picked));
+  const box = $('choices'); box.innerHTML = '';
+  for(const o of opts){
+    const b = document.createElement('button'); b.textContent = choiceName(o); b.dataset.ok = o===r ? '1' : '';
+    b.onclick = ()=>{
+      if(game.q.done) return;
+      const ok = o===r;
+      box.querySelectorAll('button').forEach(x=>{ x.disabled = true; if(x.dataset.ok) x.classList.add('correct'); });
+      if(!ok){ b.classList.add('wrong'); playSE(false); }
+      finishQ(ok); // 4択は 1 回だけ
+    };
+    box.append(b);
+  }
+}
+/* おに: 1問3分の制限時間 */
+let timerId = 0;
+function stopTimer(){ clearInterval(timerId); timerId = 0; }
+function startTimer(){
+  stopTimer();
+  if(!game || game.mode!=='oni') return;
+  const q = game.q;
+  const tick = ()=>{
+    if(!game || game.q!==q || q.done){ stopTimer(); return; }
+    const left = Math.max(0, ONI_LIMIT - (performance.now() - q.t0));
+    const el = $('timer');
+    if(el){ el.textContent = `残り ${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,'0')}`; el.classList.toggle('low', left < 30000); }
+    if(left <= 0){ stopTimer(); finishQ(false, '時間切れ…'); }
+  };
+  tick(); timerId = setInterval(tick, 250);
 }
 
 /* ---------- 譜面の読み取り（画像→音符データ）---------- */
@@ -841,13 +934,39 @@ function renderChart(){
       FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH, quizChartExtra()));
     }
     fitWidth(cv, f, sc, chartOpts(wrap, maxH, quizChartExtra()));
+    attachPinch(sc, cv);
     q.redraw = extra=>{ // BPM を表示したときなどに、同じ大きさ・スクロール位置のまま描き直す
       const top = sc.scrollTop;
       FumenParse.renderFumen(cv, f, chartOpts(wrap, maxH, quizChartExtra()));
       fitWidth(cv, f, sc, chartOpts(wrap, maxH, quizChartExtra()));
       sc.scrollTop = top;
+      if(cv._pinchReset) cv._pinchReset();
     };
   });
+}
+// スマホ: 譜面を 2 本指で拡大・縮小し、拡大したら枠の中を上下左右に動かして見られるようにする
+// （ページ全体の拡大では、出題中はページを固定しているので横に動かせないため、譜面の枠の中で拡大する）
+function attachPinch(sc, cv){
+  let scale = 1, base = null, g = null;
+  const size = s=>{ cv.style.width = base.w*s + 'px'; cv.style.height = base.h*s + 'px'; cv.style.margin = s>1 ? '0' : '0 auto'; };
+  cv._pinchReset = ()=>{ scale = 1; base = null; };
+  const dist = ts=>Math.hypot(ts[0].clientX-ts[1].clientX, ts[0].clientY-ts[1].clientY);
+  sc.addEventListener('touchstart', e=>{
+    if(e.touches.length!==2) return;
+    if(!base) base = {w: parseFloat(cv.style.width)/scale, h: parseFloat(cv.style.height)/scale};
+    const rect = sc.getBoundingClientRect(), mx = (e.touches[0].clientX+e.touches[1].clientX)/2 - rect.left, my = (e.touches[0].clientY+e.touches[1].clientY)/2 - rect.top;
+    const cx = (mx + sc.scrollLeft - cv.offsetLeft)/scale, cy = (my + sc.scrollTop)/scale; // 指の真ん中が譜面のどこか（等倍で）
+    g = {d0: dist(e.touches), s0: scale, mx, my, cx, cy};
+  }, {passive: true});
+  sc.addEventListener('touchmove', e=>{
+    if(!g || e.touches.length!==2) return;
+    e.preventDefault();
+    scale = Math.min(4, Math.max(1, g.s0 * dist(e.touches)/g.d0));
+    size(scale);
+    sc.scrollLeft = g.cx*scale - g.mx + (scale>1 ? 0 : cv.offsetLeft);
+    sc.scrollTop = g.cy*scale - g.my;
+  }, {passive: false});
+  sc.addEventListener('touchend', e=>{ if(e.touches.length<2) g = null; });
 }
 // スマホの縦画面: 譜面を段組みせず 1 列で、枠の幅いっぱいに描く（枠の中を縦にスクロールして見る）
 // 縦向きかどうかは端末の向きで判断する（画面の縦横比で判断すると、スマホでキーボードを開いたときに
@@ -888,6 +1007,7 @@ function submit(){
   hideSugg();
   if(isCorrect(v,q.r)){finishQ(true); return;}
   playSE(false);
+  if(game.mode==='oni'){ finishQ(false); return; } // おには回答が 1 回だけ。間違えたら答えを出す
   if(!q.wrong.includes(v)) q.wrong.push(v);
   const h0 = $('answerArea').offsetHeight;
   $('wrongs').innerHTML = q.wrong.map(w=>`<span>${esc(w)}</span>`).join('');
@@ -903,10 +1023,12 @@ if(window.visualViewport) visualViewport.addEventListener('resize', resetScroll)
 $('giveupBtn').onclick=()=>{ if(!game.q.done && confirm('あきらめて答えを見ますか？')) finishQ(false); };
 
 function wikiUrl(r){return WIKI+encodeURIComponent('収録曲/おに/'+r.p).replace(/%2F/g,'/');}
-function finishQ(ok){
+function finishQ(ok, ngText){
   const q=game.q;
+  if(q.done) return;
   q.done=true;
-  game.history.push({r:q.r, ok, ms: performance.now() - q.t0, shown: [...q.shown]}); // 回答にかかった時間と、表示したヒント
+  stopTimer();
+  game.history.push({r:q.r, ok, ms: Math.min(performance.now() - q.t0, game.mode==='oni' ? ONI_LIMIT : Infinity), shown: [...q.shown], timeout: !!ngText}); // 回答にかかった時間
   if(ok) playSE(true); // あきらめたときは効果音なし
   playSong(q.r); // 正解・あきらめたとき、その曲を流す
   revealInfo();  // 答えが出たら、伏せていた情報も全部見せる
@@ -916,7 +1038,7 @@ function finishQ(ok){
   const ra=$('resultArea'); ra.classList.remove('hidden');
   // 回答欄と同じくらいの高さの1行で表示する（譜面と合わせて1画面に収めるため）
   ra.innerHTML = `<div class="result-row">
-      <span class="mark ${ok?'ok':'ng'}">${ok?'正解！':'ざんねん…'}</span>
+      <span class="mark ${ok?'ok':'ng'}">${ok?'正解！':(ngText||'ざんねん…')}</span>
       <span class="title">${esc(r.n)}</span>
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a>
       <span class="sp"></span>
@@ -930,16 +1052,32 @@ function finishQ(ok){
 }
 
 function endGame(){
-  stopSong();
+  stopSong(); stopTimer();
   game.ended=true;
   const h=game.history, n=h.length, okN=correctCount();
   $('endTotal').textContent = `${okN} / ${n} 問正解`;
   const total = h.reduce((a,x)=>a+(x.ms||0),0);
-  $('endSub').textContent = n ? `正解率 ${Math.round(okN/n*100)}% ／ 合計時間 ${fmtTime(total)}` : '';
-  // 問題ごと: 曲名・見たヒント（表示した項目は色つき、見なかった項目は薄い）・回答にかかった時間・結果
-  const hintCells = x => HINT_KEYS.map(([k, label])=>`<span class="hint${(x.shown||[]).includes(k)?' on':''}" title="${label}${(x.shown||[]).includes(k)?'：表示した':'：表示しなかった'}">${label}</span>`).join('');
-  $('endTable').innerHTML = '<tr><th>#</th><th>曲名</th><th>表示したヒント</th><th class="num">時間</th><th class="num">結果</th></tr>' + h.map((x,i)=>
-    `<tr><td>${i+1}</td><td><a href="${wikiUrl(x.r)}" target="_blank" rel="noopener">${esc(x.r.n)}</a></td><td class="hints">${hintCells(x)}</td><td class="num">${x.ms!=null?fmtTime(x.ms):'-'}</td><td class="num">${x.ok?'⭕':'❌'}</td></tr>`).join('');
+  $('endSub').innerHTML = n ? `<div><div class="k">難易度</div><div class="v"><span class="mode-tag ${MODES[game.mode].cls}" style="font-size:20px">${MODES[game.mode].name}</span></div></div>`+
+    `<div><div class="k">正解率</div><div class="v">${Math.round(okN/n*100)}%</div></div><div><div class="k">合計時間</div><div class="v">${fmtTime(total)}</div></div>` : '';
+  // 問題ごとの結果のマス（1 行 10 問）。押すとその問題の詳細（曲名・時間・Wiki へのリンク）
+  const g = $('endTable'); g.innerHTML = '';
+  g.style.gridTemplateColumns = `repeat(${Math.max(1, Math.min(10, n))}, minmax(0,80px))`; // 1 行 10 問まで
+  const det = $('endDetail'); det.classList.add('hidden');
+  h.forEach((x,i)=>{
+    const b = document.createElement('button'); b.className = x.ok ? 'ok' : 'ng';
+    b.innerHTML = `問${i+1}<b>${x.ok?'⭕':'❌'}</b>`;
+    b.onclick = ()=>{
+      const same = b.classList.contains('sel');
+      g.querySelectorAll('button').forEach(y=>y.classList.remove('sel'));
+      if(same){ det.classList.add('hidden'); return; }
+      b.classList.add('sel');
+      det.innerHTML = `<div class="muted">第${i+1}問 ・ ${x.ok?'正解':(x.timeout?'時間切れ':'不正解')} ・ 回答時間 ${fmtTime(x.ms||0)}</div>`+
+        `<div class="t">${esc(x.r.n)}</div><div class="muted">★×${x.r.lv} ・ ${esc(x.r.g)}${x.r.w?' ・ 初出 '+esc(x.r.w):''}</div>`+
+        `<a href="${wikiUrl(x.r)}" target="_blank" rel="noopener">Wikiで見る</a>`;
+      det.classList.remove('hidden');
+    };
+    g.append(b);
+  });
   $('shareBox').classList.toggle('hidden', !n);
   show('scEnd');
   shareMsg('');
@@ -955,7 +1093,7 @@ function shareUrl(){
 function shareText(){
   const h=game.history, n=h.length, okN=correctCount();
   const marks = h.slice(0,30).map(x=>x.ok?'⭕':'❌').join('') + (n>30?'…':'');
-  return `太鼓の達人 曲名当てクイズで ${okN} / ${n} 問正解！（正解率 ${Math.round(okN/n*100)}%）\n${marks}\n#太鼓の達人 #曲名当てクイズ`;
+  return `太鼓の達人 曲名当てクイズ【${MODES[game.mode].name}】で ${okN} / ${n} 問正解！（正解率 ${Math.round(okN/n*100)}%）\n${marks}\n#太鼓の達人 #曲名当てクイズ`;
 }
 /* 結果発表の画面の画像（シェアボタン・下のボタンは写さない）。結果画面を出したらすぐ作っておく
    （スマホの共有はボタンを押した直後でないと開けないため、押してから作ると間に合わないことがある） */
@@ -1063,13 +1201,22 @@ function worksCell(r){
 }
 // 出題中に伏せる項目。出題設定で★やジャンルが1つに決まっているときは、それは初めから表示する
 function quizHidden(){
+  if(game && game.mode==='easy') return new Set(); // かんたんは最初から全部表示
   const h = new Set(['lv','bpm','combo','genre','work','ws']);
   if(cfg.lv.length===1) h.delete('lv');
   if(cfg.genre.length===1) h.delete('genre');
   return h;
 }
 // 伏せた項目をタップ（クリック）で表示する
-$('info').addEventListener('click', e=>{ const d = e.target.closest('.hid'); if(d){ d.classList.remove('hid'); if(game && game.q && !game.q.done) game.q.shown.add(d.dataset.k); if(d.dataset.k==='bpm') redrawQuizChart(); } });
+$('info').addEventListener('click', e=>{
+  const d = e.target.closest('.hid'); if(!d) return;
+  // おにで、答えが出る前は 1 つだけ開ける
+  if(game && game.mode==='oni' && game.q && !game.q.done && game.q.opened){ d.classList.add('flash'); setTimeout(()=>d.classList.remove('flash'), 300); return; }
+  d.classList.remove('hid');
+  if(game && game.q && !game.q.done){ game.q.shown.add(d.dataset.k); game.q.opened = (game.q.opened||0) + 1; }
+  if(d.dataset.k==='bpm') redrawQuizChart();
+  if(game && game.mode==='oni' && game.q && !game.q.done) $('info').querySelectorAll('.hid .mask').forEach(m=>m.textContent='開けません');
+});
 // ヒントの項目（結果発表で、どれを表示したかを出す）
 const HINT_KEYS = [['lv','難易度'], ['bpm','BPM'], ['combo','コンボ'], ['genre','ジャンル'], ['work','初出'], ['ws','収録']];
 // 時間の表示: 59.9秒 / 2分05秒

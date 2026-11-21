@@ -238,7 +238,7 @@ def _romaji(s):
     t = re.sub(r'\s+([!?,.、。~)\]）・])', r'\1', t)   # 記号の前の空白を詰める
     t = re.sub(r'([(\[（~])\s+', r'\1', t)
     t = t.replace('、', ', ').replace('。', '.').replace('・', ' ')
-    t = re.sub(r'(\S)~(?=[A-Za-z])', r' ~', t)  # 副題の始まりの ~ の前は空けて区切る
+    t = re.sub(r'(\S)~(?=[A-Za-z])', r'\1 ~', t)  # 副題の始まりの ~ の前は空けて区切る
     return re.sub(r'\s+', ' ', t).strip()
 def _canon(s):
     s = re.sub(r'[^a-z0-9]', '', s.lower())

@@ -218,6 +218,8 @@ button.big{font-size:19px;padding:11px 34px}
 .info .k{font-size:11px;color:var(--sub);font-weight:700}
 .info .v{font-size:17px;font-weight:800;line-height:1.3}
 .info .v.ws{font-size:14px;white-space:normal;max-width:32em} /* 収録作品は長いので小さめ・折り返しあり */
+.info>div:not(.hid) .v.ws.more{cursor:pointer;text-decoration:underline dotted #b07800;text-underline-offset:3px} /* タップで全部の作品を表示 */
+.info .v.ws.open{max-width:none}
 /* 伏せた情報: 項目名だけ見せて値は「？」。タップで表示 */
 .info .mask{display:none}
 .info>div.hid{cursor:pointer;background:#ffe49a;box-shadow:inset 0 0 0 2px #f5c542}
@@ -1636,6 +1638,15 @@ function infoHTML(r, hide, withWorks){
     (withWorks ? cell('ws', worksCell(r)) : '');
 }
 // 収録作品（出題画面用）。多いときは最初の数作品と「ほか N 作品」。全部はマウスを乗せると見られる
+// 収録作品をタップすると、全部の作品と短い表示を切り替える（伏せている間は、まず情報を開く動きを優先）
+document.addEventListener('click', e=>{
+  const v = e.target.closest && e.target.closest('.info .v.ws.more');
+  if(!v || v.closest('.hid')) return;
+  const open = !v.classList.contains('open');
+  v.classList.toggle('open', open);
+  v.textContent = open ? v.dataset.full : v.dataset.short;
+  if(game && game.q && game.q.redraw && !$('scQuiz').classList.contains('hidden')) setTimeout(()=>renderChart(), 0); // 情報の高さが変わったら譜面を収め直す
+}, true); // 伏せた情報を開く処理より先に見る（開いたのと同じタップで全部表示にならないように）
 function worksCell(r){
   const names = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
   if(!names.length) return '<div class="k">収録作品</div><div class="v">不明</div>';
@@ -1655,7 +1666,9 @@ function worksCell(r){
   }
   const rest = names.length - pick.length;
   const shown = pick.map(i=>WORKS[i].name).join('・') + (rest > 0 ? ` ほか${rest}作品` : '');
-  return `<div class="k">収録作品</div><div class="v ws" title="${esc(names.join('・'))}">${esc(shown)}</div>`;
+  // 省いた作品があるときは、タップで全部の作品と短い表示を切り替える
+  const more = rest > 0 ? ` data-full="${esc(names.join('・'))}" data-short="${esc(shown)}"` : '';
+  return `<div class="k">収録作品</div><div class="v ws${rest > 0 ? ' more' : ''}" title="${esc(names.join('・'))}"${more}>${esc(shown)}</div>`;
 }
 // 出題中に伏せる項目。出題設定で★やジャンルが1つに決まっているときは、それは初めから表示する
 function quizHidden(){

@@ -58,6 +58,40 @@ def text(s):
     return html.unescape(s).strip()
 
 
+# 曲の情報（アーティスト・作詞・作曲・主題歌など）。曲検索で作曲者やアニメ名から探せるようにする
+# 曲ページ冒頭の箇条書きと「その他」節のうち、曲そのものについての文だけを取り出す（譜面・配信の話は除く）
+KW = re.compile(r'アーティスト|歌手|作詞|作曲|編曲|歌唱|ボーカル|歌は|主題歌|テーマ|挿入歌|オープニング|エンディング|OP|ED|BGM|原曲|CM|映画|アニメ|ゲーム|ドラマ|番組|楽曲|曲である|使用|担当|作者|提供|リミックス|アレンジ|名義')
+NG = re.compile(r'配信され|配信開始|収録され|削除|復活|期間|譜面|コンボ|小節|連打|風船|音符|ゴーゴー|スコア|段位|課題曲|難易度|★|BPM|HS|分岐|クリア')
+def _txt(s):
+    s = re.sub(r'<a [^>]*class="note_super[^"]*"[^>]*>.*?</a>', '', s, flags=re.S)
+    s = re.sub(r'<rp>.*?</rp>|<rt>.*?</rt>', '', s, flags=re.S)
+    s = re.sub(r'<[^>]+>', '', s)
+    return re.sub(r'\s+', ' ', html.unescape(s)).strip()
+def _items(seg):
+    seg = re.sub(r'<div class="lazy-dom-placeholder".*?loading\.\.\.', '', seg, flags=re.S)
+    seg = re.sub(r'<div class="fold-container.*', '', seg, flags=re.S)
+    # 入れ子の li は外側の li の中身から切り離して、それぞれ 1 行にする
+    seg = re.sub(r'<(ul|ol)[^>]*>', '\n', seg); seg = re.sub(r'</(ul|ol)>', '\n', seg)
+    out = []
+    for part in re.split(r'<li[^>]*>|</li>|\n', seg):
+        x = _txt(part)
+        if x and x.endswith('。') and '<' not in x: out.append(x)
+    return out
+def parse_meta(t):
+    lines = []
+    i = t.find('<div id="content">')
+    if i < 0: return lines
+    j = t.find('<h3', i)
+    intro = _items(t[i:j]) if j > 0 else []
+    lines += [x for x in intro if len(x) <= 120]
+    m = re.search(r'<h3[^>]*>\s*その他.*?</h3>(.*?)(?=<h3|運営からのお知らせ|<div id="comment)', t[j:], flags=re.S)
+    if m:
+        for x in _items(m.group(1)):
+            if KW.search(x) and not NG.search(x) and len(x) <= 140: lines.append(x)
+    seen = []; [seen.append(x) for x in lines if x not in seen]
+    return seen[:8]
+
+
 def parse(t):
     d = {}
     i = t.find('id="body"')
@@ -136,6 +170,9 @@ def parse(t):
     vids.sort(key=lambda v: v[0])
     if vids:
         d['yt'] = [[r, i] for r, i in vids[:3]]
+    meta = parse_meta(t)
+    if meta:
+        d['meta'] = meta
     return d
 
 

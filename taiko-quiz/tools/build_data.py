@@ -254,6 +254,15 @@ js += 'window.QUIZ_WORKS_TOTAL=' + str(WORKS_TOTAL) + ';\n'
 js += 'window.QUIZ_WORKS_DONE=' + str(WORKS_DONE) + ';\n'
 js += 'window.QUIZ_DATA=' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + ';\n'
 open(os.path.join(HERE, '..', 'data.js'), 'w', encoding='utf-8').write(js)
+# 曲検索用の曲の情報（アーティスト・作詞・作曲・主題歌など）。曲ページ名 → 文の一覧。出題には使わない
+meta = {}
+for s in lists:
+    m = details.get(s['href'], {}).get('meta')
+    if m:
+        meta.setdefault(s['page'].split('/', 2)[-1], m)
+open(os.path.join(HERE, '..', 'meta.js'), 'w', encoding='utf-8').write(
+    '// 自動生成: tools/build_data.py（曲検索用の曲の情報）\n// 出典: 太鼓の達人 譜面とか Wiki (https://wikiwiki.jp/taiko-fumen/)\nwindow.QUIZ_META='
+    + json.dumps(meta, ensure_ascii=False, separators=(',', ':')) + ';\n')
 # 設定画面の BGM: taiko-quiz フォルダ直下の mp3 の一覧（ブラウザはフォルダの中身を調べられないため）
 ROOT = os.path.join(HERE, '..')
 mp3s = sorted(f for f in os.listdir(ROOT) if f.lower().endswith('.mp3') and os.path.isfile(os.path.join(ROOT, f)))

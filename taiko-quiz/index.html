@@ -238,6 +238,9 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 .slist button{font-size:13px;padding:4px 14px;box-shadow:inset 0 0 0 2px #fff,0 3px 0 #3a2a1e} /* 曲の一覧は .sm と同じ大きさ */
 .slist button small{color:var(--sub);margin-left:6px;font-weight:500}
 .slist .muted{padding:6px 2px}
+.slist button .smeta{display:block;margin:0;font-size:11px;text-align:left;max-width:22em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sd-meta{margin:4px 0 8px;padding:6px 10px;border:2px dashed #e8cfa8;border-radius:12px;background:#fff;font-size:13px;line-height:1.7}
+.sd-meta div::before{content:'・'}
 .slist .sgrp{flex-basis:100%;margin-top:8px;padding:2px 2px 2px 8px;font-weight:800;font-size:14px;border-left:4px solid var(--don)}
 .slist .sgrp:first-child{margin-top:0}
 .sfilter{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:10px;font-size:14px;font-weight:700}
@@ -399,7 +402,7 @@ a{color:var(--ka-d);font-weight:700}
     <!-- 曲を検索（別画面を開くボタンだけ） -->
     <div class="setup-search">
       <button class="blue big" id="searchBtn">曲検索</button>
-      <p class="muted" style="margin:8px 0 0;text-align:center;flex-basis:100%">曲名・読み・作品名から曲を探して、譜面・難易度・BPM・最大コンボ数・ジャンル・収録作品を見られます</p>
+      <p class="muted" style="margin:8px 0 0;text-align:center;flex-basis:100%">曲名・読み・作品名・アーティスト・作曲者・アニメ名などから曲を探して、譜面・難易度・BPM・最大コンボ数・ジャンル・収録作品を見られます</p>
     </div>
     </div></div>
   </div>
@@ -436,7 +439,7 @@ a{color:var(--ka-d);font-weight:700}
   <div class="card" id="sCard">
     <div class="search-row">
       <div class="answer-box">
-        <input id="sq" type="search" autocomplete="off" placeholder="曲名・読み・作品名で検索（例: ゆうがお、Doom、AC14）">
+        <input id="sq" type="search" autocomplete="off" placeholder="曲名・読み・作品名・作曲者・アニメ名など（例: ゆうがお、AC14、コナン）">
       </div>
     </div>
     <div class="sfilter" id="sFilter">
@@ -592,7 +595,7 @@ function toggleIn(arr, v, on){const i=arr.indexOf(v); if(on&&i<0)arr.push(v); if
 const hwsOf = w => Array.isArray(w.hw) ? w.hw : [w.hw || 'その他'];
 // ハードの並び（ユーザー指定）。行ごと: PlayStation 系 / 任天堂系 / それ以外
 const HW_ROWS = [
-  ['PS2', 'PS4', 'PS5', 'PSP', 'PS Vita'],
+  ['PSP', 'PS Vita', 'PS2', 'PS4', 'PS5'],
   ['DS', '3DS', 'Wii', 'Wii U', 'Switch'],
   ['Xbox One', 'Xbox Series X|S', 'Windows', 'Steam', 'スマートフォン', 'その他'],
 ];
@@ -882,14 +885,33 @@ function nextQ(){
 /* 4択: 正解 1 つ＋ほかの曲 3 つ。かんたんは完全ランダム、ふつうは同じジャンルで難易度・最大コンボ数が近い曲から選ぶ */
 const comboNum = r => parseInt(String(r.c||'').match(/\d+/)) || 0;
 function choiceName(r){ return songName(r); }
+// 曲名の似かた（0〜1）: 2文字ずつの組の重なり。同じ文字で始まる・片方がもう片方を含むときは高め
+function nameSim(a, b){
+  a = norm(a); b = norm(b);
+  if(!a || !b) return 0;
+  if(a.includes(b) || b.includes(a)) return 0.8;
+  const bg = s=>{ const m = new Set(); for(let i=0;i<s.length-1;i++) m.add(s.slice(i,i+2)); if(s.length===1) m.add(s); return m; };
+  const A = bg(a), B = bg(b); let n = 0; for(const x of A) if(B.has(x)) n++;
+  return n / (A.size + B.size - n || 1) + (a[0]===b[0] ? 0.1 : 0) + (a.length===b.length ? 0.05 : 0);
+}
+// BPM の差（「112※」「79-101」などは数字の平均で比べる）
+const bpmVal = r=>{ const m = String(r.bpm||'').match(/\d+(\.\d+)?/g); return m ? m.reduce((s,x)=>s+ +x,0)/m.length : 0; };
+const bpmGap = (a, b)=>{ const x = bpmVal(a), y = bpmVal(b); return x && y ? Math.min(Math.abs(x-y), 120) : 40; };
 function renderChoices(r){
   const key = x => norm(choiceName(x)), ans = key(r);
   let cands = DATA.filter(x=>key(x)!==ans && !/^【双打】/.test(x.n));
   if(game.mode==='normal'){
-    const same = cands.filter(x=>x.g===r.g && Math.abs(x.lv-r.lv)<=1);
-    // 難易度・最大コンボ数が近い順に並べ、近いほうから少し多めに取ってその中から選ぶ
-    same.sort((a,b)=>(Math.abs(a.lv-r.lv)*150 + Math.abs(comboNum(a)-comboNum(r))) - (Math.abs(b.lv-r.lv)*150 + Math.abs(comboNum(b)-comboNum(r))));
-    if(same.length >= 3) cands = same.slice(0, 12);
+    // 間違えやすい曲を選ぶ: 譜面の見た目（★・最大コンボ数・BPM・平均密度）、ジャンル、時期、曲名の似かたを合わせて点数にし、
+    // いちばん似ている数曲の中から選ぶ。曲名が似ている曲はジャンルや★が少し違っても候補に入れる
+    const sim = x=>nameSim(choiceName(x), choiceName(r));
+    const score = x=>{
+      const s = sim(x);
+      let v = Math.abs(x.lv-r.lv)*2.5 + Math.abs(comboNum(x)-comboNum(r))/35 + bpmGap(x, r)/18
+            + (x.d && r.d ? Math.abs(x.d-r.d)*1.5 : 1) + (x.g===r.g ? 0 : 3) + (x.yr && r.yr ? Math.min(Math.abs(x.yr-r.yr), 10)/4 : 1);
+      return v - s*9;
+    };
+    const near = cands.filter(x=>Math.abs(x.lv-r.lv)<=2 || sim(x)>=0.3).map(x=>[score(x), x]).sort((a,b)=>a[0]-b[0]).map(e=>e[1]);
+    if(near.length >= 3) cands = near.slice(0, 6);
   }
   const picked = [], seen = new Set([ans]);
   for(const x of shuffle(cands.slice())){ const k = key(x); if(seen.has(k)) continue; seen.add(k); picked.push(x); if(picked.length===3) break; }
@@ -1313,7 +1335,28 @@ function matchWorks(k){
   return k.length>=2 ? ws.filter(w=>keys(w).some(x=>x.startsWith(k))) : [];
 }
 let search = {song:null, idx:0, token:0, scroll:0};
-$('searchBtn').onclick=()=>{ show('scSearch'); if(!IS_TOUCH) $('sq').focus(); doSearch(); };
+/* 曲の情報（アーティスト・作詞・作曲・主題歌など。meta.js）。曲検索でこの文からも探せるようにする */
+let META_READY = false;
+function attachMeta(){
+  const M = window.QUIZ_META || {};
+  const pageBase = p => p.replace(/\(裏譜面\)$/, '').replace(/^【双打】\s*/, '');
+  for(const s of SONG_CHARTS){
+    const lines = [];
+    for(const c of s.charts) for(const p of [c.p, pageBase(c.p||'')]) for(const x of (M[p]||[])) if(!lines.includes(x)) lines.push(x);
+    s.meta = lines; s.mk = lines.map(norm);
+  }
+  META_READY = true;
+  if(!$('scSearch').classList.contains('hidden')){ if($('sDetail').classList.contains('hidden')) doSearch(); else showSong(); }
+}
+function loadMeta(){
+  if(loadMeta.started) return; loadMeta.started = true;
+  const sc = document.createElement('script');
+  sc.src = 'meta.js?t=' + Math.floor(Date.now() / 60000);
+  sc.onload = attachMeta;
+  document.head.append(sc);
+}
+if(document.readyState==='complete') setTimeout(loadMeta, 500); else addEventListener('load', ()=>setTimeout(loadMeta, 500));
+$('searchBtn').onclick=()=>{ loadMeta(); show('scSearch'); if(!IS_TOUCH) $('sq').focus(); doSearch(); };
 $('sq').addEventListener('input', doSearch);
 $('sq').addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.isComposing){ const b=$('sList').querySelector('button'); if(b) b.click(); } });
 
@@ -1360,8 +1403,8 @@ function doSearch(){
   box.classList.remove('hidden');
   $('sDetail').classList.add('hidden'); // 検索し直したら一覧に戻る
   const filtered = !!(sf.lv || sf.genre || sf.work);
-  if(!k && !filtered && sf.sort==='name'){ box.innerHTML = `<span class="muted">曲名・読み・作品名を入力するか、★・ジャンル・作品で絞り込んでください（全 ${SONG_CHARTS.length} 曲）</span>`; return; }
-  let starts=[], incl=[], works=[], wHits=[];
+  if(!k && !filtered && sf.sort==='name'){ box.innerHTML = `<span class="muted">曲名・読み・作品名・アーティスト・作曲者・アニメ名などを入力するか、★・ジャンル・作品で絞り込んでください（全 ${SONG_CHARTS.length} 曲）</span>`; return; }
+  let starts=[], incl=[], works=[], wHits=[], mHits=[];
   if(k){
     for(const s of SONG_CHARTS){
       if(s.nk.startsWith(k) || (s.yk && s.yk.startsWith(k))) starts.push(s);
@@ -1371,6 +1414,8 @@ function doSearch(){
     works = matchWorks(k);
     const byName = new Set(starts.concat(incl));
     wHits = works.length ? SONG_CHARTS.filter(s=>!byName.has(s) && works.some(w=>s.ws.has(w.i))) : [];
+    // アーティスト・作曲者・アニメ名など（曲の情報の文）でも探す。曲名・作品名で見つかった曲は除く
+    if(META_READY && k.length>=2){ const got = new Set(starts.concat(incl, wHits)); mHits = SONG_CHARTS.filter(s=>!got.has(s) && s.mk && s.mk.some(x=>x.includes(k))); }
   } else {
     starts = SONG_CHARTS.slice(); // 入力なし: 絞り込みに合う全曲
   }
@@ -1395,14 +1440,15 @@ function doSearch(){
   const wEnt = entries(wHits, workSet(works));
   const limit = k ? 80 : SEARCH_MAX;
   const hits = nameHits.slice(0, limit);
-  box.innerHTML = hits.length || wEnt.length ? '' : '<span class="muted">見つかりませんでした</span>';
+  box.innerHTML = hits.length || wEnt.length || mHits.length ? '' : '<span class="muted">見つかりませんでした</span>';
   const grp = (SORTS[sf.sort]||{}).grp;
-  const addList = list=>{
+  const addList = (list, withMeta)=>{
     let last = null;
     for(const s of list){
       if(grp){ const g = grp(s); if(g!==last){ last = g; box.insertAdjacentHTML('beforeend', `<div class="sgrp">${esc(g)}</div>`); } }
       const b = document.createElement('button');
       b.innerHTML = `${esc(s.name)}<small>${s.lvText}</small>`;
+      if(withMeta){ const i = s.song.mk.findIndex(x=>x.includes(k)); if(i>=0){ b.insertAdjacentHTML('beforeend', `<small class="smeta">${esc(s.song.meta[i])}</small>`); b.title = s.song.meta[i]; } }
       b.onclick = ()=>{ search.scroll = box.scrollTop; search.song = s; search.idx = 0; showSong(); };
       box.append(b);
     }
@@ -1415,6 +1461,12 @@ function doSearch(){
     box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">作品「${works.map(w=>esc(w.name)).join('」「')}」の収録曲: ${songCount(wEnt) + inName} 曲</div>`);
     addList(wEnt);
   }
+  const mEnt = entries(mHits, workSet([]));
+  if(mEnt.length){
+    box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">アーティスト・作曲者・アニメ名などで見つかった曲: ${songCount(mEnt)} 曲</div>`);
+    addList(mEnt.slice(0, 120), true);
+    if(mEnt.length > 120) box.insertAdjacentHTML('beforeend', `<span class="muted">ほか ${mEnt.length-120} 件</span>`);
+  } else if(k && !META_READY && !hits.length && !wEnt.length) box.innerHTML = '<span class="muted">曲の情報を読み込み中です…</span>';
 }
 // 詳細から検索結果（一覧）に戻る。一覧のスクロール位置も戻す
 function backToList(){
@@ -1441,6 +1493,7 @@ function showSong(){
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a></div>
     <div class="info">${infoHTML(r)}</div>
     <div class="sd-works"><span style="border:none;background:none;padding-left:0">収録作品:</span>${works.length?works.map(w=>`<span>${esc(w)}</span>`).join(''):'<span class="muted" style="border:none">不明（取得中の可能性があります）</span>'}</div>
+    ${s.song && s.song.meta && s.song.meta.length ? `<div class="sd-meta">${s.song.meta.map(x=>`<div>${esc(x)}</div>`).join('')}</div>` : ''}
     <div id="sChart"></div>`;
   d.querySelectorAll('.sd-tabs button').forEach(b=>b.onclick=()=>{ search.idx=+b.dataset.i; showSong(); });
   $('sdBack').onclick=backToList;

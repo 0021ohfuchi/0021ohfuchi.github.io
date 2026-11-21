@@ -41,7 +41,8 @@
     'ポップス': 'Pop', 'キッズ': 'Kids', 'アニメ': 'Anime', 'ボーカロイド™曲': 'VOCALOID™ Music', 'ゲームミュージック': 'Game Music',
     'バラエティ': 'Variety', 'クラシック': 'Classical', 'ナムコオリジナル': 'NAMCO Original', 'どうよう': 'Nursery Rhymes',
     // 作品のまとまり・ハード
-    '海外': 'Overseas', '海外の曲': 'Overseas songs', 'スマートフォン': 'Smartphone',
+    '海外': 'Overseas', 'ミュージックパスの曲を含める': 'Include Music Pass songs', 'ドンダフルフェスティバルの「太鼓ミュージックパス」で遊べる曲も出題する': 'Also ask songs playable with the Taiko Music Pass in Rhythm Festival',
+    '（ミュージックパスを除く）': ' (no Music Pass)', '海外の曲': 'Overseas songs', 'スマートフォン': 'Smartphone',
     'AC1～AC14（旧筐体）': 'AC1–AC14 (old cabinet)', 'AC15（新筐体）': 'AC15 (new cabinet)', 'AC16（ニジイロ）': 'AC16 (Nijiiro)', 'AC その他': 'AC other',
     '新筐体 無印': 'New cabinet (original)', 'ソライロ': 'Sorairo', 'モモイロ': 'Momoiro', 'キミドリ': 'Kimidori', 'ムラサキ': 'Murasaki',
     'ホワイト': 'White', 'レッド': 'Red', 'イエロー': 'Yellow', 'ブルー': 'Blue', 'グリーン': 'Green',

@@ -75,7 +75,11 @@ for old, new in [('ニジイロ（現行）', 'ニジイロ2026')]:
         works_raw[new] = works_raw.pop(old)
 # 作品の統合（ユーザー指定）: 米TDM は TDM に、太鼓ミュージックパスは本体（NS2・DF）にまとめる。
 # NS2（Switch 版）と DF（PS5 などの版）は別の作品のまま
+# ミュージックパスでしか遊べない曲は覚えておく（出題設定で「ミュージックパスを含める」を外したときに除くため）
+MP_ONLY = {}
 for src, dst in [('米TDM', 'TDM'), ('NS2MP', 'NS2'), ('DFMP', 'DF')]:
+    if src in works_raw and dst in works_raw and src.endswith('MP'):
+        MP_ONLY[dst] = set(works_raw[src]['songs']) - set(works_raw[dst]['songs'])
     if src in works_raw and dst in works_raw:
         works_raw[dst]['songs'] = sorted(set(works_raw[dst]['songs']) | set(works_raw.pop(src)['songs']))
 # 新AC中国版（AC16中）は「ニジイロ（中国版限定）」として、中国版にしか無い曲だけを入れる（ユーザー指定。国内版と共通の曲は入れない）
@@ -331,6 +335,9 @@ for s in lists:
         r['ytk'] = yt[0][0]  # 0=自動生成音源 1=公式音源/MV
     if r['p'] in song_works:
         r['ws'] = sorted(song_works[r['p']])
+        mp = [WORK_INDEX[w] for w, ps in MP_ONLY.items() if r['p'] in ps and WORK_INDEX.get(w) in r['ws']]
+        if mp:
+            r['mp'] = mp  # この作品ではミュージックパスの曲
     elif s['section'] in OVERSEAS_SECTIONS or g not in JP_GENRES:
         r['ws'] = [WORK_INDEX[OVERSEAS_WORK]]         # 海外の曲
     elif r.get('w') in WORK_INDEX:

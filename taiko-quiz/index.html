@@ -537,8 +537,6 @@ a{color:var(--ka-d);font-weight:700}
 <script>document.write('<script src="data.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
 <script src="fumen-parse.js?v=20261121c"></script><!-- 変更したら v を変える（スマホに古いファイルが残らないように） -->
 <script src="bgm.js"></script>
-<!-- 結果発表の画面を画像にする（シェア用） -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script>
 'use strict';
 // 譜面画像のある曲だけを出題対象にする
@@ -1222,27 +1220,125 @@ function shareText(){
   if(window.LANG==='en') return `Taiko no Tatsujin Song Quiz [${tr(MODES[game.mode].name)}]: ${okN} / ${n} correct! (${Math.round(okN/n*100)}%)\n${marks}\n#TaikoNoTatsujin #太鼓の達人`;
   return `太鼓の達人 曲名当てクイズ【${MODES[game.mode].name}】で ${okN} / ${n} 問正解！（正解率 ${Math.round(okN/n*100)}%）\n${marks}\n#太鼓の達人 #曲名当てクイズ`;
 }
-/* 結果発表の画面の画像（シェアボタン・下のボタンは写さない）。結果画面を出したらすぐ作っておく
-   （スマホの共有はボタンを押した直後でないと開けないため、押してから作ると間に合わないことがある） */
+/* SNS に貼る結果の画像。Canvas で専用のカードを描く（縦長 4:5、1080×1350）。
+   太鼓の赤〜オレンジの背景に、正解数を大きく、正解率に応じた称号のハンコ、問題ごとの結果を音符（正解=ドン、不正解=灰色の×）で並べる */
+const SHARE_RANKS = [[1, '全問正解！', 'PERFECT!'], [0.8, '達人級', 'MASTER'], [0.6, '名人級', 'EXPERT'], [0.4, '玄人級', 'SKILLED'], [0, '修行中', 'TRAINEE']];
+const MODE_COLORS = {easy: ['#ff6a4d', '#d9341c'], normal: ['#9ccc48', '#5a9a1c'], hard: ['#3aa6c4', '#1d6f8c'], oni: ['#ee4fa6', '#b31d72']};
+function rrect(c, x, y, w, h, r){ c.beginPath(); c.moveTo(x+r, y); c.arcTo(x+w, y, x+w, y+h, r); c.arcTo(x+w, y+h, x, y+h, r); c.arcTo(x, y+h, x, y, r); c.arcTo(x, y, x+w, y, r); c.closePath(); }
+function drawDon(c, x, y, r, ok){
+  c.beginPath(); c.arc(x, y, r, 0, Math.PI*2); c.fillStyle = '#3a2a1e'; c.fill();
+  c.beginPath(); c.arc(x, y, r*0.86, 0, Math.PI*2); c.fillStyle = '#fff'; c.fill();
+  c.beginPath(); c.arc(x, y, r*0.72, 0, Math.PI*2); c.fillStyle = ok ? '#ff4b3e' : '#b9b1a8'; c.fill();
+  c.strokeStyle = '#fff'; c.lineWidth = r*0.16; c.lineCap = 'round'; c.beginPath();
+  if(ok){ c.arc(x, y, r*0.34, 0, Math.PI*2); }
+  else { const d = r*0.3; c.moveTo(x-d, y-d); c.lineTo(x+d, y+d); c.moveTo(x+d, y-d); c.lineTo(x-d, y+d); }
+  c.stroke();
+}
+function fitText(c, text, maxW, size, weight){
+  let s = size; c.font = `${weight} ${s}px "M PLUS Rounded 1c", sans-serif`;
+  while(c.measureText(text).width > maxW && s > 10){ s -= 2; c.font = `${weight} ${s}px "M PLUS Rounded 1c", sans-serif`; }
+  return s;
+}
+async function drawShareCard(){
+  try{ await document.fonts.load('800 40px "M PLUS Rounded 1c"'); await document.fonts.ready; }catch(e){}
+  const en = window.LANG === 'en';
+  const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d'), F = (w, s)=>`${w} ${s}px "M PLUS Rounded 1c", sans-serif`;
+  const h = game.history, n = h.length, okN = correctCount(), acc = n ? okN/n : 0;
+  const total = h.reduce((a, x)=>a + (x.ms||0), 0);
+  c.textBaseline = 'middle'; c.textAlign = 'center';
+
+  // 背景: 赤〜オレンジのグラデーションに、波の模様（青海波）を薄く
+  const bg = c.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#ff3d3d'); bg.addColorStop(1, '#ff9a3d');
+  c.fillStyle = bg; c.fillRect(0, 0, W, H);
+  c.save(); c.globalAlpha = 0.13; c.strokeStyle = '#fff'; c.lineWidth = 5;
+  for(let row = 0, y = 0; y < H + 60; row++, y += 46) for(let x = (row % 2) * 50; x < W + 100; x += 100) for(const r of [48, 34, 20]){ c.beginPath(); c.arc(x, y, r, Math.PI, 0); c.stroke(); }
+  c.restore();
+
+  // タイトル
+  drawDon(c, 128, 112, 58, true);
+  c.textAlign = 'left'; c.fillStyle = '#fff';
+  c.save(); c.shadowColor = 'rgba(0,0,0,.25)'; c.shadowOffsetX = 4; c.shadowOffsetY = 4;
+  c.font = F(800, 40); c.fillText(en ? 'Taiko no Tatsujin' : '太鼓の達人', 210, 82);
+  const title = en ? 'Song Quiz' : '曲名当てクイズ';
+  fitText(c, title, 820, 66, 800); c.fillText(title, 206, 140);
+  c.restore();
+
+  // 白いカード
+  const cx = 60, cy = 220, cw = W - 120, ch = H - 220 - 150;
+  c.fillStyle = '#3a2a1e'; rrect(c, cx, cy + 14, cw, ch, 48); c.fill();
+  c.fillStyle = '#fffaf0'; rrect(c, cx, cy, cw, ch, 48); c.fill();
+  c.lineWidth = 8; c.strokeStyle = '#3a2a1e'; rrect(c, cx, cy, cw, ch, 48); c.stroke();
+
+  // 難易度の札と日付
+  const mc = MODE_COLORS[game.mode] || MODE_COLORS.hard, mname = tr(MODES[game.mode].name);
+  c.font = F(800, 40); const mw = c.measureText(mname).width + 70;
+  const mg = c.createLinearGradient(0, cy + 50, 0, cy + 122); mg.addColorStop(0, mc[0]); mg.addColorStop(1, mc[1]);
+  c.fillStyle = mg; rrect(c, cx + 50, cy + 50, mw, 72, 36); c.fill();
+  c.lineWidth = 5; c.strokeStyle = '#3a2a1e'; c.stroke();
+  c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(mname, cx + 50 + mw/2, cy + 88);
+  const d = new Date();
+  c.textAlign = 'right'; c.fillStyle = '#9a8573'; c.font = F(700, 32);
+  c.fillText(`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`, cx + cw - 50, cy + 88);
+
+  // 正解数（大きく）
+  c.textAlign = 'left';
+  const big = String(okN), small = ` / ${n}`;
+  // ハンコ（右）と重ならないよう、左側の幅に収まる大きさにする（2〜3 桁のとき）
+  const areaL = cx + 40, areaR = cx + cw - 330;
+  c.font = F(800, 250); let bw = c.measureText(big).width;
+  c.font = F(800, 110); let sw = c.measureText(small).width;
+  const k = Math.min(1, (areaR - areaL) / (bw + sw + 10)), bs = Math.round(250*k), ss = Math.round(110*k);
+  bw *= k; sw *= k;
+  const sx = (areaL + areaR)/2 - (bw + sw)/2, by = cy + 300;
+  c.font = F(800, bs); c.fillStyle = '#ffd36b'; c.fillText(big, sx + 10*k, by + 10*k); c.fillStyle = '#ff3d3d'; c.fillText(big, sx, by);
+  c.font = F(800, ss); c.fillStyle = '#3a2a1e'; c.fillText(small, sx + bw + 6, by + 46*k);
+  c.textAlign = 'center'; c.font = F(800, 44); c.fillStyle = '#3a2a1e';
+  c.fillText(en ? 'correct!' : '問正解！', sx + (bw + sw)/2, by + 150);
+
+  // 称号のハンコ（右、少し傾ける）
+  const rank = SHARE_RANKS.find(x=>acc >= x[0]) || SHARE_RANKS[SHARE_RANKS.length-1];
+  c.save(); c.translate(cx + cw - 175, cy + 330); c.rotate(-0.2);
+  c.beginPath(); c.arc(0, 0, 118, 0, Math.PI*2); c.fillStyle = 'rgba(255,255,255,.9)'; c.fill();
+  c.lineWidth = 10; c.strokeStyle = '#d9241c'; c.stroke();
+  c.beginPath(); c.arc(0, 0, 100, 0, Math.PI*2); c.lineWidth = 3; c.stroke();
+  c.fillStyle = '#d9241c'; c.textAlign = 'center';
+  const rl = en ? rank[2] : rank[1]; fitText(c, rl, 170, 60, 800); c.fillText(rl, 0, -4);
+  c.font = F(800, 22); c.fillText(en ? 'RANK' : '称号', 0, 50);
+  c.restore();
+
+  // 正解率・合計時間・1問あたり
+  const stats = [[en ? 'Accuracy' : '正解率', Math.round(acc*100) + '%'], [en ? 'Total time' : '合計時間', tr(fmtTime(total))], [en ? 'Per question' : '1問あたり', tr(fmtTime(n ? total/n : 0))]];
+  const sy = cy + 560, sbw = (cw - 100 - 40)/3;
+  stats.forEach(([k, v], i)=>{
+    const x = cx + 50 + i*(sbw + 20);
+    c.fillStyle = '#fff1c9'; rrect(c, x, sy, sbw, 130, 26); c.fill();
+    c.textAlign = 'center'; c.fillStyle = '#9a7b5f'; c.font = F(700, 28); c.fillText(k, x + sbw/2, sy + 36);
+    c.fillStyle = '#3a2a1e'; fitText(c, v, sbw - 30, 52, 800); c.fillText(v, x + sbw/2, sy + 88);
+  });
+
+  // 問題ごとの結果（1 行 10 個の音符）。多いときは小さくし、入りきらなければ最初の 50 問まで
+  const shown = h.slice(0, 50), cols = Math.min(10, Math.max(5, shown.length));
+  const rows = Math.ceil(shown.length / cols), gy0 = sy + 175, gh = cy + ch - 60 - gy0;
+  const cell = Math.min((cw - 100) / cols, gh / Math.max(rows, 1), 110), r = cell * 0.42;
+  const gx0 = W/2 - (cols * cell)/2 + cell/2, gyc = gy0 + (gh - rows*cell)/2 + cell/2;
+  shown.forEach((x, i)=>drawDon(c, gx0 + (i % cols)*cell, gyc + Math.floor(i / cols)*cell, r, x.ok));
+  if(n > 50){ c.fillStyle = '#9a8573'; c.font = F(700, 28); c.textAlign = 'right'; c.fillText(en ? `+${n-50} more` : `ほか ${n-50} 問`, cx + cw - 50, cy + ch - 34); }
+
+  // 下の帯: 鋲の並んだ太鼓の胴と、サイトの URL
+  const fy = H - 120;
+  c.fillStyle = '#5a2e16'; c.fillRect(0, fy, W, 120);
+  for(let x = 18; x < W; x += 44){ c.beginPath(); c.arc(x, fy + 16, 7, 0, Math.PI*2); c.fillStyle = '#ffd25e'; c.fill(); }
+  c.textAlign = 'center'; c.fillStyle = '#ffd25e'; c.font = F(800, 34);
+  const url = shareUrl() ? shareUrl().replace(/^https?:\/\//, '') : '';
+  c.fillText(url || (en ? 'Taiko no Tatsujin Song Quiz' : '太鼓の達人 曲名当てクイズ'), W/2, fy + 62);
+  c.fillStyle = '#e8cfa8'; c.font = F(700, 24); c.fillText(en ? 'Can you name the song from its chart?' : '譜面を見て、曲名を当てよう！', W/2, fy + 98);
+  return cv;
+}
 let shot = null; // {blob, file} または作成中の Promise
 function makeShot(){
   shot = null;
-  if(!window.html2canvas) return Promise.resolve(null);
-  const card = $('scEnd').querySelector('.card');
-  const p = html2canvas(card, {
-    // スマホで見やすい縦長の画像にする: 画面の幅にかかわらず幅 540px（画像は 1080px）で描き、
-    // 問題数が少なくても縦横比 4:5 より横長にならないようにする
-    scale: 2, backgroundColor: null, useCORS: true, windowWidth: 600, windowHeight: 900,
-    onclone: doc=>{ // 画像の下にサイト名と URL を入れる
-      const c = doc.getElementById('scEnd').querySelector('.card');
-      c.style.cssText += ';width:540px;max-width:none;min-height:675px;margin:0;box-sizing:border-box;display:flex;flex-direction:column';
-      const f = doc.createElement('div');
-      f.style.cssText = 'margin-top:auto;padding-top:14px;text-align:center;font-weight:800;color:#5a2e16;font-size:14px';
-      f.textContent = tr('太鼓の達人 曲名当てクイズ') + (shareUrl() ? '　' + shareUrl().replace(/^https?:\/\//,'') : '');
-      c.append(f);
-      c.querySelectorAll('.total').forEach(e=>e.style.animation='none');
-    }
-  }).then(cv=>new Promise(res=>cv.toBlob(res,'image/png'))).then(blob=>{
+  const p = drawShareCard().then(cv=>new Promise(res=>cv.toBlob(res, 'image/png'))).then(blob=>{
     if(!blob) return null;
     const d = new Date(), name = `taiko-quiz-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.png`;
     let file = null; try{ file = new File([blob], name, {type:'image/png'}); }catch(e){}

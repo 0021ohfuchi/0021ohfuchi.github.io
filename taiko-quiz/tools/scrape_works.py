@@ -91,6 +91,30 @@ def oni_links(b, exclude_ns=False, any_diff=False):
     return set(html.unescape(m) for m in re.findall(r'title="収録曲/' + diff + r'/([^"]+)"', b))
 
 
+def current_links(b):
+    """作品/新AC（現行）のページ本体のおにリンク。下の方の「期間限定」「段位道場限定」の表には過去に期間限定で
+    配信されただけの曲（例: さかさま世界 14/2/19~6/30）も並ぶので、その表の曲は、今のバージョンの開始日
+    （凡例の「2026.3.25以降の追加曲」）以降に配信期間がある曲だけを数える"""
+    txt = html.unescape(re.sub(r'<[^>]+>', '', b))
+    m = re.search(r'(\d{4})\.(\d+)\.(\d+)以降の追加曲', txt)
+    start = (int(m.group(1)) % 100, int(m.group(2)), int(m.group(3))) if m else None
+    parts = re.split(r'(<h[2-5][^>]*>.*?</h[2-5]>)', b, flags=re.S)
+    keep, limited = [], []
+    heading = ''
+    for p in parts:
+        if re.match(r'<h[2-5]', p):
+            heading = re.sub(r'<[^>]+>', '', html.unescape(p)).strip()
+            continue
+        (limited if heading in ('期間限定', '段位道場限定') else keep).append(p)
+    songs = oni_links('\n'.join(keep))
+    for row in re.findall(r'<tr[^>]*>(.*?)</tr>', '\n'.join(limited), flags=re.S):
+        rt = html.unescape(re.sub(r'<[^>]+>', ' ', row))
+        dates = [tuple(int(x) for x in d) for d in re.findall(r'(?<![\d.])(\d\d)/(\d{1,2})/(\d{1,2})', rt)]
+        if start and any(d >= start for d in dates):
+            songs |= oni_links(row)
+    return songs
+
+
 out = json.load(open(OUT, encoding='utf-8')) if os.path.exists(OUT) else {}
 out['_meta'] = {'total': len(WORKS)}
 # 自動更新用: REFRESH_WORKS に表示名をカンマ区切りで書くと、その作品は取り直す（今も曲が追加される作品向け）
@@ -104,7 +128,7 @@ for order, (page, label, kind) in enumerate(WORKS):
     if net:
         time.sleep(DELAY)
     b = body(t)
-    songs = set() if label in SUBS_ONLY else oni_links(b, label in EXCLUDE_NS, label in ANY_DIFF)
+    songs = set() if label in SUBS_ONLY else current_links(b) if page == '作品/新AC' else oni_links(b, label in EXCLUDE_NS, label in ANY_DIFF)
     # ジャンル別ページ
     subs = []
     prefixes = [page + '/'] + ([SHARED_SUBS[page] + '/'] if page in SHARED_SUBS else [])

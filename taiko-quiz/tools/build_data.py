@@ -384,9 +384,11 @@ for s in lists:
 open(os.path.join(HERE, '..', 'meta.js'), 'w', encoding='utf-8').write(
     '// 自動生成: tools/build_data.py（曲検索用の曲の情報）\n// 出典: 太鼓の達人 譜面とか Wiki (https://wikiwiki.jp/taiko-fumen/)\nwindow.QUIZ_META='
     + json.dumps(meta, ensure_ascii=False, separators=(',', ':')) + ';\n')
-# 設定画面の BGM: taiko-quiz フォルダ直下の mp3 の一覧（ブラウザはフォルダの中身を調べられないため）
+# 設定画面の BGM: taiko-quiz/BGM フォルダの mp3 の一覧（ブラウザはフォルダの中身を調べられないため）
 ROOT = os.path.join(HERE, '..')
-mp3s = sorted(f for f in os.listdir(ROOT) if f.lower().endswith('.mp3') and os.path.isfile(os.path.join(ROOT, f)))
+BGM_DIR = os.path.join(ROOT, 'BGM')
+os.makedirs(BGM_DIR, exist_ok=True)
+mp3s = sorted(f for f in os.listdir(BGM_DIR) if f.lower().endswith('.mp3') and os.path.isfile(os.path.join(BGM_DIR, f)))
 open(os.path.join(ROOT, 'bgm.js'), 'w', encoding='utf-8').write(
-    '// 自動生成: tools/build_data.py（taiko-quiz フォルダ直下の mp3 の一覧）\nwindow.QUIZ_BGM=' + json.dumps(mp3s, ensure_ascii=False) + ';\n')
+    '// 自動生成: tools/build_data.py（BGM フォルダの mp3 の一覧。ファイル名のみ）\nwindow.QUIZ_BGM=' + json.dumps(mp3s, ensure_ascii=False) + ';\n')
 print('songs', len(out), 'with charts', sum(1 for r in out if 'ch' in r), 'details', len(details))

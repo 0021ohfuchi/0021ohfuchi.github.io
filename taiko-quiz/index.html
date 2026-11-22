@@ -940,7 +940,7 @@ function bgmNext(){
   let i = Math.random()*BGM_LIST.length|0;
   if(BGM_LIST.length>1 && i===bgm.last) i = (i+1)%BGM_LIST.length; // 同じ曲が続かないように
   bgm.last = i;
-  bgm.audio.src = encodeURI(BGM_LIST[i]);
+  bgm.audio.src = encodeURI('BGM/' + BGM_LIST[i]);
   bgmPlay();
 }
 function bgmPlay(){

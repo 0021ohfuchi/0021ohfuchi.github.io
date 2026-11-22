@@ -43,7 +43,8 @@ def main():
     added = 0
     for href, name in items:
         fname = BAD.sub('', name) + '.mp3'
-        dest = os.path.join(ROOT, fname)
+        os.makedirs(os.path.join(ROOT, 'BGM'), exist_ok=True)
+        dest = os.path.join(ROOT, 'BGM', fname)
         if os.path.exists(dest):
             continue
         url = PAGE + href

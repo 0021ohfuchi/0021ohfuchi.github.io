@@ -47,6 +47,11 @@ jobs:
           key: wiki-cache-${{ github.run_id }}
           restore-keys: wiki-cache-
 
+      # WADIVE RECORD（公式のオフボーカル配布ページ）に新しい曲があれば mp3 を取り込む（設定画面の BGM に出る）
+      - name: WADIVE RECORD の新しい mp3 を取り込む
+        continue-on-error: true
+        run: python tools/fetch_wadive.py
+
       - name: Wiki から差分を取得して data.js を作り直す
         timeout-minutes: 300
         continue-on-error: true   # 途中で止まっても、進んだぶんは下でコミットする
@@ -61,7 +66,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data.js meta.js bgm.js charts tools/lists.json tools/extra_lists.json tools/details.json tools/debut.json tools/works.json tools/charts_index.json tools/en_names.json
+          git add data.js meta.js bgm.js *.mp3 charts tools/lists.json tools/extra_lists.json tools/details.json tools/debut.json tools/works.json tools/charts_index.json tools/en_names.json
           if git diff --cached --quiet; then
             echo "変更なし"
           else

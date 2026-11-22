@@ -704,7 +704,7 @@ const SEPARATE_OLD = new Set(['ウィーアー！(東方神起)', 'Butterfly(倖
 const isSeparate = r => r.s===3 && SEPARATE_OLD.has(r.n);
 // 曲としての名前（まとめるときの名前）と、まとめるためのキー
 // まとめるときは【双打】以外の【 】を残す（旋風ノ舞【天】と【地】、UMA…【BPM150編】と【BPM240編】などは別の曲）
-function groupBase(r){ return (stripParen(r.n.replace(/【(?!双打)([^】]*)】/g, '\u0001$1\u0002')).replace(/\u0001/g, '【').replace(/\u0002/g, '】').trim()) || r.n; }
+function groupBase(r){ if(/^クラシックメドレー[(（].+編[)）]$/.test(r.n)) return r.n; /* ○○編はそれぞれ別の曲（カッコを除くと存在しない曲名「クラシックメドレー」になる） */ return (stripParen(r.n.replace(/【(?!双打)([^】]*)】/g, '\u0001$1\u0002')).replace(/\u0001/g, '【').replace(/\u0002/g, '】').trim()) || r.n; }
 function songName(r){ return isSeparate(r) ? r.n.replace('(裏譜面)', '') : groupBase(r); }
 function songKey(r){ return isSeparate(r) ? 'sep:' + norm(songName(r)) : norm(groupBase(r)); }
 const SONGS = (()=>{

@@ -44,7 +44,8 @@
     const isRing = p => near(p, 176, 6) ||
       (Math.max(p[0], p[1], p[2]) - Math.min(p[0], p[1], p[2]) < 30 && p[0] + p[1] + p[2] >= 400 && p[0] + p[1] + p[2] <= 560);
     const isWhite = p => p[0] > 235 && p[1] > 235 && p[2] > 235;
-    const isBg = p => near(p, 204, 3);
+    // 背景の灰色。少し青みのある (204,204,208) の画像もある（青天の黎明の「見た目」画像）
+    const isBg = p => near(p, 204, 3) || same(p, [204, 204, 208], 3);
     const cls = p => {
       const [r, g2, b] = p;
       // 連打は (255,239,67)、風船は (255,191,67) くらい。緑の値で分ける
@@ -207,7 +208,8 @@
         }
       }
       rowNotes.sort((a, b) => a.x - b.x);
-      return rowNotes;
+      // 帯が数字などで2本に分かれて見えると、同じ風船の頭が2回足されることがあるので、同じ位置の頭は1つにする
+      return rowNotes.filter((n, i) => !(n.kind === 'roll' && rowNotes.slice(0, i).some(m => m.kind === 'roll' && m.c === n.c && Math.abs(m.x - n.x) < 2)));
     }
 
     // x0..x1 の範囲で、y 付近にある黒い数字（5px の文字）を読む
@@ -349,6 +351,19 @@
           const pc = [...pl.notes].reverse().find(n => n.kind === 'roll');
           pl.notes.push({ x: pr.laneEnd - 8, c: pc ? pc.c : 'y', big: false, kind: 'end', row: rows.indexOf(pr) });
           o = false;
+        }
+        // 前の段の連打・風船が段の最後の小節線の所で終わったように見えても、この段が頭の無い帯（終わり）から始まるなら、
+        // 実際は次の段に続いている（例: マツケンサンバII の 41〜42小節の風船）。前の段の終わりを消してつなげる
+        if (!o && last[l.type]) {
+          const [pl, pr] = last[l.type];
+          const firstEnd = l.notes.find(n => n.kind !== 'note');
+          const pe = pl.notes[pl.notes.length - 1];
+          const lastBar = pr.bars[pr.bars.length - 1];
+          if (firstEnd && firstEnd.kind === 'end' && pe && pe.kind === 'end' && lastBar != null && pe.x >= lastBar - 12 &&
+              pl.notes.some(n => n.kind === 'roll')) {
+            pl.notes.pop();
+            o = true;
+          }
         }
         l.notes = l.notes.filter(n => {
           if (n.kind === 'roll') { o = true; return true; }

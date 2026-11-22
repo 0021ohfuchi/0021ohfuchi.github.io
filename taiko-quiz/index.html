@@ -46,6 +46,7 @@ header .stat:empty{display:none}
 main{max-width:860px;margin:0 auto;padding:18px 16px}
 body.wide main{max-width:none;padding:10px 16px}
 body.wide #qCard{padding:12px 14px;margin-bottom:0}
+#sCard{margin-bottom:6px} /* 検索結果を画面の下まで広げるので、下の余白はカードの影の分だけ */
 body.nofoot .foot{display:none}
 body.wide .foot{margin:8px 0}
 .card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:0 6px 0 var(--line)}
@@ -178,6 +179,8 @@ button:disabled{opacity:.45;cursor:default;transform:none}
 #scEnd .rc-notes button{background:none;border:none;box-shadow:none;padding:2px;min-height:0;border-radius:50%;transform:none}
 #scEnd .rc-notes button.sel{background:#ffd36b}
 .rc-notes .don{width:100%;height:auto;display:block}
+.rc-notes.small{grid-template-columns:repeat(15,minmax(0,32px));gap:2px} /* 50 問以上: 結果画像と同じ 1 行 15 個 */
+#scEnd .rc-notes.small button{padding:1px}
 @media (max-width:560px){
   .rc{padding:12px 10px 18px;border-radius:22px}
   .rc-title .logo-icon{width:44px;height:44px}
@@ -1349,7 +1352,7 @@ function endGame(){
     .map(([k, v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
   // 問題ごとの結果: 20 問までは音符・番号・曲名・時間を 2 列（スマホは 1 列）、それより多いときは音符だけ。押すとその問題の詳細
   const g = $('endTable'), many = n > 20; g.innerHTML = '';
-  g.className = many ? 'rc-notes' : 'rc-list';
+  g.className = many ? (n >= 50 ? 'rc-notes small' : 'rc-notes') : 'rc-list'; // 50 問以上は音符を小さく 1 行 15 個
   const rows = Math.ceil(n / 2); g.style.gridTemplateRows = many ? '' : `repeat(${rows}, auto)`;
   const det = $('endDetail'); det.classList.add('hidden');
   h.forEach((x,i)=>{
@@ -1563,12 +1566,12 @@ async function drawShareCard(){
       c.textAlign = 'right'; c.font = F(700, tfs); c.fillStyle = '#9a8573'; c.fillText(timeOf(x), x0 + colW - 14, yc + 1);
     });
   } else {
-    // それより多いとき: 音符だけを 1 行 10 個（最初の 50 問まで）
-    const shown = h.slice(0, 50), cols = 10, rows = Math.ceil(shown.length / cols);
+    // それより多いとき: 音符だけを並べる。50 問未満は 1 行 10 個、50 問以上は小さくして 1 行 15 個（最初の 100 問まで）
+    const MAX = 100, shown = h.slice(0, MAX), cols = n >= 50 ? 15 : 10, rows = Math.ceil(shown.length / cols);
     const cell = Math.min(gw / cols, gh / Math.max(rows, 1), 96), r = cell * 0.42;
     const gx0 = W/2 - (cols * cell)/2 + cell/2, gyc = gy0 + (gh - rows*cell)/2 + cell/2;
     shown.forEach((x, i)=>drawDon(c, gx0 + (i % cols)*cell, gyc + Math.floor(i / cols)*cell, r, x.ok));
-    if(n > 50){ c.fillStyle = '#9a8573'; c.font = F(700, 26); c.textAlign = 'right'; c.fillText(en ? `+${n-50} more` : `ほか ${n-50} 問`, cx + cw - 40, cy + ch - 22); }
+    if(n > MAX){ c.fillStyle = '#9a8573'; c.font = F(700, 26); c.textAlign = 'right'; c.fillText(en ? `+${n-MAX} more` : `ほか ${n-MAX} 問`, cx + cw - 40, cy + ch - 22); }
   }
 
   // 下の帯: 鋲の並んだ太鼓の胴と、サイトの URL
@@ -1883,6 +1886,7 @@ function doSearch(){
   const box = $('sList');
   box.classList.remove('hidden');
   $('sDetail').classList.add('hidden'); // 検索し直したら一覧に戻る
+  fitList();
   const filtered = !!(sf.lv || sf.genre || sf.work);
   if(!k && !filtered && sf.sort==='name'){ box.innerHTML = `<span class="muted">曲名・読み・作品名・アーティスト・作曲者・アニメ名などを入力するか、★・ジャンル・作品で絞り込んでください（全 ${TOTAL_ENTRIES()} 譜面）</span>`; return; }
   let starts=[], incl=[], works=[], wHits=[], mHits=[];
@@ -1951,11 +1955,22 @@ function doSearch(){
     if(mEnt.length > 120) box.insertAdjacentHTML('beforeend', `<span class="muted">ほか ${mEnt.length-120} 件</span>`);
   } else if(k && !META_READY && !hits.length && !wEnt.length) box.innerHTML = '<span class="muted">曲の情報を読み込み中です…</span>';
 }
+// 検索結果の一覧を画面の下まで広げる（上の検索欄・絞り込みの高さは画面幅で変わるので、その都度測る）
+function fitList(){
+  const box = $('sList');
+  if(box.classList.contains('hidden') || $('scSearch').classList.contains('hidden')) return;
+  const card = $('sCard'), main = card.closest('main');
+  const below = (parseFloat(getComputedStyle(card).paddingBottom)||0) + (parseFloat(getComputedStyle(card).borderBottomWidth)||0)
+              + (main ? parseFloat(getComputedStyle(main).paddingBottom)||0 : 0) + 6 + 4; // 6 = カードの影
+  const top = box.getBoundingClientRect().top + window.scrollY;
+  box.style.maxHeight = Math.max(200, window.innerHeight - top - below) + 'px';
+}
 // 詳細から検索結果（一覧）に戻る。一覧のスクロール位置も戻す
 function backToList(){
   search.token++;
   $('sDetail').classList.add('hidden');
   $('sList').classList.remove('hidden');
+  fitList();
   $('sList').scrollTop = search.scroll;
 }
 // 譜面の切り替えタブの名前。裏譜面が無い曲は「表譜面」と書かず ★×6 のように★だけにする
@@ -2003,6 +2018,7 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Escape' && !$('scSearch').classList.contains('hidden') && !$('sDetail').classList.contains('hidden')) backToList();
 });
 window.addEventListener('resize',()=>{ clearTimeout(resizeTimer); resizeTimer=setTimeout(()=>{ if(search.song && !$('scSearch').classList.contains('hidden')) drawSearchChart(search.song.charts[search.idx]); },200); });
+window.addEventListener('resize', fitList);
 
 /* ---------- 入力候補 ---------- */
 let suggSel=-1, suggItems=[];

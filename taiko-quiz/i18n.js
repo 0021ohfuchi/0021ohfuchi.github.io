@@ -107,7 +107,7 @@
     // 譜面検索
     '曲名・読み・作品名・作曲者・アニメ名など（例: ゆうがお、AC14、コナン）': 'Title, reading, game, composer, anime… (e.g. AC14, Conan)',
     '作品': 'Game', '並び順': 'Sort', '名前順': 'Name', '★が多い順': 'Stars (high → low)', '★が少ない順': 'Stars (low → high)',
-    'ジャンル順': 'Genre', '作品順': 'Game', '絞り込みと並び順を元に戻す': 'Reset filters and sort', 'リセット': 'Reset',
+    'ジャンル順': 'Genre', '作品順': 'Game', '新しい順': 'Newest first', '古い順': 'Oldest first', '初出不明': 'Unknown debut', '絞り込みと並び順を元に戻す': 'Reset filters and sort', 'リセット': 'Reset',
     '見つかりませんでした': 'No results', '曲の情報を読み込み中です…': 'Loading song info…',
     '検索結果の一覧に戻る（Esc）': 'Back to the results (Esc)', '← 検索結果に戻る': '← Back to results',
     '収録作品:': 'Included in:', '不明（取得中の可能性があります）': 'Unknown (may still be loading)', '収録作品不明': 'Unknown game',

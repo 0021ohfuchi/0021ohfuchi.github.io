@@ -3,7 +3,7 @@
 #
 # 環境変数 YOUTUBE_API_KEY（YouTube Data API v3 のキー）があれば、日本語のタイトル・説明文（YouTube Studio の「翻訳」に登録したもの）を取る。
 # キーが無い、または API が失敗したときは、RSS から英語のタイトルだけ取る。
-import json, os, re, sys, urllib.request, urllib.parse, html
+import json, os, re, sys, urllib.request, urllib.parse, urllib.error, html
 
 CHANNEL_ID = 'UCILPNLmKxGQXJHtdp-Stcvw'
 RSS = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + CHANNEL_ID
@@ -72,6 +72,9 @@ if KEY:
         videos = from_api()
     except Exception as e:
         print('!! YouTube API が失敗したので RSS を使います:', type(e).__name__, flush=True)
+        if isinstance(e, urllib.error.HTTPError):
+            # 原因（キー無効 / API 未有効化 / 制限 など）が分かるよう、Google の返事を表示する（キーは含まれない）
+            print('   HTTP', e.code, e.read().decode('utf-8', 'replace')[:600], flush=True)
 if not videos:
     videos = from_rss()
 if not videos:

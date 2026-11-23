@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google-site-verification" content="sKPbmBNxT1ct_nCcskDar0WU6Oz1uU6fc90blgG3EDY" />
-<meta name="description" content="随時更新！譜面の画像と★の数・BPM・コンボ数・ジャンルなどの情報を手がかりに、何の曲か当てよう！">
+<meta name="description" content="全曲収録！譜面の画像と★の数・BPM・コンボ数・ジャンルなどの情報を手がかりに、何の曲か当てよう！">
 <meta property="og:site_name" content="太鼓の達人 曲名当てクイズ">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"太鼓の達人 曲名当てクイズ","url":"https://0021ohfuchi.github.io/taiko-quiz/"}</script>
 <title>譜面を見て当てろ！ 太鼓の達人 曲名当てクイズ</title>
@@ -1715,28 +1715,43 @@ document.addEventListener('click', e=>{
   v.textContent = open ? v.dataset.full : v.dataset.short;
   if(game && game.q && game.q.redraw && !$('scQuiz').classList.contains('hidden')) setTimeout(()=>renderChart(), 0); // 情報の高さが変わったら譜面を収め直す
 }, true); // 伏せた情報を開く処理より先に見る（開いたのと同じタップで全部表示にならないように）
+// AC の作品が 3 つ以上連続して収録されているときは「一番古い～一番新しい」にまとめる（例: ソライロ～グリーン）
+function joinWorks(idx){
+  // 連続した AC の作品を 1 項目にまとめる。項目: {text, last(一番新しい作品の番号), n(作品数)}
+  const a = [...idx].sort((x,y)=>x-y), out = [];
+  for(let s=0; s<a.length;){
+    let e = s;
+    while(e+1<a.length && a[e+1]===a[e]+1 && WORKS[a[e]].kind==='AC' && WORKS[a[e+1]].kind==='AC') e++;
+    if(e-s >= 2) out.push({text: WORKS[a[s]].name + '～' + WORKS[a[e]].name, last: a[e], n: e-s+1});
+    else for(let k=s;k<=e;k++) out.push({text: WORKS[a[k]].name, last: a[k], n: 1});
+    s = e+1;
+  }
+  return out;
+}
 function worksCell(r){
-  const names = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
-  if(!names.length) return '<div class="k">収録作品</div><div class="v">不明</div>';
+  const all = (r.ws||[]).filter(i=>WORKS[i]);
+  const items = joinWorks(all);
+  if(!items.length) return '<div class="k">収録作品</div><div class="v">不明</div>';
   const MAX = 4;
-  let pick = (r.ws||[]).filter(i=>WORKS[i]);
-  if(pick.length > MAX){
-    // 枠に入りきらないときは、同じタブ（AC の旧筐体・新筐体・ニジイロ、家庭用はハード）からは一番新しい作品 1 つだけを代表にして、
+  let pick = items;
+  if(items.length > MAX){
+    // 枠に入りきらないときは、同じタブ（AC の旧筐体・新筐体・ニジイロ、家庭用はハード）からは一番新しい項目 1 つだけを代表にして、
     // いろいろなタブの作品が並ぶようにする。タブが多すぎるときは新しいタブの代表を優先する
-    const tabOf = w=> w.kind==='AC' ? 'AC:' + acGroupOf(w) : w.kind==='CS' ? 'CS:' + hwsOf(w)[0] : 'OS';
-    const rep = new Map(); // タブ → そのタブで一番新しい（WORKS の並びで後ろの）作品
-    for(const i of pick){ const k = tabOf(WORKS[i]); if(!rep.has(k) || i > rep.get(k)) rep.set(k, i); }
+    const tabOf = it=>{ const w = WORKS[it.last]; return w.kind==='AC' ? 'AC:' + acGroupOf(w) : w.kind==='CS' ? 'CS:' + hwsOf(w)[0] : 'OS'; };
+    const rep = new Map(); // タブ → そのタブで一番新しい項目
+    for(const it of items){ const k = tabOf(it); if(!rep.has(k) || it.last > rep.get(k).last) rep.set(k, it); }
     // AC と家庭用（とその他）から交互に、新しいタブの代表から選ぶ
-    const byKind = k=>[...rep.entries()].filter(([t])=>t.startsWith(k)).map(([, i])=>i).sort((a,b)=>b-a);
+    const byKind = k=>[...rep.entries()].filter(([t])=>t.startsWith(k)).map(([, it])=>it).sort((a,b)=>b.last-a.last);
     const lists = [byKind('AC:'), byKind('CS:'), byKind('OS')], chosen = [];
     while(chosen.length < MAX && lists.some(l=>l.length)) for(const l of lists) if(l.length && chosen.length < MAX) chosen.push(l.shift());
-    pick = chosen.sort((a,b)=>a-b);
+    pick = chosen.sort((a,b)=>a.last-b.last);
   }
-  const rest = names.length - pick.length;
-  const shown = pick.map(i=>WORKS[i].name).join('・') + (rest > 0 ? ` ほか${rest}作品` : '');
+  const rest = all.length - pick.reduce((s,it)=>s+it.n, 0);
+  const full = items.map(it=>it.text).join('・');
+  const shown = pick.map(it=>it.text).join('・') + (rest > 0 ? ` ほか${rest}作品` : '');
   // 省いた作品があるときは、タップで全部の作品と短い表示を切り替える
-  const more = rest > 0 ? ` data-full="${esc(names.join('・'))}" data-short="${esc(shown)}"` : '';
-  return `<div class="k">収録作品</div><div class="v ws${rest > 0 ? ' more' : ''}" title="${esc(names.join('・'))}"${more}>${esc(shown)}</div>`;
+  const more = rest > 0 ? ` data-full="${esc(full)}" data-short="${esc(shown)}"` : '';
+  return `<div class="k">収録作品</div><div class="v ws${rest > 0 ? ' more' : ''}" title="${esc(full)}"${more}>${esc(shown)}</div>`;
 }
 // 出題中に伏せる項目。出題設定で★やジャンルが1つに決まっているときは、それは初めから表示する
 function quizHidden(){

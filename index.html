@@ -59,6 +59,7 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
 .news-list li{padding:7px 2px;border-bottom:1px dashed #d9c3a5}
 .news-list li:last-child{border-bottom:none}
 .news-list b{margin-right:8px;color:var(--sub);font-variant-numeric:tabular-nums}
+.news-tag{display:inline-block;margin-right:8px;padding:0 8px;border-radius:999px;background:#fff3c4;border:1.5px solid #ffd36b;font-size:12px;font-weight:800;color:#3a2a1e;white-space:nowrap}
 .news-more{margin-top:10px;text-align:center}
 .news-more button{font:inherit;font-weight:800;font-size:14px;cursor:pointer;border:2.5px solid #3a2a1e;border-radius:999px;padding:5px 18px;background:#2fb8e8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.2);box-shadow:inset 0 0 0 2px #fff,0 3px 0 #3a2a1e}
 .news-more button:active{transform:translateY(2px);box-shadow:inset 0 0 0 2px #fff,0 1px 0 #3a2a1e}
@@ -85,11 +86,6 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
   <h1>0021_ohfuchiのホームサイト(準備中)</h1>
 </header>
 <main>
-<div class="card" id="newsCard">
-<h2>お知らせ</h2>
-<ul class="news-list" id="newsList"></ul>
-<div class="news-more"><button type="button" id="newsAll" class="hidden">すべて見る</button></div>
-</div>
 <div class="card">
 <h2>作成したゲーム・ツールはこちら</h2>
 <div class="links">
@@ -107,6 +103,11 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
 <a class="blue" href="https://note.com/0021_taiko" target="_blank" rel="noopener">note</a>
 </div>
 </div>
+<div class="card" id="newsCard">
+<h2>お知らせ</h2>
+<ul class="news-list" id="newsList"></ul>
+<div class="news-more"><button type="button" id="newsAll" class="hidden">すべて見る</button></div>
+</div>
 </main>
 <div class="modal hidden" id="newsModal">
 <div class="modal-box" role="dialog" aria-labelledby="newsTitle">
@@ -115,16 +116,33 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
 <div class="news-more" style="text-align:right"><button type="button" id="newsClose">閉じる</button></div>
 </div>
 </div>
-<script>document.write('<script src="news.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
 <script>
 (function(){
   const $=id=>document.getElementById(id);
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const news=window.SITE_NEWS||[];
-  const li=n=>'<li><b>'+esc(n.d)+'</b>'+esc(n.t)+'</li>';
-  $('newsList').innerHTML=news.slice(0,5).map(li).join('')||'<li>お知らせはありません</li>';
-  $('newsListAll').innerHTML=news.map(li).join('');
-  $('newsAll').classList.toggle('hidden',news.length<=5);
+  // お知らせの取得元: ホームサイト自身と各ゲーム・ツール。各ツールのフォルダに news.js（window.<g>=[{d:'2026/11/23',t:'内容'}, ...]）を置くと、ここに自動で載る。
+  // ファイルが無いツールは飛ばす
+  const SOURCES=[
+    {tag:'',src:'news.js',g:'SITE_NEWS'},
+    {tag:'太鼓の達人 曲名当てクイズ',src:'taiko-quiz/news.js',g:'QUIZ_NEWS'},
+    {tag:'HTML太鼓シミュレーター',src:'HTMLTaikoSimulator/news.js',g:'SIM_NEWS'},
+    {tag:'MuseDash 譜面エディター',src:'MuseDashChartEditor/news.js',g:'MUSE_NEWS'}
+  ];
+  const t=Math.floor(Date.now()/60000);
+  const load=s=>new Promise(res=>{
+    const e=document.createElement('script'); e.src='/'+s.src+'?t='+t;
+    e.onload=()=>{const v=window[s.g]; res(Array.isArray(v)?v.map(n=>({d:n.d,t:n.t,tag:s.tag})):[]);};
+    e.onerror=()=>res([]);
+    document.head.appendChild(e);
+  });
+  Promise.all(SOURCES.map(load)).then(lists=>{
+    // 日付の新しい順（同じ日は取得元の順・ファイルの順のまま）
+    const news=[].concat(...lists).map((n,i)=>({...n,i})).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:a.i-b.i);
+    const li=n=>'<li><b>'+esc(n.d)+'</b>'+(n.tag?'<span class="news-tag">'+esc(n.tag)+'</span>':'')+esc(n.t)+'</li>';
+    $('newsList').innerHTML=news.slice(0,5).map(li).join('')||'<li>お知らせはありません</li>';
+    $('newsListAll').innerHTML=news.map(li).join('');
+    $('newsAll').classList.toggle('hidden',news.length<=5);
+  });
   const m=$('newsModal');
   $('newsAll').onclick=()=>m.classList.remove('hidden');
   $('newsClose').onclick=()=>m.classList.add('hidden');

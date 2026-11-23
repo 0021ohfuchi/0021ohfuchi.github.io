@@ -61,6 +61,7 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
 .video img{width:168px;max-width:42%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;flex:none;background:#ddd}
 .video span{display:flex;flex-direction:column;gap:2px;min-width:0}
 .video small{color:var(--sub);font-size:12px}
+.video em{font-style:normal;font-size:13px;line-height:1.5;color:var(--sub);overflow-wrap:anywhere}
 .video b{font-size:15px;line-height:1.5;font-weight:800;overflow-wrap:anywhere}
 /* お知らせ */
 .news-list{list-style:none;margin:0;padding:0;font-size:14px;line-height:1.7}
@@ -106,7 +107,7 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
 <h2>YouTubeの最新動画</h2>
 <a class="video" id="videoLink" href="https://www.youtube.com/@0021_taiko" target="_blank" rel="noopener">
 <img id="videoThumb" alt="" loading="lazy">
-<span><small id="videoDate"></small><b id="videoTitle"></b></span>
+<span><small id="videoDate"></small><b id="videoTitle"></b><em id="videoDesc"></em></span>
 </a>
 </div>
 <div class="card">
@@ -139,6 +140,7 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
   document.getElementById('videoLink').href='https://www.youtube.com/watch?v='+encodeURIComponent(v.id);
   document.getElementById('videoThumb').src='https://i.ytimg.com/vi/'+encodeURIComponent(v.id)+'/mqdefault.jpg';
   document.getElementById('videoTitle').textContent=v.title;
+  document.getElementById('videoDesc').textContent=v.desc||'';
   document.getElementById('videoDate').textContent=v.date+' 公開';
   document.getElementById('videoCard').hidden=false;
 })();

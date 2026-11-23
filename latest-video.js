@@ -2,27 +2,32 @@
 window.LATEST_VIDEOS=[
  {
   "id": "Ru6uuxoJJG8",
-  "title": "Good-bye my earth (Oni) [Taiko no Tatsujin Rhythmic Adventure Pack] #keyboard",
+  "title": "Good-bye my earth /「ダライアスバースト」より 全良【太鼓の達人 ドコどんRPGパック！】#",
+  "desc": "★×8 476コンボ ゲームミュージックジャンルの中で、個人的にTOP5に入るほど好きな曲です 3DS3当時から10年近くたって初全良出来ました（感慨深い…）",
   "date": "2026/11/22"
  },
  {
   "id": "o9-73nUTnTs",
-  "title": "KURU KURU KUROKKURU (Oni) [Taiko no Tatsujin: Rhythm Festival] #keyboard #shorts",
+  "title": "クルクルクロックル 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人 #shorts",
+  "desc": "",
   "date": "2026/11/20"
  },
  {
   "id": "o-pglY10RE4",
-  "title": "Kimi wa doko? / GOLDEN BOMBER (Oni) [Taiko no Tatsujin: Rhythm Festival] #keyboard #shorts",
+  "title": "君はドコ？ / ゴールデンボンバー 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人 #shorts",
+  "desc": "",
   "date": "2026/11/19"
  },
  {
   "id": "ScX6Uw8-v_I",
-  "title": "Hyper Thrilling Don-chan Land (All Stages) [Taiko no Tatsujin: Rhythm Festival]",
+  "title": "はいぱーわくわくどんちゃんランド 全ステージプレイ動画 【太鼓の達人 ドンダフルフェスティバル】",
+  "desc": "2026年11月19日の無料アップデートで追加されたミニゲームモード 全4種類のステージをプレイ 4種類ともSwitchば～じょん！に収録されているミニゲームのリメイクとなっています 00:00 メニュー 00:17 ニンジャしゅぎょー 01:43 ハチミツだいさくせん 03:42 なまはげがころんだ 05:57 だる",
   "date": "2026/11/19"
  },
  {
   "id": "Ks3KXXQSuKw",
-  "title": "Kimi wa doko? / GOLDEN BOMBER (Oni) [Taiko no Tatsujin: Rhythm Festival] #keyboard",
+  "title": "君はドコ？ / ゴールデンボンバー 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人",
+  "desc": "★×9 563コンボ 2026年11月19日に追加された楽曲 先週の追加楽曲が「女々しくて」だったのはこの曲の伏線、ということだったんですね…！ 曲調的に裏の高難易度譜面がありそうですが、表譜面だけのようです 倍速に見える高速地帯は、実際は低速地帯よりもBPMが速く（BPM 134の等速＆BPM288の等速）、同じリズ",
   "date": "2026/11/19"
  }
 ];

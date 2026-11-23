@@ -25,6 +25,23 @@ v = {'id': str(e['id']), 'title': title[:120],
 # サムネイル: TikTok の画像の URL は数日で期限が切れるので、取得できたときにファイル（latest-tiktok.jpg）として保存して使う
 THUMB = os.path.join(os.path.dirname(OUT), 'latest-tiktok.jpg')
 v['thumb'] = False
+
+
+def shrink(data):
+    """表示サイズ（高さ 180px）の 2 倍＝高さ 360px の JPEG に縮める（元は 500KB 前後 → 20KB 前後）。Pillow が無ければそのまま"""
+    try:
+        import io
+        from PIL import Image
+        im = Image.open(io.BytesIO(data)).convert('RGB')
+        if im.height > 360:
+            im = im.resize((round(im.width * 360 / im.height), 360), Image.LANCZOS)
+        buf = io.BytesIO()
+        im.save(buf, 'JPEG', quality=78, optimize=True)
+        return buf.getvalue()
+    except Exception as ex:
+        print('!! 画像を縮められませんでした（そのまま使います）:', type(ex).__name__, flush=True)
+        return data
+
 try:
     import urllib.request
     cands = sorted([t for t in (e.get('thumbnails') or []) if t.get('url')], key=lambda t: (t.get('id') != 'cover', -(t.get('preference') or 0)))
@@ -33,7 +50,8 @@ try:
         resp = urllib.request.urlopen(req, timeout=60)
         data = resp.read()
         if 'image' in (resp.headers.get('Content-Type') or '') and len(data) > 1000:
-            open(THUMB, 'wb').write(data)
+            data = shrink(data)
+            open(THUMB, 'wb').write(data)  # 同じファイル名で上書きするので、古いサムネイルは残らない
             v['thumb'] = True
             break
 except Exception as ex:

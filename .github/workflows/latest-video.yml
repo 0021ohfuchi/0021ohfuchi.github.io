@@ -24,7 +24,7 @@ jobs:
       - name: TikTok の最新動画を取得する（取れなくても前回のままにして先へ進む）
         continue-on-error: true
         run: |
-          pip install yt-dlp
+          pip install yt-dlp pillow
           python scripts/fetch_tiktok.py
       - name: YouTube の最新動画を取得する
         env:

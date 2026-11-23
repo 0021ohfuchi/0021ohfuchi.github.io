@@ -16,10 +16,15 @@ if not entries:
     sys.exit('TikTok の動画が見つかりませんでした')
 # 固定表示の動画が先頭に来ることがあるので、投稿日時が一番新しいものを選ぶ
 e = max(entries, key=lambda x: x.get('timestamp') or 0)
-title = (e.get('description') or e.get('title') or '').strip()
-title = re.split(r'\s+左利きの太鼓の達人', title)[0].strip() or title  # 自己紹介文の前までを動画のタイトルとする
+full = (e.get('description') or e.get('title') or '').strip()
+title = re.split(r'\s+左利きの太鼓の達人', full)[0].strip() or full  # 自己紹介文の前までを動画のタイトルとする
+# 説明欄: タイトルより後ろの文章（使用機材の紹介の手前まで）にハッシュタグを足す
+rest = full[len(title):].strip()
+rest = re.split(r'\s*(?:モニター|キーボード|カメラ|イヤホン|マウス|コントローラー)\s*[:：]', rest)[0]
+tags = re.findall(r'#\S+', full)
+desc = ' '.join([re.sub(r'#\S+', '', rest).strip()] + tags).strip()
 ts = e.get('timestamp')
-v = {'id': str(e['id']), 'title': title[:120],
+v = {'id': str(e['id']), 'title': title[:120], 'desc': desc[:200],
      'date': time.strftime('%Y/%m/%d', time.gmtime(ts + 9 * 3600)) if ts else '',
      'url': e.get('url') or f'https://www.tiktok.com/@{USER}/video/{e["id"]}'}
 # サムネイル: TikTok の画像の URL は数日で期限が切れるので、取得できたときにファイル（latest-tiktok.jpg）として保存して使う

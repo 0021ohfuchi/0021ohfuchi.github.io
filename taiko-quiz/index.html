@@ -307,6 +307,12 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 .modal-box{background:#fff;border:3px solid var(--line);border-radius:22px;box-shadow:0 6px 0 var(--line);padding:20px 24px;max-width:620px;width:100%;max-height:90vh;overflow-y:auto}
 .modal-box ul{margin:0 0 14px;padding-left:1.2em;font-size:15px;line-height:1.8}
 .modal-box ul ul{margin:0;font-size:14px}
+.news-list{list-style:none;margin:0;padding:0;font-size:14px;line-height:1.7}
+.news-list li{padding:7px 2px;border-bottom:1px dashed #d9c3a5}
+.news-list li:last-child{border-bottom:none}
+.news-list b{margin-right:8px;color:var(--sub);font-variant-numeric:tabular-nums}
+.news-more{margin-top:10px;text-align:center}
+#newsModal .news-list{max-height:60vh;overflow-y:auto}
 .modal-box ul.changelog{font-size:13px;line-height:1.7;max-height:9em;overflow-y:auto}
 .modal-box ul.changelog b{margin-right:6px;color:var(--sub)}
 /* 日本語 / 英語の切り替え（ホームボタンの左） */
@@ -441,6 +447,15 @@ a{color:var(--ka-d);font-weight:700}
   <div class="player-body" id="plBody"></div>
 </div>
 
+<!-- お知らせ（全件） -->
+<div class="modal hidden" id="newsModal">
+  <div class="modal-box" role="dialog" aria-labelledby="newsTitle">
+    <h2 id="newsTitle">お知らせ</h2>
+    <ul class="news-list" id="newsListAll"></ul>
+    <div style="text-align:right;margin-top:12px"><button class="primary" id="newsClose">閉じる</button></div>
+  </div>
+</div>
+
 <!-- あそびかた（右上の ? から開く） -->
 <div class="modal hidden" id="helpModal">
   <div class="modal-box" role="dialog" aria-labelledby="helpTitle">
@@ -535,6 +550,11 @@ a{color:var(--ka-d);font-weight:700}
       <p class="muted" style="margin:8px 0 0;text-align:center;flex-basis:100%">曲名・読み・作品名・アーティスト・作曲者・アニメ名などから譜面を探して、譜面・難易度・BPM・最大コンボ数・ジャンル・収録作品を見られます</p>
     </div>
     </div></div>
+  </div>
+  <div class="card" id="newsCard" style="margin-top:22px">
+    <h2>お知らせ</h2>
+    <ul class="news-list" id="newsList"></ul>
+    <div class="news-more"><button class="blue sm" id="newsAll">すべて見る</button></div>
   </div>
 </section>
 
@@ -632,6 +652,7 @@ a{color:var(--ka-d);font-weight:700}
 <script>document.write('<script src="data.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
 <script src="fumen-parse.js?v=20261122b"></script><!-- 変更したら v を変える（スマホに古いファイルが残らないように） -->
 <script src="bgm.js"></script>
+<script>document.write('<script src="news.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
 <script>
 'use strict';
 // 譜面画像のある曲だけを出題対象にする
@@ -2154,6 +2175,19 @@ $('plClose').onclick=stopSong; // 閉じたら、その問題ではもう流さ�
 /* ---------- あそびかた ---------- */
 // 日本語 / 英語の切り替え（切り替えるとページを読み込み直す）
 document.querySelectorAll('#langTog button').forEach(b=>{ b.classList.toggle('on', b.dataset.l===window.LANG); b.onclick=()=>{ if(b.dataset.l!==window.LANG) setLang(b.dataset.l); }; });
+/* ---------- お知らせ（news.js: 新しいものが先頭） ---------- */
+(function(){
+  const news = window.QUIZ_NEWS || [];
+  const li = n=>`<li><b>${esc(n.d)}</b>${esc(window.tr ? window.tr(n.t) : n.t)}</li>`;
+  $('newsList').innerHTML = news.slice(0,5).map(li).join('') || '<li class="muted">お知らせはありません</li>';
+  $('newsAll').classList.toggle('hidden', news.length <= 5);
+  $('newsListAll').innerHTML = news.map(li).join('');
+  const m=$('newsModal');
+  $('newsAll').onclick=()=>m.classList.remove('hidden');
+  $('newsClose').onclick=()=>m.classList.add('hidden');
+  m.onclick=e=>{ if(e.target===m) m.classList.add('hidden'); };
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') m.classList.add('hidden'); });
+})();
 $('helpBtn').onclick=()=>$('helpModal').classList.remove('hidden');
 $('homeIcon').onclick=()=>$('homeBtn').click(); // 左上のタイトルと同じ（クイズの途中なら確認してから戻る）
 $('helpClose').onclick=()=>$('helpModal').classList.add('hidden');

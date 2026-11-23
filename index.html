@@ -6,32 +6,90 @@
 <title>太鼓の達人 曲名当てクイズ</title>
 <meta name="description" content="譜面を見て曲名を当てる「太鼓の達人 曲名当てクイズ」など、ブラウザで遊べるツールを置いています。">
 <meta property="og:site_name" content="太鼓の達人 曲名当てクイズ">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" sizes="192x192" href="/taiko-quiz/favicon.png">
 <link rel="apple-touch-icon" href="/taiko-quiz/favicon.png">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"太鼓の達人 曲名当てクイズ","alternateName":"曲名当てクイズ","url":"https://0021ohfuchi.github.io/"}</script>
 <style>
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#ffb43a;color:#3a2a1e;font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif}
-main{width:min(92vw,480px);background:#fff;border-radius:16px;padding:24px;box-shadow:0 4px 0 #d98f1c}
-h1{margin:0 0 8px;font-size:1.3rem}
-h2{margin:20px 0 4px;font-size:.95rem;color:#8a7564}
-a{display:block;margin:8px 0;padding:12px 16px;border-radius:10px;background:#fff3c4;color:#3a2a1e;text-decoration:none;font-weight:700}
-a:hover{background:#ffe49a}
-a.main{background:#ff4b3e;color:#fff}
-a.main:hover{background:#d6301f}
+:root{
+  --bg:#fff6d6; --dot:#ffe49a; --card:#ffffff; --text:#3a2a1e; --sub:#8a7564; --line:#ffd36b;
+  --don:#ff4b3e; --don-d:#d6301f; --ka:#2fb8e8; --ka-d:#1a8fbb; --gold:#ffb400; --pink:#ff6fae; --green:#3cc46a;
+  --ok:#22a855; --ng:#ff4b3e; --chip:#fff3c4;
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--text);
+  font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;font-weight:500;line-height:1.6;
+  /* お祭りっぽい背景: 山吹色の地に青海波（せいがいは）の模様 */
+  --sg:#ffb43a; --sgl:#ffcf6e;
+  background-color:var(--sg);
+  background-image:
+    radial-gradient(circle at 100% 150%, var(--sg) 24%, var(--sgl) 24%, var(--sgl) 28%, var(--sg) 28%, var(--sg) 36%, var(--sgl) 36%, var(--sgl) 40%, transparent 40%, transparent),
+    radial-gradient(circle at 0 150%, var(--sg) 24%, var(--sgl) 24%, var(--sgl) 28%, var(--sg) 28%, var(--sg) 36%, var(--sgl) 36%, var(--sgl) 40%, transparent 40%, transparent),
+    radial-gradient(circle at 50% 100%, var(--sgl) 10%, var(--sg) 10%, var(--sg) 23%, var(--sgl) 23%, var(--sgl) 30%, var(--sg) 30%, var(--sg) 43%, var(--sgl) 43%, var(--sgl) 50%, var(--sg) 50%, var(--sg) 63%, var(--sgl) 63%, var(--sgl) 71%, transparent 71%, transparent),
+    radial-gradient(circle at 100% 50%, var(--sgl) 5%, var(--sg) 5%, var(--sg) 15%, var(--sgl) 15%, var(--sgl) 20%, var(--sg) 20%, var(--sg) 29%, var(--sgl) 29%, var(--sgl) 34%, var(--sg) 34%, var(--sg) 44%, var(--sgl) 44%, var(--sgl) 49%, transparent 49%, transparent),
+    radial-gradient(circle at 0 50%, var(--sgl) 5%, var(--sg) 5%, var(--sg) 15%, var(--sgl) 15%, var(--sgl) 20%, var(--sg) 20%, var(--sg) 29%, var(--sgl) 29%, var(--sgl) 34%, var(--sg) 34%, var(--sg) 44%, var(--sgl) 44%, var(--sgl) 49%, transparent 49%, transparent);
+  background-size:100px 50px;background-attachment:fixed;
+  /* スマホの 100vh はアドレスバーのぶん実際より高く、中身が収まっていてもスクロールできてしまうので、見えている高さ（dvh）を使う */
+  min-height:100vh;min-height:100dvh;overflow-x:hidden}
+header{background:linear-gradient(90deg,var(--don),#ff7a3d);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;
+  position:relative;box-shadow:0 4px 0 rgba(0,0,0,.08)}
+/* ヘッダーの下に、太鼓の胴の鋲（びょう）が並んだような帯 */
+header::after{content:"";position:absolute;left:0;right:0;bottom:-12px;height:12px;
+  background:#5a2e16 radial-gradient(circle,#ffd25e 0 3px,#b8860b 3.5px 4px,transparent 4.5px) 0 50%/22px 12px repeat-x;
+  box-shadow:0 3px 0 rgba(0,0,0,.12)}
+.logo-icon{width:46px;height:46px;flex:none;display:block;filter:drop-shadow(0 2px 0 rgba(0,0,0,.18))}
+main{max-width:860px;margin:0 auto;padding:42px 16px 18px}
+.card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:0 6px 0 var(--line)}
+h2{font-size:20px;margin:0 0 10px;font-weight:800;display:flex;align-items:center;gap:8px}
+h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--don);box-shadow:18px 0 0 var(--ka);margin-right:20px}
+/* 見出し: ドン（赤）とカッ（青）の飾り。ゲームは赤、SNS は青の帯 */
+.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+/* リンク: クイズのボタンと同じ（こげ茶の縁＋内側の白い縁＋下の影） */
+.links a{display:block;text-align:center;font-weight:800;font-size:16px;line-height:1.4;letter-spacing:.02em;text-decoration:none;
+  border:2.5px solid #3a2a1e;border-radius:999px;padding:9px 18px;background:#fff;color:#3a2a1e;
+  box-shadow:inset 0 0 0 2px #fff,0 4px 0 #3a2a1e;transition:transform .08s,box-shadow .08s}
+.links a:hover{transform:translateY(-1px)}
+.links a:active{transform:translateY(3px);box-shadow:inset 0 0 0 2px #fff,0 1px 0 #3a2a1e}
+.links a.primary{background:#ff4b3e;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.2)}
+.links a.blue{background:#2fb8e8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.2)}
+@media(max-width:480px){header h1{font-size:17px}}
 </style>
 </head>
 <body>
+<header>
+  <svg class="logo-icon" viewBox="0 4 44 44" aria-hidden="true">
+    <!-- 太鼓の面: 濃い縁・白い縁・赤（ドン） -->
+    <circle cx="22" cy="26" r="20" fill="#3a2a1e"/>
+    <circle cx="22" cy="26" r="17.5" fill="#fff"/>
+    <circle cx="22" cy="26" r="15" fill="#ff4b3e"/>
+    <!-- 音符 -->
+    <path d="M18.5 18.5 L28.5 16 V30.2" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M18.5 18.5 V32.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+    <ellipse cx="15.6" cy="33" rx="3.6" ry="2.8" fill="#fff" transform="rotate(-20 15.6 33)"/>
+    <ellipse cx="25.6" cy="30.7" rx="3.6" ry="2.8" fill="#fff" transform="rotate(-20 25.6 30.7)"/>
+  </svg>
+  <h1>0021_ohfuchiのホームページ(仮)</h1>
+</header>
 <main>
-<h1>0021_ohfuchiのホームページ(仮)</h1>
+<div class="card">
 <h2>ゲーム</h2>
-<a class="main" href="/taiko-quiz/">曲名当てクイズをあそぶ</a>
+<div class="links">
+<a class="primary" href="/taiko-quiz/">曲名当てクイズをあそぶ</a>
 <a href="/HTMLTaikoSimulator/">HTML太鼓シミュレーター</a>
 <a href="/MuseDashChartEditor/">MuseDash 譜面エディター</a>
+</div>
+</div>
+<div class="card">
 <h2>SNS</h2>
-<a href="https://www.youtube.com/@0021_taiko" target="_blank" rel="noopener">YouTube</a>
-<a href="https://www.tiktok.com/@0021_taiko" target="_blank" rel="noopener">TikTok</a>
-<a href="https://x.com/tama71037107" target="_blank" rel="noopener">X</a>
-<a href="https://note.com/0021_taiko" target="_blank" rel="noopener">note</a>
+<div class="links">
+<a class="blue" href="https://www.youtube.com/@0021_taiko" target="_blank" rel="noopener">YouTube</a>
+<a class="blue" href="https://www.tiktok.com/@0021_taiko" target="_blank" rel="noopener">TikTok</a>
+<a class="blue" href="https://x.com/tama71037107" target="_blank" rel="noopener">X</a>
+<a class="blue" href="https://note.com/0021_taiko" target="_blank" rel="noopener">note</a>
+</div>
+</div>
 </main>
 </body>
 </html>

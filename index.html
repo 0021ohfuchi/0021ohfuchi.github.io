@@ -55,6 +55,13 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
 .links a:active{transform:translateY(3px);box-shadow:inset 0 0 0 2px #fff,0 1px 0 #3a2a1e}
 .links a.primary{background:#ff4b3e;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.2)}
 .links a.blue{background:#2fb8e8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.2)}
+/* 最新の動画 */
+.video{display:flex;gap:14px;align-items:center;text-decoration:none;color:var(--text);border:2.5px solid #3a2a1e;border-radius:16px;padding:8px;background:#fff;box-shadow:inset 0 0 0 2px #fff,0 4px 0 #3a2a1e}
+.video:active{transform:translateY(3px);box-shadow:inset 0 0 0 2px #fff,0 1px 0 #3a2a1e}
+.video img{width:168px;max-width:42%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;flex:none;background:#ddd}
+.video span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.video small{color:var(--sub);font-size:12px}
+.video b{font-size:15px;line-height:1.5;font-weight:800;overflow-wrap:anywhere}
 /* お知らせ */
 .news-list{list-style:none;margin:0;padding:0;font-size:14px;line-height:1.7}
 .news-list li{padding:7px 2px;border-bottom:1px dashed #d9c3a5}
@@ -95,6 +102,13 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
 <div class="tool"><a class="primary" href="/MuseDashChartEditor/">MuseDash 譜面エディター</a><p>MuseDash の譜面（.mdm）をブラウザで編集できるエディターです。</p></div>
 </div>
 </div>
+<div class="card" id="videoCard" hidden>
+<h2>YouTubeの最新動画</h2>
+<a class="video" id="videoLink" href="https://www.youtube.com/@0021_taiko" target="_blank" rel="noopener">
+<img id="videoThumb" alt="" loading="lazy">
+<span><small id="videoDate"></small><b id="videoTitle"></b></span>
+</a>
+</div>
 <div class="card">
 <h2>SNSはこちら</h2>
 <div class="links">
@@ -117,6 +131,18 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
 <div class="news-more" style="text-align:right"><button type="button" id="newsClose">閉じる</button></div>
 </div>
 </div>
+<script>document.write('<script src="latest-video.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
+<script>
+(function(){
+  const v=(window.LATEST_VIDEOS||[])[0];
+  if(!v) return; // 取れていなければカードごと出さない
+  document.getElementById('videoLink').href='https://www.youtube.com/watch?v='+encodeURIComponent(v.id);
+  document.getElementById('videoThumb').src='https://i.ytimg.com/vi/'+encodeURIComponent(v.id)+'/mqdefault.jpg';
+  document.getElementById('videoTitle').textContent=v.title;
+  document.getElementById('videoDate').textContent=v.date+' 公開';
+  document.getElementById('videoCard').hidden=false;
+})();
+</script>
 <script>
 (function(){
   const $=id=>document.getElementById(id);

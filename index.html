@@ -47,6 +47,7 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
 /* 見出し: ドン（赤）とカッ（青）の飾り。ゲームは赤、SNS は青の帯 */
 .links{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
 /* リンク: クイズのボタンと同じ（こげ茶の縁＋内側の白い縁＋下の影） */
+.tool p{margin:8px 4px 0;font-size:13px;line-height:1.6;color:var(--sub)}
 .links a{display:block;text-align:center;font-weight:800;font-size:16px;line-height:1.4;letter-spacing:.02em;text-decoration:none;
   border:2.5px solid #3a2a1e;border-radius:999px;padding:9px 18px;background:#fff;color:#3a2a1e;
   box-shadow:inset 0 0 0 2px #fff,0 4px 0 #3a2a1e;transition:transform .08s,box-shadow .08s}
@@ -89,9 +90,9 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
 <div class="card">
 <h2>作成したゲーム・ツールはこちら</h2>
 <div class="links">
-<a class="primary" href="/taiko-quiz/">太鼓の達人 曲名当てクイズ</a>
-<a class="primary" href="/HTMLTaikoSimulator/">太鼓 譜面エディター</a>
-<a class="primary" href="/MuseDashChartEditor/">MuseDash 譜面エディター</a>
+<div class="tool"><a class="primary" href="/taiko-quiz/">太鼓の達人 曲名当てクイズ</a><p>おにの譜面画像と★・BPM・コンボ数などを手がかりに、曲名を当てるクイズです。譜面検索もできます。</p></div>
+<div class="tool"><a class="primary" href="/HTMLTaikoSimulator/">太鼓 譜面エディター</a><p>スマホでも使える、太鼓の達人風の譜面エディター＆シミュレーターです。ブラウザだけで動きます。</p></div>
+<div class="tool"><a class="primary" href="/MuseDashChartEditor/">MuseDash 譜面エディター</a><p>MuseDash の譜面（.mdm）をブラウザで編集できるエディターです。</p></div>
 </div>
 </div>
 <div class="card">

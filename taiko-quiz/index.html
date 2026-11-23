@@ -1738,11 +1738,15 @@ function joinWorks(idx){
   }
   return out;
 }
-function worksCell(r){
+// 表示する収録作品の番号。ドンダフルフェスティバル（Switch版）は、Switch版にしかない譜面（ドンダフルフェスティバル本体に無い譜面）のときだけ表示する
+function shownWorks(r){
   let all = (r.ws||[]).filter(i=>WORKS[i]);
-  // ドンダフルフェスティバル（スイッチ版）は、スイッチ版にしかない譜面（ドンダフルフェスティバル本体に無い譜面）のときだけ表示する
   const sw = WORKS.findIndex(w=>w.name==='太鼓の達人 ドンダフルフェスティバル（スイッチ版）'), df = WORKS.findIndex(w=>w.name==='太鼓の達人 ドンダフルフェスティバル');
   if(sw >= 0 && df >= 0 && all.includes(df)) all = all.filter(i=>i!==sw);
+  return all;
+}
+function worksCell(r){
+  const all = shownWorks(r);
   const items = joinWorks(all);
   if(!items.length) return '<div class="k">収録作品</div><div class="v">不明</div>';
   const MAX = 4;
@@ -2040,7 +2044,7 @@ function showSong(){
   const s = search.song, r = s.charts[search.idx];
   const d = $('sDetail'); d.classList.remove('hidden');
   $('sList').classList.add('hidden'); // 譜面を1画面に収めるため、候補一覧は閉じる（「検索結果に戻る」でまた開く）
-  const works = joinWorks((r.ws||[]).filter(i=>WORKS[i])).map(it=>it.text);
+  const works = joinWorks(shownWorks(r)).map(it=>it.text);
   d.innerHTML = `<div class="sd-head"><button class="sd-back" id="sdBack" title="検索結果の一覧に戻る（Esc）">← 検索結果に戻る</button><span class="title">${esc(dispSong(s.name, s.charts[search.idx]))}</span>${s.yomi?`<span class="muted">${esc(s.yomi)}</span>`:''}
       <div class="sd-tabs">${s.charts.map((c,i)=>`<button data-i="${i}" class="sm${i===search.idx?' on':''}">${chartLabel(c, s.charts.some(x=>/裏譜面/.test(x.n)), s.charts.every(x=>x.s===3))}</button>`).join('')}</div>
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a></div>

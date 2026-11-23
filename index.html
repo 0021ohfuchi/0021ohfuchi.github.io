@@ -66,7 +66,9 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
   .video-row>.card{flex:1 1 0;min-width:0;display:flex;flex-direction:column}
   .video-row>.card .video{flex:1}
 }
-.video.tiktok{padding:14px 16px}
+.video.tiktok{padding:8px}
+.video.tiktok img{width:auto;height:180px;max-width:42%;aspect-ratio:9/16;object-fit:cover}
+.video.tiktok span{padding:0 4px}
 .video.tiktok b{font-size:16px}
 
 .video{display:flex;gap:14px;align-items:center;text-decoration:none;color:var(--text);border:2.5px solid #3a2a1e;border-radius:16px;padding:8px;background:#fff;box-shadow:inset 0 0 0 2px #fff,0 4px 0 #3a2a1e}
@@ -127,6 +129,7 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
 <div class="card" id="tiktokCard" hidden>
 <h2>TikTokの最新動画</h2>
 <a class="video tiktok" id="tiktokLink" href="https://www.tiktok.com/@0021_taiko" target="_blank" rel="noopener">
+<img id="tiktokThumb" alt="" loading="lazy" hidden>
 <span><small id="tiktokDate"></small><b id="tiktokTitle"></b></span>
 </a>
 </div>
@@ -162,6 +165,7 @@ h2::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--
   document.getElementById('tiktokLink').href='https://www.tiktok.com/@0021_taiko/video/'+encodeURIComponent(t.id);
   document.getElementById('tiktokTitle').textContent=t.title;
   document.getElementById('tiktokDate').textContent=(t.date?t.date+' 公開':'');
+  if(t.thumb){const i=document.getElementById('tiktokThumb'); i.src='latest-tiktok.jpg?v='+encodeURIComponent(t.id); i.hidden=false;}
   document.getElementById('tiktokCard').hidden=false;
 })();
 </script>

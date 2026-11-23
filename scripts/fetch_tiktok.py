@@ -22,6 +22,29 @@ ts = e.get('timestamp')
 v = {'id': str(e['id']), 'title': title[:120],
      'date': time.strftime('%Y/%m/%d', time.gmtime(ts + 9 * 3600)) if ts else '',
      'url': e.get('url') or f'https://www.tiktok.com/@{USER}/video/{e["id"]}'}
+# サムネイル: TikTok の画像の URL は数日で期限が切れるので、取得できたときにファイル（latest-tiktok.jpg）として保存して使う
+THUMB = os.path.join(os.path.dirname(OUT), 'latest-tiktok.jpg')
+v['thumb'] = False
+try:
+    import urllib.request
+    cands = sorted([t for t in (e.get('thumbnails') or []) if t.get('url')], key=lambda t: (t.get('id') != 'cover', -(t.get('preference') or 0)))
+    for t in cands:
+        req = urllib.request.Request(t['url'], headers={'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.tiktok.com/'})
+        resp = urllib.request.urlopen(req, timeout=60)
+        data = resp.read()
+        if 'image' in (resp.headers.get('Content-Type') or '') and len(data) > 1000:
+            open(THUMB, 'wb').write(data)
+            v['thumb'] = True
+            break
+except Exception as ex:
+    print('!! サムネイルが取れませんでした:', type(ex).__name__, flush=True)
+if not v['thumb'] and os.path.exists(THUMB):
+    # 取れなかったとき、前回と同じ動画ならサムネイルも前回のものを使う
+    try:
+        prev = json.loads(open(OUT, encoding='utf-8').read().split('window.LATEST_TIKTOK=', 1)[1].rsplit(';', 1)[0])
+        v['thumb'] = prev.get('id') == v['id'] and bool(prev.get('thumb'))
+    except Exception:
+        pass
 js = '// 自動生成: scripts/fetch_tiktok.py（TikTok の最新動画）\nwindow.LATEST_TIKTOK=' + json.dumps(v, ensure_ascii=False, indent=1) + ';\n'
 old = open(OUT, encoding='utf-8').read() if os.path.exists(OUT) else ''
 if old != js:

@@ -39,7 +39,12 @@ EXCLUDE_NS = {'DFMP'}
 SHARED_SUBS = {'作品/DF': '作品/NS2'}
 # おに譜面が無い作品（AC1 は かんたん〜むずかしい だけ）。どの難易度のリンクでも曲名で拾う
 ANY_DIFF = {'AC1'}
-GENRES =['ポップス', 'キッズ', 'アニメ', 'ボーカロイド™曲', 'ゲームミュージック', 'バラエティ', 'クラシック', 'ナムコオリジナル', 'どうよう']
+# ジャンル別ページの名前。グリーン以前はポップスが「J-POP」という名前だったので、それも拾う
+# （J-POP が抜けていたため、モモイロ〜グリーンのポップスの曲がほぼ全部もれていた）
+GENRES =['ポップス', 'J-POP', 'キッズ', 'アニメ', 'ボーカロイド™曲', 'ボーカロイド曲', 'ゲームミュージック', 'バラエティ', 'クラシック', 'ナムコオリジナル', 'どうよう']
+# 集め方を変えたら上げる。works.json の作品がこれより古い集め方で取られていたら、取り直す
+# （ページはキャッシュにあればそれを使うので、Wiki へのアクセスは新しく拾うページのぶんだけ）
+RULES_REV = 2
 
 
 def fetch(page, force=False):
@@ -121,7 +126,7 @@ out['_meta'] = {'total': len(WORKS)}
 REFRESH = set(x.strip() for x in os.environ.get('REFRESH_WORKS', '').split(',') if x.strip())
 for order, (page, label, kind) in enumerate(WORKS):
     force = label in REFRESH
-    if label in out and out[label].get('done') and not force:
+    if label in out and out[label].get('done') and out[label].get('rev') == RULES_REV and not force:
         out[label]['order'] = order  # 作品を途中に足したときのために、並び順だけは毎回付け直す
         continue
     t, net = fetch(page, force)
@@ -130,18 +135,23 @@ for order, (page, label, kind) in enumerate(WORKS):
     b = body(t)
     songs = set() if label in SUBS_ONLY else current_links(b) if page == '作品/新AC' else oni_links(b, label in EXCLUDE_NS, label in ANY_DIFF)
     # ジャンル別ページ
-    subs = []
+    subs, unknown = [], []
     prefixes = [page + '/'] + ([SHARED_SUBS[page] + '/'] if page in SHARED_SUBS else [])
     for m in re.findall(r'href="/taiko-fumen/([^"#?]+)"', b):
         name = urllib.parse.unquote(html.unescape(m))
         if any(name.startswith(p) and '/' not in name[len(p):] for p in prefixes) and name.split('/')[-1] in GENRES and name not in subs:
             subs.append(name)
+        elif name.startswith(page + '/') and '/' not in name[len(page) + 1:] and name not in subs and name not in unknown \
+                and not any(pg == name for pg, _, _ in WORKS):
+            unknown.append(name)   # ジャンル別ページとして拾わなかった子ページ（ログに出して、もれに気づけるようにする）
+    if unknown:
+        print('  拾わなかった子ページ:', ', '.join(unknown), flush=True)
     for sp in subs:
         st, net = fetch(sp, force)
         songs |= oni_links(body(st), label in EXCLUDE_NS, label in ANY_DIFF)
         if net:
             time.sleep(DELAY)
-    out[label] = {'kind': kind, 'order': order, 'page': page, 'subs': len(subs), 'songs': sorted(songs), 'done': True}
+    out[label] = {'kind': kind, 'order': order, 'page': page, 'subs': len(subs), 'songs': sorted(songs), 'done': True, 'rev': RULES_REV}
     json.dump(out, open(OUT, 'w', encoding='utf-8'), ensure_ascii=False)
     print(time.strftime('%H:%M:%S'), label, len(subs), 'subpages', len(songs), 'oni', flush=True)
     subprocess.run([sys.executable, '-I', os.path.join(HERE, 'build_data.py')])

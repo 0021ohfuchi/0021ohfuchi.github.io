@@ -173,6 +173,13 @@ song_works = {}
 for name, v in works_raw.items():
     for p in v['songs']:
         song_works.setdefault(p, set()).add(WORK_INDEX[name])
+# 作品ページから拾えなかった収録作品の手直し（works_fixes.json: 譜面ページ名 → 足す作品名の一覧）
+wfp = os.path.join(HERE, 'works_fixes.json')
+for p, names in (json.load(open(wfp, encoding='utf-8')) if os.path.exists(wfp) else {}).items():
+    if p.startswith('_'):
+        continue
+    for name in names:
+        song_works.setdefault(p, set()).add(WORK_INDEX[name])
 
 # 国内のジャンル名。国内のどの作品にも収録されていない曲のうち、ジャンル名がこれ以外のもの
 # （Pop・Rock・華語流行音樂・綜合音樂・中国版の J-POP など）と、ブラジル版限定曲を海外の曲とみなす
@@ -334,6 +341,8 @@ for s in lists:
         r['yt'] = [i for _, i in yt]
         r['ytk'] = yt[0][0]  # 0=自動生成音源 1=公式音源/MV
     if r['p'] in song_works:
+        if r.get('wk') == 'AC' and r.get('w') in WORK_INDEX:
+            song_works[r['p']].add(WORK_INDEX[r['w']])  # 初出のアーケード作品には必ず収録されている（作品ページでもれていても入れる）
         r['ws'] = sorted(song_works[r['p']])
         mp = [WORK_INDEX[w] for w, ps in MP_ONLY.items() if r['p'] in ps and WORK_INDEX.get(w) in r['ws']]
         if mp:

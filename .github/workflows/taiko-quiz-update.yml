@@ -5,7 +5,7 @@ name: 曲名当てクイズ 曲データの自動更新
 
 on:
   schedule:
-    - cron: '0 18 * * *'   # 毎日 03:00（日本時間）
+    - cron: '0 13 * * *'   # 毎日 03:00（日本時間）
   workflow_dispatch:        # Actions のページから手動でも実行できる
     inputs:
       max_fetch:

@@ -1715,6 +1715,15 @@ document.addEventListener('click', e=>{
   v.textContent = open ? v.dataset.full : v.dataset.short;
   if(game && game.q && game.q.redraw && !$('scQuiz').classList.contains('hidden')) setTimeout(()=>renderChart(), 0); // 情報の高さが変わったら譜面を収め直す
 }, true); // 伏せた情報を開く処理より先に見る（開いたのと同じタップで全部表示にならないように）
+// 収録作品の表示名: 家庭用の「太鼓の達人」は省く。太鼓の達人プラス・アイドルマスター マストソングスは短い呼び名にする
+function wname(w){
+  if(!w) return '';
+  const n = w.name;
+  if(w.kind !== 'CS') return n;
+  if(n === '太鼓の達人プラス') return 'プラス★新曲取り放題！';
+  if(n.startsWith('アイドルマスター マストソングス')) return n.replace(/^アイドルマスター マストソングス\s*/, '').replace('／', '/');
+  return n.replace(/^太鼓の達人\s*/, '');
+}
 // AC の作品が 3 つ以上連続して収録されているときは「一番古い～一番新しい」にまとめる（例: ソライロ～グリーン）
 function joinWorks(idx){
   // 連続した AC の作品を 1 項目にまとめる。項目: {text, last(一番新しい作品の番号), n(作品数)}
@@ -1722,8 +1731,8 @@ function joinWorks(idx){
   for(let s=0; s<a.length;){
     let e = s;
     while(e+1<a.length && a[e+1]===a[e]+1 && WORKS[a[e]].kind==='AC' && WORKS[a[e+1]].kind==='AC') e++;
-    if(e-s >= 2) out.push({text: WORKS[a[s]].name + '～' + WORKS[a[e]].name, last: a[e], n: e-s+1});
-    else for(let k=s;k<=e;k++) out.push({text: WORKS[a[k]].name, last: a[k], n: 1});
+    if(e-s >= 2) out.push({text: wname(WORKS[a[s]]) + '～' + wname(WORKS[a[e]]), last: a[e], n: e-s+1});
+    else for(let k=s;k<=e;k++) out.push({text: wname(WORKS[a[k]]), last: a[k], n: 1});
     s = e+1;
   }
   return out;
@@ -1911,7 +1920,7 @@ const SORTS = {
   lvd:   {cmp:(a,b)=>b.maxLv-a.maxLv, grp:s=>'★'+s.maxLv},
   lva:   {cmp:(a,b)=>a.minLv-b.minLv, grp:s=>'★'+s.minLv},
   genre: {cmp:(a,b)=>genreRank(a)-genreRank(b), grp:genreOf},
-  work:  {cmp:(a,b)=>a.w0-b.w0, grp:s=>s.w0<1e9 ? WORKS[s.w0].name : '収録作品不明'},
+  work:  {cmp:(a,b)=>a.w0-b.w0, grp:s=>s.w0<1e9 ? wname(WORKS[s.w0]) : '収録作品不明'},
   // 初出日の順（初出が分からない譜面はどちらの順でも最後）。見出しは初出の年
   new:   {cmp:(a,b)=>(b.t0??-1)-(a.t0??-1), grp:s=>s.t0 ? Math.floor(s.t0/1e4)+'年' : '初出不明'},
   old:   {cmp:(a,b)=>(a.t0??1e9)-(b.t0??1e9), grp:s=>s.t0 ? Math.floor(s.t0/1e4)+'年' : '初出不明'},
@@ -2030,7 +2039,7 @@ function showSong(){
   const s = search.song, r = s.charts[search.idx];
   const d = $('sDetail'); d.classList.remove('hidden');
   $('sList').classList.add('hidden'); // 譜面を1画面に収めるため、候補一覧は閉じる（「検索結果に戻る」でまた開く）
-  const works = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
+  const works = (r.ws||[]).map(i=>WORKS[i] && wname(WORKS[i])).filter(Boolean);
   d.innerHTML = `<div class="sd-head"><button class="sd-back" id="sdBack" title="検索結果の一覧に戻る（Esc）">← 検索結果に戻る</button><span class="title">${esc(dispSong(s.name, s.charts[search.idx]))}</span>${s.yomi?`<span class="muted">${esc(s.yomi)}</span>`:''}
       <div class="sd-tabs">${s.charts.map((c,i)=>`<button data-i="${i}" class="sm${i===search.idx?' on':''}">${chartLabel(c, s.charts.some(x=>/裏譜面/.test(x.n)), s.charts.every(x=>x.s===3))}</button>`).join('')}</div>
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a></div>

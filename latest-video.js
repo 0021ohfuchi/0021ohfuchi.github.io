@@ -2,31 +2,31 @@
 window.LATEST_VIDEOS=[
  {
   "id": "dR7stGL8ENc",
-  "title": "HATARAKU 2000 (Oni) [Taiko no Tatsujin: Rhythm Festival] #keyboard",
-  "desc": "",
+  "title": "はたラク2000 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人",
+  "desc": "★×10 876コンボ 前回のプレイ動画↓ https://youtu.be/7_Tw6Q5iyYM 11月23日は勤労感謝の日！ということで、この曲をプレイ 等速でのプレイは初めてでしたが、最近サボり気味なのもあって見た目32分音符が全然精度取れませんでした… BPM揺れがところどころあるため正確に押しているのに可が",
   "date": "2026/11/23"
  },
  {
   "id": "IuDVXVa2weM",
-  "title": "HATARAKU 2000 (Oni) [Taiko no Tatsujin: Rhythm Festival] #keyboard #shorts",
+  "title": "はたラク2000 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人 #shorts",
   "desc": "",
   "date": "2026/11/23"
  },
  {
   "id": "Ru6uuxoJJG8",
-  "title": "Good-bye my earth (Oni) [Taiko no Tatsujin Rhythmic Adventure Pack] #keyboard",
-  "desc": "",
+  "title": "Good-bye my earth /「ダライアスバースト」より 全良【太鼓の達人 ドコどんRPGパック！】#太鼓の達人",
+  "desc": "★×8 476コンボ ゲームミュージックジャンルの中で、個人的にTOP5に入るほど好きな曲です 3DS3当時から10年近くたって初全良出来ました（感慨深い…）",
   "date": "2026/11/22"
  },
  {
   "id": "o9-73nUTnTs",
-  "title": "KURU KURU KUROKKURU (Oni) [Taiko no Tatsujin: Rhythm Festival] #keyboard #shorts",
+  "title": "クルクルクロックル 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人 #shorts",
   "desc": "",
   "date": "2026/11/20"
  },
  {
   "id": "o-pglY10RE4",
-  "title": "Kimi wa doko? / GOLDEN BOMBER (Oni) [Taiko no Tatsujin: Rhythm Festival] #keyboard #shorts",
+  "title": "君はドコ？ / ゴールデンボンバー 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人 #shorts",
   "desc": "",
   "date": "2026/11/19"
  }

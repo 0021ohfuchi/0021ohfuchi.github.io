@@ -29,7 +29,8 @@ a{color:inherit;text-decoration:none}
 /* ヘッダー */
 .nav{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
 .nav .wrap{display:flex;align-items:center;gap:8px;height:64px}
-.brand{font-weight:700;font-size:20px;letter-spacing:-.01em}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:-.01em}
+.brand img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex:none;border:1px solid rgba(0,0,0,.06)}
 .nav ul{display:flex;gap:4px;margin:0 8px 0 auto;padding:0;list-style:none}
 .nav ul a{display:block;padding:6px 12px;font-size:14px;color:var(--sub);border-radius:999px;transition:background .15s,color .15s}
 .nav ul a:hover{background:var(--soft);color:var(--text)}
@@ -39,6 +40,10 @@ a{color:inherit;text-decoration:none}
 .pill.outline{border:1px solid #d5d5d5;background:#fff;color:var(--text)}
 .pill.outline:hover{background:var(--soft)}
 .pill svg{width:16px;height:16px;flex:none}
+/* 日本語 / 英語の切り替え */
+.lang{display:flex;flex:none;padding:3px;margin-right:8px;border:1px solid #d5d5d5;border-radius:999px}
+.lang button{font:inherit;font-size:12px;font-weight:700;line-height:1;padding:7px 10px;border:0;border-radius:999px;background:none;color:var(--sub);cursor:pointer}
+.lang button.on{background:var(--text);color:#fff}
 
 /* プロフィール */
 .profile{max-width:620px;margin:0 auto;padding:56px 24px 40px;text-align:center}
@@ -66,6 +71,21 @@ section{padding:40px 0}
 .item .meta{margin-top:8px;font-size:12px;color:var(--dim)}
 .item:hover h3{text-decoration:underline;text-underline-offset:3px}
 .item:hover .thumb img{opacity:.88}
+
+/* 動画: YouTube 動画 / YouTube ショート / TikTok の枠 */
+.vgroup+.vgroup{margin-top:44px}
+.vgroup[hidden]{display:none}
+.sub-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.sub-head h3{display:flex;align-items:center;gap:8px;margin:0;font-size:16px;font-weight:700}
+.sub-head h3 svg{width:20px;height:20px;flex:none}
+.sub-head a{display:inline-flex;align-items:center;gap:2px;font-size:14px;color:var(--sub);white-space:nowrap}
+.sub-head a:hover{color:var(--text)}
+.sub-head a svg{width:16px;height:16px}
+/* 縦長（ショート・TikTok）は 6 列 */
+.grid.vert{grid-template-columns:repeat(6,1fr);gap:24px 14px}
+.vert .item .thumb{aspect-ratio:9/16}
+.vert .item h3{margin-top:8px;font-size:13px;line-height:1.55;-webkit-line-clamp:2}
+.vert .item .meta{margin-top:4px;font-size:11px}
 
 /* お知らせ */
 .news-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
@@ -95,10 +115,15 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
 @media (max-width:860px){
   .grid{grid-template-columns:repeat(2,1fr);gap:28px 16px}
   .nav ul{display:none}
-  .nav .pill{margin-left:auto}
+  .lang{margin-left:auto}
+  .grid.vert{grid-template-columns:repeat(3,1fr);gap:20px 10px}
 }
 @media (max-width:560px){
   .wrap{padding:0 16px}
+  .brand{font-size:18px}
+  /* お問い合わせはアイコンだけの丸いボタンに */
+  .nav .pill.black{width:40px;padding:0;justify-content:center}
+  .nav .pill.black span{display:none}
   .profile{padding:40px 16px 24px}
   .avatar{width:80px;height:80px}
   .profile p{font-size:14px;text-align:left}
@@ -106,12 +131,14 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
   .item h3{font-size:14px}
   .item p{display:none}
   .news-list li{flex-direction:column;gap:2px}
-  /* ツールは 左にサムネイル・右に文字 の1列リスト */
-  .grid.tools{grid-template-columns:1fr;gap:20px}
-  .tools .item{display:grid;grid-template-columns:120px 1fr;column-gap:14px;align-items:start}
-  .tools .item .thumb{grid-row:span 2}
-  .tools .item h3{margin:0}
-  .tools .item p{display:block;margin:2px 0 0;font-size:12px}
+  /* 横長のカード（YouTube 動画・ツール）は 左にサムネイル・右に文字 の1列リスト */
+  .grid.rows{grid-template-columns:1fr;gap:20px}
+  .rows .item{display:grid;grid-template-columns:132px 1fr;column-gap:14px;align-items:start}
+  .rows .item .thumb{grid-row:span 3}
+  .rows .item h3{margin:0}
+  .rows .item p{display:block;margin:2px 0 0;font-size:12px}
+  .rows .item .meta{margin-top:2px}
+  .vert .item h3{font-size:12px}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
@@ -120,20 +147,21 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
 
 <nav class="nav">
   <div class="wrap">
-    <a class="brand" href="/">0021ohfuchi</a>
+    <a class="brand" href="/"><img src="avatar.jpg" alt="" width="36" height="36">0021ohfuchi</a>
     <ul>
-      <li><a href="#videos">動画</a></li>
-      <li><a href="#tools">ゲーム・ツール</a></li>
-      <li><a href="#news">お知らせ</a></li>
+      <li><a href="#videos" data-en="Videos">動画</a></li>
+      <li><a href="#tools" data-en="Games &amp; Tools">ゲーム・ツール</a></li>
+      <li><a href="#news" data-en="News">お知らせ</a></li>
     </ul>
-    <a class="pill black" href="#contact">お問い合わせ</a>
+    <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="ja">JA</button><button type="button" data-lang="en">EN</button></div>
+    <a class="pill black" href="#contact" aria-label="お問い合わせ / Contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg><span data-en="Contact">お問い合わせ</span></a>
   </div>
 </nav>
 
 <div class="profile">
   <img class="avatar" src="avatar.jpg" alt="" width="96" height="96">
   <h1>0021ohfuchi</h1>
-  <p>YouTube・TikTok に太鼓の達人のプレイ動画を投稿しています。<br>ブラウザだけで遊べるゲームや、譜面エディターなどのツールも作っています。</p>
+  <p data-en="I post Taiko no Tatsujin play videos on YouTube and TikTok.&lt;br&gt;I also make browser games and tools, such as chart editors.">YouTube・TikTok に太鼓の達人のプレイ動画を投稿しています。<br>ブラウザだけで遊べるゲームや、譜面エディターなどのツールも作っています。</p>
   <div class="links">
     <a class="pill outline" href="https://www.youtube.com/@0021_taiko" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8zM10 15V9l5.2 3z"/></svg>YouTube</a>
     <a class="pill outline" href="https://www.tiktok.com/@0021_taiko" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 3c.3 2.3 1.9 3.9 4.1 4.1v3.1a7.3 7.3 0 0 1-4-1.3v6.2a5.9 5.9 0 1 1-5.9-5.9c.3 0 .6 0 .9.1v3.2a2.8 2.8 0 1 0 1.9 2.6V3z"/></svg>TikTok</a>
@@ -145,29 +173,40 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
 <main>
 <section id="videos" hidden>
   <div class="wrap">
-    <div class="sec-head"><h2>公開中の動画</h2><a href="https://www.youtube.com/@0021_taiko" target="_blank" rel="noopener">もっとみる<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a></div>
-    <div class="grid" id="videoGrid"></div>
+    <div class="sec-head"><h2 data-en="Videos">公開中の動画</h2></div>
+    <div class="vgroup" id="gLong" hidden>
+      <div class="sub-head"><h3><svg viewBox="0 0 24 24" fill="#ff0033"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8zM10 15V9l5.2 3z"/></svg><span>YouTube <span data-en="Videos">動画</span></span></h3><a href="https://www.youtube.com/@0021_taiko/videos" target="_blank" rel="noopener"><span data-en="See more">もっとみる</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a></div>
+      <div class="grid rows" id="ytLong"></div>
+    </div>
+    <div class="vgroup" id="gShort" hidden>
+      <div class="sub-head"><h3><svg viewBox="0 0 24 24" fill="#ff0033"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8zM10 15V9l5.2 3z"/></svg><span>YouTube <span data-en="Shorts">ショート</span></span></h3><a href="https://www.youtube.com/@0021_taiko/shorts" target="_blank" rel="noopener"><span data-en="See more">もっとみる</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a></div>
+      <div class="grid vert" id="ytShort"></div>
+    </div>
+    <div class="vgroup" id="gTiktok" hidden>
+      <div class="sub-head"><h3><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 3c.3 2.3 1.9 3.9 4.1 4.1v3.1a7.3 7.3 0 0 1-4-1.3v6.2a5.9 5.9 0 1 1-5.9-5.9c.3 0 .6 0 .9.1v3.2a2.8 2.8 0 1 0 1.9 2.6V3z"/></svg>TikTok</h3><a href="https://www.tiktok.com/@0021_taiko" target="_blank" rel="noopener"><span data-en="See more">もっとみる</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a></div>
+      <div class="grid vert" id="tiktokGrid"></div>
+    </div>
   </div>
 </section>
 
 <section id="tools">
   <div class="wrap">
-    <div class="sec-head"><h2>ゲーム・ツール</h2></div>
-    <div class="grid tools">
-      <a class="item" href="/taiko-quiz/">
+    <div class="sec-head"><h2 data-en="Games &amp; Tools">ゲーム・ツール</h2></div>
+    <div class="grid rows">
+      <a class="item" href="/taiko-quiz/" id="quizLink">
         <div class="thumb"><img src="thumbs/taiko-quiz.jpg" alt="" loading="lazy"></div>
-        <h3>太鼓の達人 曲当てクイズ</h3>
-        <p>おにの譜面画像と★・BPM・コンボ数などを手がかりに、曲名を当てるクイズです。譜面検索もできます。</p>
+        <h3 data-en="Taiko no Tatsujin Song Quiz">太鼓の達人 曲当てクイズ</h3>
+        <p data-en="Guess the song from its Oni chart image, using hints such as stars, BPM and combo count. You can also search charts.">おにの譜面画像と★・BPM・コンボ数などを手がかりに、曲名を当てるクイズです。譜面検索もできます。</p>
       </a>
       <a class="item" href="/HTMLTaikoSimulator/">
         <div class="thumb"><img src="thumbs/taiko-editor.jpg" alt="" loading="lazy"></div>
-        <h3>太鼓 譜面エディター</h3>
-        <p>スマホでも使える、太鼓の達人風の譜面エディター＆シミュレーターです。ブラウザだけで動きます。</p>
+        <h3 data-en="Taiko Chart Editor">太鼓 譜面エディター</h3>
+        <p data-en="A Taiko no Tatsujin-style chart editor and simulator that also works on smartphones. Runs entirely in your browser.">スマホでも使える、太鼓の達人風の譜面エディター＆シミュレーターです。ブラウザだけで動きます。</p>
       </a>
       <a class="item" href="/MuseDashChartEditor/">
         <div class="thumb"><img src="thumbs/musedash-editor.jpg" alt="" loading="lazy"></div>
-        <h3>MuseDash 譜面エディター</h3>
-        <p>MuseDash の譜面（.mdm）をブラウザで編集できるエディターです。</p>
+        <h3 data-en="MuseDash Chart Editor">MuseDash 譜面エディター</h3>
+        <p data-en="An editor for MuseDash charts (.mdm) that runs in your browser.">MuseDash の譜面（.mdm）をブラウザで編集できるエディターです。</p>
       </a>
     </div>
   </div>
@@ -175,9 +214,9 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
 
 <section id="news">
   <div class="wrap">
-    <div class="sec-head"><h2>お知らせ</h2></div>
+    <div class="sec-head"><h2 data-en="News">お知らせ</h2></div>
     <ul class="news-list" id="newsList"></ul>
-    <div class="news-more"><button type="button" id="newsAll" class="hidden">すべてのお知らせを見る</button></div>
+    <div class="news-more"><button type="button" id="newsAll" class="hidden" data-en="View all news">すべてのお知らせを見る</button></div>
   </div>
 </section>
 </main>
@@ -185,7 +224,7 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
 <footer id="contact">
   <div class="wrap">
     <div class="contact">
-      <b>お問い合わせ</b>
+      <b data-en="Contact">お問い合わせ</b>
       <a href="mailto:ohfuchi0021@gmail.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg>ohfuchi0021@gmail.com</a>
       <a href="https://x.com/tama71037107" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.7L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.2-8.3L1.8 3h6.4l4.4 5.8zm-1.1 16.2h1.7L7.3 4.7H5.5z"/></svg>@tama71037107</a>
     </div>
@@ -195,63 +234,103 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
 
 <div class="modal hidden" id="newsModal">
 <div class="modal-box" role="dialog" aria-labelledby="newsTitle">
-<h2 id="newsTitle">お知らせ</h2>
+<h2 id="newsTitle" data-en="News">お知らせ</h2>
 <ul class="news-list" id="newsListAll"></ul>
-<div class="news-more" style="text-align:right"><button type="button" id="newsClose">閉じる</button></div>
+<div class="news-more" style="text-align:right"><button type="button" id="newsClose" data-en="Close">閉じる</button></div>
 </div>
 </div>
 
 <script>document.write('<script src="latest-video.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
 <script>document.write('<script src="latest-tiktok.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
 <script>
-// 公開中の動画: YouTube と TikTok をまとめて新しい順に最大6本
-(function(){
-  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const items=(window.LATEST_VIDEOS||[]).map(v=>({kind:'YouTube',date:v.date||'',title:v.title,
-    url:'https://www.youtube.com/watch?v='+encodeURIComponent(v.id),img:'https://i.ytimg.com/vi/'+encodeURIComponent(v.id)+'/hqdefault.jpg'}));
-  const t=window.LATEST_TIKTOK;
-  if(t&&t.id) items.push({kind:'TikTok',date:t.date||'',title:t.title,
-    url:'https://www.tiktok.com/@0021_taiko/video/'+encodeURIComponent(t.id),img:t.thumb?'latest-tiktok.jpg?v='+encodeURIComponent(t.id):''});
-  if(!items.length) return; // 取れていなければセクションごと出さない
-  items.sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
-  document.getElementById('videoGrid').innerHTML=items.slice(0,6).map(x=>
-    '<a class="item" href="'+esc(x.url)+'" target="_blank" rel="noopener"><div class="thumb">'+(x.img?'<img src="'+esc(x.img)+'" alt="" loading="lazy">':'')+
-    '<span class="kind">'+x.kind+'</span></div><h3>'+esc(x.title)+'</h3><div class="meta">'+esc(x.date)+'</div></a>').join('');
-  document.getElementById('videos').hidden=false;
-})();
-</script>
-<script>
 (function(){
   const $=id=>document.getElementById(id);
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  // お知らせの取得元: ホームサイト自身と各ゲーム・ツール。各ツールのフォルダに news.js（window.<g>=[{d:'2026/11/23',t:'内容'}, ...]）を置くと、ここに自動で載る。
-  // ファイルが無いツールは飛ばす
+
+  // ---------- 言語（日本語 / 英語） ----------
+  // ?lang=en / ?lang=ja → 前に選んだもの → ブラウザの言語 の順で決める
+  const KEY='home.lang';
+  const q=(location.search.match(/[?&]lang=(ja|en)(?:&|$)/)||[])[1];
+  let lang=q||null;
+  if(!lang){try{lang=localStorage.getItem(KEY);}catch(e){}}
+  if(lang!=='ja'&&lang!=='en') lang=/^ja\b/i.test(navigator.language||'ja')?'ja':'en';
+  const EN=()=>lang==='en';
+
+  // ---------- 公開中の動画（YouTube 動画 / YouTube ショート / TikTok） ----------
+  // 古い形式のデータ（short が無い）のときは、タイトルの #shorts で見分ける
+  const yt=(window.LATEST_VIDEOS||[]).map(v=>({...v,short:'short' in v?v.short:/#shorts/i.test(v.title||'')}));
+  const tiktoks=window.LATEST_TIKTOKS||[];
+  const card=x=>'<a class="item" href="'+esc(x.url)+'" target="_blank" rel="noopener"><div class="thumb">'+
+    (x.img?'<img src="'+esc(x.img)+'" alt="" loading="lazy"'+(x.alt?' onerror="this.onerror=null;this.src=\''+esc(x.alt)+'\'"':'')+'>':'')+
+    '</div><h3>'+esc(x.title)+'</h3><div class="meta">'+esc(x.date||'')+'</div></a>';
+  function renderVideos(){
+    const ytTitle=v=>EN()?(v.title_en||v.title):v.title; // 英語のときは YouTube の英語のタイトル
+    const id=v=>encodeURIComponent(v.id);
+    const longs=yt.filter(v=>!v.short).slice(0,3).map(v=>({title:ytTitle(v),date:v.date,
+      url:'https://www.youtube.com/watch?v='+id(v),img:'https://i.ytimg.com/vi/'+id(v)+'/hqdefault.jpg'}));
+    // ショートは縦長の画像（oar2）。無ければ普通のサムネイル（縦の動画が真ん中に入っている）を切り抜いて使う
+    const shorts=yt.filter(v=>v.short).slice(0,6).map(v=>({title:ytTitle(v),date:v.date,
+      url:'https://www.youtube.com/shorts/'+id(v),img:'https://i.ytimg.com/vi/'+id(v)+'/oar2.jpg',alt:'https://i.ytimg.com/vi/'+id(v)+'/hqdefault.jpg'}));
+    const tts=tiktoks.slice(0,6).map(v=>({title:v.title,date:v.date,
+      url:'https://www.tiktok.com/@0021_taiko/video/'+id(v),img:v.thumb?'tiktok/'+id(v)+'.jpg':''}));
+    [['gLong','ytLong',longs],['gShort','ytShort',shorts],['gTiktok','tiktokGrid',tts]].forEach(([g,grid,list])=>{
+      $(grid).innerHTML=list.map(card).join('');
+      $(g).hidden=!list.length;
+    });
+    $('videos').hidden=!(longs.length||shorts.length||tts.length);
+  }
+
+  // ---------- お知らせ ----------
+  // 取得元: ホームサイト自身と各ゲーム・ツール。各ツールのフォルダに news.js（window.<g>=[{d:'2026/11/23',t:'内容',en:'英語（任意）'}, ...]）を置くと、ここに自動で載る。
+  // ファイルが無いツールは飛ばす。英語表示のときは en があればそれを出す
   const SOURCES=[
     {tag:'',src:'news.js',g:'SITE_NEWS'},
-    {tag:'太鼓の達人 曲当てクイズ',src:'taiko-quiz/news.js',g:'QUIZ_NEWS'},
-    {tag:'太鼓 譜面エディター',src:'HTMLTaikoSimulator/news.js',g:'SIM_NEWS'},
-    {tag:'MuseDash 譜面エディター',src:'MuseDashChartEditor/news.js',g:'MUSE_NEWS'}
+    {tag:'太鼓の達人 曲当てクイズ',en:'Taiko no Tatsujin Song Quiz',src:'taiko-quiz/news.js',g:'QUIZ_NEWS'},
+    {tag:'太鼓 譜面エディター',en:'Taiko Chart Editor',src:'HTMLTaikoSimulator/news.js',g:'SIM_NEWS'},
+    {tag:'MuseDash 譜面エディター',en:'MuseDash Chart Editor',src:'MuseDashChartEditor/news.js',g:'MUSE_NEWS'}
   ];
+  let news=[];
+  function renderNews(){
+    const li=n=>'<li><time>'+esc(n.d)+'</time><div class="body">'+(n.s.tag?'<span class="news-tag">'+esc(EN()?n.s.en:n.s.tag)+'</span>':'')+esc(EN()&&n.en?n.en:n.t)+'</div></li>';
+    $('newsList').innerHTML=news.slice(0,5).map(li).join('')||'<li><div class="body">'+(EN()?'No news':'お知らせはありません')+'</div></li>';
+    $('newsListAll').innerHTML=news.map(li).join('');
+    $('newsAll').classList.toggle('hidden',news.length<=5);
+  }
   const t=Math.floor(Date.now()/60000);
   const load=s=>new Promise(res=>{
     const e=document.createElement('script'); e.src='/'+s.src+'?t='+t;
-    e.onload=()=>{const v=window[s.g]; res(Array.isArray(v)?v.map(n=>({d:n.d,t:n.t,tag:s.tag})):[]);};
+    e.onload=()=>{const v=window[s.g]; res(Array.isArray(v)?v.map(n=>({d:n.d,t:n.t,en:n.en,s})):[]);};
     e.onerror=()=>res([]);
     document.head.appendChild(e);
   });
   Promise.all(SOURCES.map(load)).then(lists=>{
     // 日付の新しい順（同じ日は取得元の順・ファイルの順のまま）
-    const news=[].concat(...lists).map((n,i)=>({...n,i})).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:a.i-b.i);
-    const li=n=>'<li><time>'+esc(n.d)+'</time><div class="body">'+(n.tag?'<span class="news-tag">'+esc(n.tag)+'</span>':'')+esc(n.t)+'</div></li>';
-    $('newsList').innerHTML=news.slice(0,5).map(li).join('')||'<li><div class="body">お知らせはありません</div></li>';
-    $('newsListAll').innerHTML=news.map(li).join('');
-    $('newsAll').classList.toggle('hidden',news.length<=5);
+    news=[].concat(...lists).map((n,i)=>({...n,i})).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:a.i-b.i);
+    renderNews();
   });
   const m=$('newsModal');
   $('newsAll').onclick=()=>m.classList.remove('hidden');
   $('newsClose').onclick=()=>m.classList.add('hidden');
   m.onclick=e=>{if(e.target===m)m.classList.add('hidden');};
   document.addEventListener('keydown',e=>{if(e.key==='Escape')m.classList.add('hidden');});
+
+  // ---------- 言語の切り替え ----------
+  // data-en の付いた要素は、英語のときその中身（HTML）に置き換える。日本語の中身は data-ja に覚えておく
+  function applyLang(){
+    document.documentElement.lang=lang;
+    document.querySelectorAll('[data-en]').forEach(el=>{
+      if(el.dataset.ja==null) el.dataset.ja=el.innerHTML;
+      el.innerHTML=EN()?el.dataset.en:el.dataset.ja;
+    });
+    document.querySelectorAll('.lang button').forEach(b=>{b.classList.toggle('on',b.dataset.lang===lang);b.setAttribute('aria-pressed',b.dataset.lang===lang);});
+    $('quizLink').href='/taiko-quiz/?lang='+lang; // クイズも同じ言語で開く
+    renderVideos(); renderNews();
+  }
+  document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{
+    lang=b.dataset.lang; try{localStorage.setItem(KEY,lang);}catch(e){}
+    applyLang();
+  });
+  applyLang();
 })();
 </script>
 </body>

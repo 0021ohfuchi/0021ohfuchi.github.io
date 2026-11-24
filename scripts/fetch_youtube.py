@@ -3,13 +3,16 @@
 #
 # 環境変数 YOUTUBE_API_KEY（YouTube Data API v3 のキー）があれば、日本語のタイトル・説明文（YouTube Studio の「翻訳」に登録したもの）を取る。
 # キーが無い、または API が失敗したときは、RSS から英語のタイトルだけ取る。
+# 英語のタイトル・説明文（YouTube の既定の言語＝英語）も title_en / desc_en に入れる（トップページの英語表示用）。
+# 通常の動画とショートを分けて表示するので、それぞれ最大 N 本ずつ取り、short（ショートかどうか）を付ける。
 import json, os, re, sys, urllib.request, urllib.parse, urllib.error, html
 
 CHANNEL_ID = 'UCILPNLmKxGQXJHtdp-Stcvw'
 RSS = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + CHANNEL_ID
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'latest-video.js')
 KEY = os.environ.get('YOUTUBE_API_KEY', '').strip()
-N = 5
+N = 6       # 通常の動画・ショートそれぞれの本数
+SCAN = 50   # API で見る最近のアップロードの数（ショートと通常の動画が混ざっているので多めに）
 
 
 def get(url):
@@ -32,9 +35,9 @@ def short_desc(text):
 
 
 def from_api():
-    # アップロード一覧（UU + チャンネル ID の後ろ）で最新の動画を取り、日本語（hl=ja）のタイトル・説明文を付ける
+    # アップロード一覧（UU + チャンネル ID の後ろ）で最近の動画を取り、日本語（hl=ja）のタイトル・説明文を付ける
     pl = json.loads(get('https://www.googleapis.com/youtube/v3/playlistItems?' + urllib.parse.urlencode(
-        {'part': 'contentDetails', 'playlistId': 'UU' + CHANNEL_ID[2:], 'maxResults': N, 'key': KEY})))
+        {'part': 'contentDetails', 'playlistId': 'UU' + CHANNEL_ID[2:], 'maxResults': SCAN, 'key': KEY})))
     ids = [i['contentDetails']['videoId'] for i in pl.get('items', [])]
     if not ids:
         return []
@@ -49,6 +52,7 @@ def from_api():
         loc = s.get('localized') or {}
         videos.append({'id': i, 'title': (loc.get('title') or s['title']).strip(),
                        'desc': short_desc(loc.get('description') or s.get('description')),
+                       'title_en': s['title'].strip(), 'desc_en': short_desc(s.get('description')),
                        'date': s['publishedAt'][:10].replace('-', '/')})
     return videos
 
@@ -56,14 +60,44 @@ def from_api():
 def from_rss():
     xml = get(RSS)
     videos = []
-    for e in re.findall(r'<entry>(.*?)</entry>', xml, re.S)[:N]:
+    for e in re.findall(r'<entry>(.*?)</entry>', xml, re.S):
         vid = re.search(r'<yt:videoId>(.*?)</yt:videoId>', e)
         title = re.search(r'<title>(.*?)</title>', e, re.S)
         pub = re.search(r'<published>(.*?)</published>', e)
         if vid and title and pub:
-            videos.append({'id': vid.group(1), 'title': html.unescape(title.group(1)).strip(), 'desc': '',
+            t = html.unescape(title.group(1)).strip()
+            videos.append({'id': vid.group(1), 'title': t, 'desc': '', 'title_en': t, 'desc_en': '',
                            'date': pub.group(1)[:10].replace('-', '/')})
     return videos
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *a, **k):
+        return None
+
+
+_opener = urllib.request.build_opener(_NoRedirect)
+
+
+def is_short(v):
+    """youtube.com/shorts/<ID> を開くと、ショートなら 200、通常の動画なら /watch へ転送（303）される。
+    調べられなかったときは、タイトルに #shorts があるかで決める"""
+    try:
+        req = urllib.request.Request('https://www.youtube.com/shorts/' + v['id'], headers={'User-Agent': 'Mozilla/5.0'})
+        return _opener.open(req, timeout=30).status == 200
+    except urllib.error.HTTPError as e:
+        if 300 <= e.code < 400:
+            return False
+    except Exception:
+        pass
+    return '#shorts' in (v['title'] + v['title_en']).lower()
+
+
+def read_old():
+    try:
+        return json.loads(open(OUT, encoding='utf-8').read().split('window.LATEST_VIDEOS=', 1)[1].rsplit(';', 1)[0])
+    except Exception:
+        return []
 
 
 videos = []
@@ -79,10 +113,24 @@ if not videos:
     videos = from_rss()
 if not videos:
     sys.exit('動画が取得できませんでした')
-js = '// 自動生成: scripts/fetch_youtube.py（YouTube の最新動画。新しいものが先頭）\nwindow.LATEST_VIDEOS=' + json.dumps(videos, ensure_ascii=False, indent=1) + ';\n'
+# ショートかどうか: 前回調べた動画は前回の結果を使い、新しい動画だけ調べる
+known = {o['id']: o['short'] for o in read_old() if isinstance(o, dict) and 'short' in o}
+out, n_long, n_short = [], 0, 0
+for v in videos:
+    if n_long >= N and n_short >= N:
+        break
+    v['short'] = known[v['id']] if v['id'] in known else is_short(v)
+    if v['short'] and n_short < N:
+        n_short += 1
+        out.append(v)
+    elif not v['short'] and n_long < N:
+        n_long += 1
+        out.append(v)
+videos = out
+js = '// 自動生成: scripts/fetch_youtube.py（YouTube の最新動画。新しいものが先頭。short: ショートかどうか）\nwindow.LATEST_VIDEOS=' + json.dumps(videos, ensure_ascii=False, indent=1) + ';\n'
 old = open(OUT, encoding='utf-8').read() if os.path.exists(OUT) else ''
 if old != js:
     open(OUT, 'w', encoding='utf-8', newline='\n').write(js)
-    print('updated', videos[0]['id'])
+    print('updated', videos[0]['id'], f'（通常 {n_long} 本・ショート {n_short} 本）')
 else:
     print('no change')

@@ -31,17 +31,15 @@ a{color:inherit;text-decoration:none}
 .nav .wrap{display:flex;align-items:center;gap:8px;height:64px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:-.01em}
 .brand img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex:none;border:1px solid rgba(0,0,0,.06)}
-.nav ul{display:flex;gap:4px;margin:0 8px 0 auto;padding:0;list-style:none}
+.nav ul{display:flex;gap:4px;margin:0 12px 0 auto;padding:0;list-style:none}
 .nav ul a{display:block;padding:6px 12px;font-size:14px;color:var(--sub);border-radius:999px;transition:background .15s,color .15s}
 .nav ul a:hover{background:var(--soft);color:var(--text)}
 .pill{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 20px;border-radius:999px;font-size:14px;font-weight:700;white-space:nowrap;transition:opacity .15s,background .15s}
-.pill.black{background:var(--text);color:#fff}
-.pill.black:hover{opacity:.8}
 .pill.outline{border:1px solid #d5d5d5;background:#fff;color:var(--text)}
 .pill.outline:hover{background:var(--soft)}
 .pill svg{width:16px;height:16px;flex:none}
 /* 日本語 / 英語の切り替え */
-.lang{display:flex;flex:none;padding:3px;margin-right:8px;border:1px solid #d5d5d5;border-radius:999px}
+.lang{display:flex;flex:none;padding:3px;border:1px solid #d5d5d5;border-radius:999px}
 .lang button{font:inherit;font-size:12px;font-weight:700;line-height:1;padding:7px 10px;border:0;border-radius:999px;background:none;color:var(--sub);cursor:pointer}
 .lang button.on{background:var(--text);color:#fff}
 
@@ -121,9 +119,6 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
 @media (max-width:560px){
   .wrap{padding:0 16px}
   .brand{font-size:18px}
-  /* お問い合わせはアイコンだけの丸いボタンに */
-  .nav .pill.black{width:40px;padding:0;justify-content:center}
-  .nav .pill.black span{display:none}
   .profile{padding:40px 16px 24px}
   .avatar{width:80px;height:80px}
   .profile p{font-size:14px;text-align:left}
@@ -152,9 +147,9 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
       <li><a href="#videos" data-en="Videos">動画</a></li>
       <li><a href="#tools" data-en="Games &amp; Tools">ゲーム・ツール</a></li>
       <li><a href="#news" data-en="News">お知らせ</a></li>
+      <li><a href="#contact" data-en="Contact">お問い合わせ</a></li>
     </ul>
     <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="ja">JA</button><button type="button" data-lang="en">EN</button></div>
-    <a class="pill black" href="#contact" aria-label="お問い合わせ / Contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg><span data-en="Contact">お問い合わせ</span></a>
   </div>
 </nav>
 

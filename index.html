@@ -81,8 +81,12 @@ section{padding:40px 0}
 .sub-head a{display:inline-flex;align-items:center;gap:2px;font-size:14px;color:var(--sub);white-space:nowrap}
 .sub-head a:hover{color:var(--text)}
 .sub-head a svg{width:16px;height:16px}
-/* 縦長（ショート・TikTok）は 6 列 */
-.grid.vert{grid-template-columns:repeat(6,1fr);gap:24px 14px}
+/* 縦長（ショート・TikTok）は 3 本ずつ、左右に並べる */
+.vpair{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;align-items:start}
+.vpair .vgroup+.vgroup{margin-top:0}
+.vgroup:not([hidden])+.vpair{margin-top:44px}
+.vpair:has(.vgroup[hidden]){grid-template-columns:1fr}
+.grid.vert{grid-template-columns:repeat(3,1fr);gap:24px 14px}
 .vert .item .thumb{aspect-ratio:9/16}
 .vert .item h3{margin-top:8px;font-size:13px;line-height:1.55;-webkit-line-clamp:2}
 .vert .item .meta{margin-top:4px;font-size:11px}
@@ -116,7 +120,8 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
   .grid{grid-template-columns:repeat(2,1fr);gap:28px 16px}
   .nav ul{display:none}
   .lang{margin-left:auto}
-  .grid.vert{grid-template-columns:repeat(3,1fr);gap:20px 10px}
+  .vpair{grid-template-columns:1fr;gap:44px 0}
+  .grid.vert{gap:20px 10px}
 }
 @media (max-width:560px){
   .wrap{padding:0 16px}
@@ -175,6 +180,7 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
       <div class="sub-head"><h3><svg viewBox="0 0 24 24" fill="#ff0033"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8zM10 15V9l5.2 3z"/></svg><span>YouTube <span data-en="Videos">動画</span></span></h3><a href="https://www.youtube.com/@0021_taiko/videos" target="_blank" rel="noopener"><span data-en="See more">もっとみる</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a></div>
       <div class="grid rows" id="ytLong"></div>
     </div>
+    <div class="vpair">
     <div class="vgroup" id="gShort" hidden>
       <div class="sub-head"><h3><svg viewBox="0 0 24 24" fill="#ff0033"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8zM10 15V9l5.2 3z"/></svg><span>YouTube <span data-en="Shorts">ショート</span></span></h3><a href="https://www.youtube.com/@0021_taiko/shorts" target="_blank" rel="noopener"><span data-en="See more">もっとみる</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a></div>
       <div class="grid vert" id="ytShort"></div>
@@ -182,6 +188,7 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
     <div class="vgroup" id="gTiktok" hidden>
       <div class="sub-head"><h3><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 3c.3 2.3 1.9 3.9 4.1 4.1v3.1a7.3 7.3 0 0 1-4-1.3v6.2a5.9 5.9 0 1 1-5.9-5.9c.3 0 .6 0 .9.1v3.2a2.8 2.8 0 1 0 1.9 2.6V3z"/></svg>TikTok</h3><a href="https://www.tiktok.com/@0021_taiko" target="_blank" rel="noopener"><span data-en="See more">もっとみる</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a></div>
       <div class="grid vert" id="tiktokGrid"></div>
+    </div>
     </div>
   </div>
 </section>
@@ -266,9 +273,9 @@ footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:1
     const longs=yt.filter(v=>!v.short).slice(0,3).map(v=>({title:ytTitle(v),date:v.date,
       url:'https://www.youtube.com/watch?v='+id(v),img:'https://i.ytimg.com/vi/'+id(v)+'/hqdefault.jpg'}));
     // ショートは縦長の画像（oar2）。無ければ普通のサムネイル（縦の動画が真ん中に入っている）を切り抜いて使う
-    const shorts=yt.filter(v=>v.short).slice(0,6).map(v=>({title:ytTitle(v),date:v.date,
+    const shorts=yt.filter(v=>v.short).slice(0,3).map(v=>({title:ytTitle(v),date:v.date,
       url:'https://www.youtube.com/shorts/'+id(v),img:'https://i.ytimg.com/vi/'+id(v)+'/oar2.jpg',alt:'https://i.ytimg.com/vi/'+id(v)+'/hqdefault.jpg'}));
-    const tts=tiktoks.slice(0,6).map(v=>({title:v.title,date:v.date,
+    const tts=tiktoks.slice(0,3).map(v=>({title:v.title,date:v.date,
       url:'https://www.tiktok.com/@0021_taiko/video/'+id(v),img:v.thumb?'tiktok/'+id(v)+'.jpg':''}));
     [['gLong','ytLong',longs],['gShort','ytShort',shorts],['gTiktok','tiktokGrid',tts]].forEach(([g,grid,list])=>{
       $(grid).innerHTML=list.map(card).join('');

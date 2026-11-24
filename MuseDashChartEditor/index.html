@@ -207,6 +207,21 @@ body.playing{overflow:hidden}
 .settings-help{font-size:12px;color:var(--muted);line-height:1.6;margin:8px 0 0}
 @media(max-width:700px){.topbar{gap:8px;padding:0 8px}.brand>span:last-child{display:none}.nav-btn{padding:0 10px}main{padding:12px 12px 40px}.save-btn{padding:7px 10px;font-size:12px}.save-btn.ghost{padding:5px 8px;font-size:11px}}
 </style>
+<style>
+/* 曲一覧の下のお知らせ */
+.lib-news{margin-top:22px;padding:18px 22px 12px}
+.lib-news-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:2px}
+.lib-news h2{margin:0;font-size:16px}
+.lib-news-more{border:1px solid var(--line);background:none;color:var(--muted);font:inherit;font-size:12px;font-weight:700;padding:3px 12px;border-radius:999px;cursor:pointer}
+.lib-news-more:hover{color:var(--ink)}
+.muse-news-list{list-style:none;margin:0;padding:0}
+.muse-news-list li{display:flex;gap:2px 18px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.7;align-items:baseline}
+.muse-news-list li:last-child{border-bottom:none}
+.muse-news-list time{flex:none;font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.muse-news-list .empty{color:var(--muted)}
+#newsDlg .muse-news-list{padding:4px 20px 10px}
+@media(max-width:560px){.lib-news{padding:14px 16px 8px}.muse-news-list li{flex-direction:column}}
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -239,6 +254,10 @@ body.playing{overflow:hidden}
     <button class="btn" id="newSongBtn">＋ 新規作成</button>
   </div>
   <div id="libGrid" class="lib-grid"></div>
+  <div class="card lib-news" id="libNews" hidden>
+    <div class="lib-news-head"><h2>お知らせ</h2><button type="button" class="lib-news-more" id="newsAllBtn" hidden>すべて見る</button></div>
+    <ul class="muse-news-list" id="newsList" data-notr></ul>
+  </div>
 </section>
 
 <!-- ===== エディット ===== -->
@@ -412,6 +431,10 @@ body.playing{overflow:hidden}
 </dialog>
 
 <!-- 変更履歴：新しい版ほど上。版を上げたら section を先頭に足し、曲一覧の Ver 表示も合わせる -->
+<dialog id="newsDlg" aria-label="お知らせ">
+  <div class="dlg-head"><h2>お知らせ</h2><button data-close aria-label="閉じる">✕</button></div>
+  <ul class="muse-news-list" id="newsListAll" data-notr></ul>
+</dialog>
 <dialog id="changelogDlg" aria-label="変更履歴">
   <div class="dlg-head"><h2>変更履歴</h2><button data-close aria-label="閉じる">✕</button></div>
   <div class="dlg-body changelog">
@@ -738,7 +761,7 @@ const I18N_EN={
  '：info.json を読めませんでした':': could not read info.json',' 曲を読み込みました':' song(s) imported','書き出せませんでした：':'Could not export: ',
  '曲を新規作成':'New song','曲名':'Title','アーティスト':'Artist','音源ファイル（任意：ogg / mp3 / wav。あとから「曲の情報」で追加できます）':'Audio file (optional: ogg / mp3 / wav — you can add it later in Song info)','音源がないため、このままではゲームで読み込めません（「曲の情報」から音源を追加してください）':'This song has no audio, so the game can’t load it yet (add audio in Song info)',
  'ジャケット画像（任意・PNG に変換して保存）':'Cover image (optional, saved as PNG)','キャンセル':'Cancel','作成してエディットへ':'Create and edit',
- '曲名を入れてください':'Please enter a title','音源ファイルを選んでください':'Please choose an audio file','画像を読み込めませんでした':'Could not load the image','閉じる':'Close',
+ '曲名を入れてください':'Please enter a title','音源ファイルを選んでください':'Please choose an audio file','画像を読み込めませんでした':'Could not load the image','閉じる':'Close','お知らせ':'News','すべて見る':'View all',
  // エディット
  '編集する曲がありません':'No song to edit','曲一覧で「エディット」を押すか、新規作成してください。':'Click "Edit" on a song in the list, or create a new song.','曲一覧へ':'Go to songs',
  '● 未保存':'● Unsaved','曲の情報（info.json）とファイル':'Song info (info.json) and files','ジャケット画像を変更':'Change cover image','音源を変更':'Change audio',
@@ -3006,6 +3029,30 @@ $('#keyReset').addEventListener('click',()=>{S.keys={};for(const kk in DEF_KEYS)
   SONGS=[...SONGS,...loaded.filter(s=>!SONGS.some(x=>x.id===s.id))];
   if(PAGE==='library')renderLibrary();
   if(!DB.ok)toast('この端末に保存できない環境です。読み込んだ曲はタブを閉じると消えます',5000);
+})();
+</script>
+<script>
+(function(){
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let news=[];
+  const en=()=>document.documentElement.lang==='en';
+  function render(){
+    const li=n=>'<li><time>'+esc(n.d)+'</time><span>'+esc(en()&&n.en?n.en:n.t)+'</span></li>';
+    document.getElementById('newsList').innerHTML=news.slice(0,5).map(li).join('')||'<li class="empty">'+(en()?'No news':'お知らせはありません')+'</li>';
+    document.getElementById('newsListAll').innerHTML=news.map(li).join('');
+    document.getElementById('newsAllBtn').hidden=news.length<=5;
+  }
+  const e=document.createElement('script');
+  e.src='news.js?t='+Math.floor(Date.now()/60000);
+  e.onload=()=>{
+    news=(Array.isArray(window.MUSE_NEWS)?window.MUSE_NEWS:[]).map((n,i)=>({...n,i})).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:a.i-b.i);
+    render(); document.getElementById('libNews').hidden=false;
+  };
+  document.head.appendChild(e);
+  document.querySelectorAll('#langBtn [data-l]').forEach(b=>b.addEventListener('click',()=>setTimeout(render)));
+  const dlg=document.getElementById('newsDlg');
+  document.getElementById('newsAllBtn').onclick=()=>dlg.showModal();
+  dlg.addEventListener('click',ev=>{if(ev.target===dlg)dlg.close()});
 })();
 </script>
 </body>

@@ -137,7 +137,7 @@
     '事前の連絡や許可は必要ありません。': 'No prior contact or permission is needed.',
     'ご利用の際は、動画説明欄や配信概要欄などに、本コンテンツのURLを記載していただけると幸いです。': 'We would appreciate it if you could include the URL of this content in your video description or stream description.',
     '本コンテンツのURL:': 'URL of this content:',
-    '動画・配信での利用についてのご案内を追加しました。連絡や許可なく自由にご利用いただけます': 'Added a guide on using this content in videos and live streams. You are free to use it without contacting us or asking for permission',
+    '動画・配信での利用についてのご案内をヘルプに追加しました': 'Added a guide on using this content in videos and live streams to the Help',
     'このコンテンツはファンメイドコンテンツです。ファンメイドコンテンツポリシー（': 'This is fan-made content, created under the Fan-Made Content Policy (',
     '）のもと制作されています。': ').',
     '曲データ・譜面の出典:': 'Song data and charts:',

@@ -109,7 +109,9 @@ if added:
         head, body = src.split('window.QUIZ_NEWS=', 1)
         news = json.loads(body.rsplit(';', 1)[0])
         shown = '、'.join(added[:8]) + (f' ほか{len(added) - 8}曲' if len(added) > 8 else '')
-        news.insert(0, {'d': time.strftime('%Y/%m/%d', time.gmtime(time.time() + 9 * 3600)), 't': f'{len(added)}曲を追加しました: {shown}'})
+        shown_en = ', '.join(added[:8]) + (f' and {len(added) - 8} more' if len(added) > 8 else '')
+        news.insert(0, {'d': time.strftime('%Y/%m/%d', time.gmtime(time.time() + 9 * 3600)), 't': f'{len(added)}曲を追加しました: {shown}',
+                        'en': f'Added {len(added)} song{"s" if len(added) != 1 else ""}: {shown_en}'})  # en: トップページの英語表示用
         open(news_js, 'w', encoding='utf-8', newline='\n').write(head + 'window.QUIZ_NEWS=' + json.dumps(news, ensure_ascii=False, indent=1) + ';\n')
         print('news: +', len(added), flush=True)
     except Exception as e:

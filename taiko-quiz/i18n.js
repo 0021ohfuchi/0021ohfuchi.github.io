@@ -14,7 +14,7 @@
 
   const D = {
     // 見出し・共通
-    '太鼓の達人 曲名当てクイズ': 'Taiko no Tatsujin Song Quiz',
+    '太鼓の達人 曲当てクイズ': 'Taiko no Tatsujin Song Quiz',
     'トップへ': 'Home', 'あそびかた': 'How to play', '閉じる': 'Close',
     'すべて': 'All', 'クリア': 'Clear', '不明': 'Unknown', 'その他': 'Other',
     '日本語と英語を切り替え': 'Switch language (Japanese / English)',

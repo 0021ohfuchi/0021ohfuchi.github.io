@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google-site-verification" content="sKPbmBNxT1ct_nCcskDar0WU6Oz1uU6fc90blgG3EDY" />
 <meta name="description" content="全曲収録！譜面の画像と★の数・BPM・コンボ数・ジャンルなどの情報を手がかりに、何の曲か当てよう！">
-<meta property="og:site_name" content="太鼓の達人 曲名当てクイズ">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"太鼓の達人 曲名当てクイズ","url":"https://0021ohfuchi.github.io/taiko-quiz/"}</script>
-<title>譜面を見て当てろ！ 太鼓の達人 曲名当てクイズ</title>
+<meta property="og:site_name" content="太鼓の達人 曲当てクイズ">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"太鼓の達人 曲当てクイズ","url":"https://0021ohfuchi.github.io/taiko-quiz/"}</script>
+<title>譜面を見て当てろ！ 太鼓の達人 曲当てクイズ</title>
 <script src="i18n.js?v=20261122a"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
 <link rel="icon" type="image/png" sizes="192x192" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -421,7 +421,7 @@ a{color:var(--ka-d);font-weight:700}
     <ellipse cx="15.6" cy="33" rx="3.6" ry="2.8" fill="#fff" transform="rotate(-20 15.6 33)"/>
     <ellipse cx="25.6" cy="30.7" rx="3.6" ry="2.8" fill="#fff" transform="rotate(-20 25.6 30.7)"/>
   </svg>
-  <h1 id="homeBtn" title="トップへ">太鼓の達人 曲名当てクイズ</h1>
+  <h1 id="homeBtn" title="トップへ">太鼓の達人 曲当てクイズ</h1>
   <div class="sp"></div>
   <div class="stat" id="hdrStat"></div>
   <div class="lang-tog" id="langTog" title="日本語と英語を切り替え"><button data-l="ja">JA</button><button data-l="en">EN</button></div>
@@ -1394,7 +1394,7 @@ function shareText(){
   const h=game.history, n=h.length, okN=correctCount();
   const marks = h.slice(0,30).map(x=>x.ok?'⭕':'❌').join('') + (n>30?'…':'');
   if(window.LANG==='en') return `Taiko no Tatsujin Song Quiz [${tr(MODES[game.mode].name)}]: ${okN} / ${n} correct! (${Math.round(okN/n*100)}%)\n${marks}\n#TaikoNoTatsujin #太鼓の達人`;
-  return `太鼓の達人 曲名当てクイズ【${MODES[game.mode].name}】で ${okN} / ${n} 問正解！（正解率 ${Math.round(okN/n*100)}%）\n${marks}\n#太鼓の達人 #曲名当てクイズ`;
+  return `太鼓の達人 曲当てクイズ【${MODES[game.mode].name}】で ${okN} / ${n} 問正解！（正解率 ${Math.round(okN/n*100)}%）\n${marks}\n#太鼓の達人 #曲当てクイズ`;
 }
 /* SNS に貼る結果の画像。Canvas で専用のカードを描く（縦長 4:5、1080×1350）。
    太鼓の赤〜オレンジの背景に、正解数を大きく、問題ごとの結果を音符（正解=ドン、不正解=灰色の×）で並べる */
@@ -1459,7 +1459,7 @@ async function drawShareCard(){
   c.textAlign = 'left'; c.fillStyle = '#fff';
   c.save(); c.shadowColor = 'rgba(0,0,0,.25)'; c.shadowOffsetX = 4; c.shadowOffsetY = 4;
   c.font = F(800, 38); c.fillText(en ? 'Taiko no Tatsujin' : '太鼓の達人', 204, 74);
-  const title = en ? 'Song Quiz' : '曲名当てクイズ';
+  const title = en ? 'Song Quiz' : '曲当てクイズ';
   fitText(c, title, 820, 64, 800); c.fillText(title, 200, 130);
   c.restore();
 
@@ -1585,7 +1585,7 @@ async function drawShareCard(){
   for(let x = 18; x < W; x += 44){ c.beginPath(); c.arc(x, fy + 15, 7, 0, Math.PI*2); c.fillStyle = '#ffd25e'; c.fill(); }
   c.textAlign = 'center'; c.fillStyle = '#ffd25e'; c.font = F(800, 32);
   const url = shareUrl() ? shareUrl().replace(/^https?:\/\//, '') : '';
-  c.fillText(url || (en ? 'Taiko no Tatsujin Song Quiz' : '太鼓の達人 曲名当てクイズ'), W/2, fy + 58);
+  c.fillText(url || (en ? 'Taiko no Tatsujin Song Quiz' : '太鼓の達人 曲当てクイズ'), W/2, fy + 58);
   c.fillStyle = '#e8cfa8'; c.font = F(700, 23); c.fillText(en ? 'Can you name the song from its chart?' : '譜面を見て、曲名を当てよう！', W/2, fy + 92);
   return cv;
 }

@@ -1,7 +1,7 @@
 # 太鼓の達人 曲当てクイズ（taiko-quiz/）の曲データを毎日自動で更新する
 # 太鼓の達人 譜面とか Wiki から差分だけを取得し、変わっていればコミットする。
 # GitHub Pages はコミットされた data.js・charts をそのまま配信するので、サイトにも反映される。
-name: 曲名当てクイズ 曲データの自動更新
+name: 曲当てクイズ 曲データの自動更新
 
 on:
   schedule:
@@ -70,7 +70,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "変更なし"
           else
-            git commit -m "曲名当てクイズ: 曲データを自動更新 ($(TZ=Asia/Tokyo date +%Y-%m-%d))"
+            git commit -m "曲当てクイズ: 曲データを自動更新 ($(TZ=Asia/Tokyo date +%Y-%m-%d))"
             git pull --rebase --autostash
             git push
           fi

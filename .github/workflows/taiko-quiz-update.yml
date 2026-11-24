@@ -5,7 +5,7 @@ name: 曲名当てクイズ 曲データの自動更新
 
 on:
   schedule:
-    - cron: '0 18 * * *'   # 毎日 03:00（日本時間）
+    - cron: '0 13 * * *'   # 毎日 03:00（日本時間）
   workflow_dispatch:        # Actions のページから手動でも実行できる
     inputs:
       max_fetch:
@@ -66,7 +66,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data.js meta.js bgm.js BGM charts tools/lists.json tools/extra_lists.json tools/details.json tools/debut.json tools/works.json tools/charts_index.json tools/en_names.json
+          git add data.js meta.js bgm.js news.js BGM charts tools/lists.json tools/extra_lists.json tools/details.json tools/debut.json tools/works.json tools/charts_index.json tools/en_names.json
           if git diff --cached --quiet; then
             echo "変更なし"
           else

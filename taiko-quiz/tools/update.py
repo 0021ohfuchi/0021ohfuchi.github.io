@@ -15,7 +15,7 @@
 #   REFRESH_OLDEST 取り直す古い曲ページの数（既定 30）
 #   ACTIVE_WORKS   取り直す作品の表示名（カンマ区切り）
 #   SKIP           飛ばす段階（例: "works,debut"）
-import json, os, shutil, subprocess, sys
+import json, os, re, shutil, subprocess, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PY = [sys.executable, '-I']
@@ -43,6 +43,21 @@ def song_count(path):
 
 
 ok = True
+
+
+def page_names():
+    # 一覧と、一覧に載っていない曲の追加分に載っている曲名（「(裏譜面)」はまとめる）
+    names = set()
+    for f in ('lists.json', 'extra_lists.json'):
+        try:
+            for s in json.load(open(os.path.join(HERE, f), encoding='utf-8')):
+                names.add(re.sub(r'\(裏譜面\)$', '', s['page'].split('/', 2)[-1]))
+        except Exception:
+            pass
+    return names
+
+
+names_before = page_names()
 
 # 1. 一覧（取得に失敗して曲数が大きく減ったら、前の一覧に戻す）
 lists = os.path.join(HERE, 'lists.json')
@@ -84,5 +99,20 @@ run('en', ['scrape_en.py'])
 
 # 7. data.js
 ok &= run('build', ['build_data.py'])
+
+# 8. 新しく増えた曲を、お知らせ（news.js）に足す（最初の実行など、元の一覧が空のときは足さない）
+added = sorted(page_names() - names_before) if names_before else []
+if added:
+    news_js = os.path.join(HERE, '..', 'news.js')
+    try:
+        src = open(news_js, encoding='utf-8').read()
+        head, body = src.split('window.QUIZ_NEWS=', 1)
+        news = json.loads(body.rsplit(';', 1)[0])
+        shown = '、'.join(added[:8]) + (f' ほか{len(added) - 8}曲' if len(added) > 8 else '')
+        news.insert(0, {'d': time.strftime('%Y/%m/%d', time.gmtime(time.time() + 9 * 3600)), 't': f'{len(added)}曲を追加しました: {shown}'})
+        open(news_js, 'w', encoding='utf-8', newline='\n').write(head + 'window.QUIZ_NEWS=' + json.dumps(news, ensure_ascii=False, indent=1) + ';\n')
+        print('news: +', len(added), flush=True)
+    except Exception as e:
+        print('!! お知らせの更新に失敗', e, flush=True)
 
 sys.exit(0 if ok else 1)

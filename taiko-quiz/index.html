@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google-site-verification" content="sKPbmBNxT1ct_nCcskDar0WU6Oz1uU6fc90blgG3EDY" />
 <meta name="description" content="全曲収録！譜面の画像と★の数・BPM・コンボ数・ジャンルなどの情報を手がかりに、何の曲か当てよう！">
-<meta property="og:site_name" content="太鼓の達人 曲当てクイズ">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"太鼓の達人 曲当てクイズ","url":"https://0021ohfuchi.github.io/taiko-quiz/"}</script>
+<meta property="og:site_name" content="0021ohfuchi">
 <title>譜面を見て当てろ！ 太鼓の達人 曲当てクイズ</title>
 <script src="i18n.js?v=20261122a"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
 <link rel="icon" type="image/png" sizes="192x192" href="favicon.png">
@@ -307,6 +306,12 @@ body.setup main{max-width:none} /* 出題設定・曲を検索は画面端まで
 .modal-box{background:#fff;border:3px solid var(--line);border-radius:22px;box-shadow:0 6px 0 var(--line);padding:20px 24px;max-width:620px;width:100%;max-height:90vh;overflow-y:auto}
 .modal-box ul{margin:0 0 14px;padding-left:1.2em;font-size:15px;line-height:1.8}
 .modal-box ul ul{margin:0;font-size:14px}
+.news-list{list-style:none;margin:0;padding:0;font-size:14px;line-height:1.7}
+.news-list li{padding:7px 2px;border-bottom:1px dashed #d9c3a5}
+.news-list li:last-child{border-bottom:none}
+.news-list b{margin-right:8px;color:var(--sub);font-variant-numeric:tabular-nums}
+.news-more{margin-top:10px;text-align:center}
+#newsModal .news-list{max-height:60vh;overflow-y:auto}
 .modal-box ul.changelog{font-size:13px;line-height:1.7;max-height:9em;overflow-y:auto}
 .modal-box ul.changelog b{margin-right:6px;color:var(--sub)}
 /* 日本語 / 英語の切り替え（ホームボタンの左） */
@@ -441,6 +446,15 @@ a{color:var(--ka-d);font-weight:700}
   <div class="player-body" id="plBody"></div>
 </div>
 
+<!-- お知らせ（全件） -->
+<div class="modal hidden" id="newsModal">
+  <div class="modal-box" role="dialog" aria-labelledby="newsTitle">
+    <h2 id="newsTitle">お知らせ</h2>
+    <ul class="news-list" id="newsListAll"></ul>
+    <div style="text-align:right;margin-top:12px"><button class="primary" id="newsClose">閉じる</button></div>
+  </div>
+</div>
+
 <!-- あそびかた（右上の ? から開く） -->
 <div class="modal hidden" id="helpModal">
   <div class="modal-box" role="dialog" aria-labelledby="helpTitle">
@@ -465,6 +479,7 @@ a{color:var(--ka-d);font-weight:700}
     <!-- 更新履歴（新しいものを上に足す） -->
     <h3 style="margin:4px 0 6px;font-size:16px">更新履歴</h3>
     <ul class="changelog">
+      <li><b>2026/11/23</b> 出題設定の画面の下に「お知らせ」を追加しました。曲の追加や更新内容をここでお知らせします</li>
       <li><b>2026/11/22</b> 連打が2段にまたがっているとき、2段目が表示されない不具合を修正しました</li>
       <li><b>2026/11/21</b> ドンダフルフェスティバルを選択時に、ミュージックパスを含めるかどうかのチェックボックスを表示するようにしました</li>
     </ul>
@@ -535,6 +550,11 @@ a{color:var(--ka-d);font-weight:700}
       <p class="muted" style="margin:8px 0 0;text-align:center;flex-basis:100%">曲名・読み・作品名・アーティスト・作曲者・アニメ名などから譜面を探して、譜面・難易度・BPM・最大コンボ数・ジャンル・収録作品を見られます</p>
     </div>
     </div></div>
+  </div>
+  <div class="card" id="newsCard" style="margin-top:22px">
+    <h2>お知らせ</h2>
+    <ul class="news-list" id="newsList"></ul>
+    <div class="news-more"><button class="blue sm" id="newsAll">すべて見る</button></div>
   </div>
 </section>
 
@@ -632,6 +652,7 @@ a{color:var(--ka-d);font-weight:700}
 <script>document.write('<script src="data.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
 <script src="fumen-parse.js?v=20261122b"></script><!-- 変更したら v を変える（スマホに古いファイルが残らないように） -->
 <script src="bgm.js"></script>
+<script>document.write('<script src="news.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
 <script>
 'use strict';
 // 譜面画像のある曲だけを出題対象にする
@@ -781,8 +802,9 @@ const HW_ALIAS = []; // 使っていない（複数のハードの作品は w.hw
 // アーケード（AC）の作品のまとまり（ユーザー指定）。作品名で振り分ける
 const AC_GROUPS = [
   ['AC1～AC14（旧筐体）', n => /^AC\d+/.test(n)],
-  ['AC15（新筐体）', n => /^(新筐体|無印|KATSU-DON|ソライロ|モモイロ|キミドリ|ムラサキ|ホワイト|レッド|イエロー|ブルー|グリーン|ブラジル版限定)/.test(n)],
-  ['AC16（ニジイロ）', n => /^(ニジイロ|中国版限定)/.test(n)],
+  ['AC15（新筐体）', n => /^(新筐体|無印|KATSU-DON|ソライロ|モモイロ|キミドリ|ムラサキ|ホワイト|レッド|イエロー|ブルー|グリーン)/.test(n)],
+  ['AC16（ニジイロ）', n => /^ニジイロ/.test(n)],
+  ['地域限定', n => /^(ブラジル版限定|中国版限定)/.test(n)],
 ];
 function acGroupOf(w){ const g = AC_GROUPS.find(([, f])=>f(w.name)); return g ? g[0] : 'AC その他'; }
 function acGroups(){ const s = new Set(WORKS.filter(w=>w.n>0 && w.kind==='AC').map(acGroupOf)); return AC_GROUPS.map(g=>g[0]).filter(g=>s.has(g)).concat(s.has('AC その他') ? ['AC その他'] : []); }
@@ -797,7 +819,7 @@ function renderSetup(){
   const gBox=$('genreBox'); gBox.innerHTML='';
   for(const [g] of GENRES) gBox.append(chip(g, cfg.genre.includes(g), on=>{toggleIn(cfg.genre,g,on);saveCfg();}));
   // 複数のハードに出る作品は、押したらほかのハードの中のボタンもそろえるために描き直す
-  const workChip = w => chip(w.name, !cfg.worksOff.includes(wkey(w)), on=>{toggleIn(cfg.worksOff,wkey(w),!on);saveCfg(); if(hwsOf(w).length>1 || MP_WORKS.has(wkey(w))) renderSetup();}, `${w.short ? w.short + '　' : ''}おに ${w.n}譜面`);
+  const workChip = w => chip(wname(w), !cfg.worksOff.includes(wkey(w)), on=>{toggleIn(cfg.worksOff,wkey(w),!on);saveCfg(); if(hwsOf(w).length>1 || MP_WORKS.has(wkey(w))) renderSetup();}, `${w.short ? w.short + '　' : ''}おに ${w.n}譜面`);
   { const box=$('workOS'); box.innerHTML=''; for(const w of WORKS.filter(w=>w.n>0 && w.kind==='OS')) box.append(workChip(w)); }
   // AC はまとまり（旧筐体・新筐体・ニジイロ）、CS はハードのボタンを並べ、作品はその中にしまう。
   // まとまりを押すと、その作品を表示する（作品はまだ選ばれていない状態）。選びたい作品を押して選ぶ。
@@ -1033,7 +1055,7 @@ function worksSummary(){
   const items = [], done = new Set();
   for(const [g, ws] of acGroups().map(g=>[g, acWorksOf(g)]).concat(csHardwares().map(hw=>[hw, csWorksOf(hw)]))){
     if(ws.length > 1 && ws.every(on) && acGroups().includes(g)){ items.push(g); ws.forEach(w=>done.add(w)); continue; }
-    for(const w of ws) if(on(w) && !done.has(w)){ items.push(w.name); done.add(w); }
+    for(const w of ws) if(on(w) && !done.has(w)){ items.push(wname(w)); done.add(w); }
   }
   if(osOn) items.push('海外の曲');
   const noMP = cfg.mp === false && WORKS.some(w=>MP_WORKS.has(wkey(w)) && on(w)) ? '（ミュージックパスを除く）' : '';
@@ -1693,28 +1715,59 @@ document.addEventListener('click', e=>{
   v.textContent = open ? v.dataset.full : v.dataset.short;
   if(game && game.q && game.q.redraw && !$('scQuiz').classList.contains('hidden')) setTimeout(()=>renderChart(), 0); // 情報の高さが変わったら譜面を収め直す
 }, true); // 伏せた情報を開く処理より先に見る（開いたのと同じタップで全部表示にならないように）
+// 収録作品の表示名: 家庭用の「太鼓の達人」は省く。太鼓の達人プラス・アイドルマスター マストソングスは短い呼び名にする
+function wname(w){
+  if(!w) return '';
+  const n = w.name;
+  if(w.kind !== 'CS') return n;
+  if(n === '太鼓の達人プラス') return 'プラス★新曲取り放題！';
+  if(n.startsWith('アイドルマスター マストソングス')) return n.replace(/^アイドルマスター マストソングス\s*/, '').replace('／', '/');
+  return n.replace(/^太鼓の達人\s*/, '').replace('（スイッチ版）', '（Switch版）');
+}
+// AC の作品が 3 つ以上連続して収録されているときは「一番古い～一番新しい」にまとめる（例: ソライロ～グリーン）
+function joinWorks(idx){
+  // 連続した AC の作品を 1 項目にまとめる。項目: {text, last(一番新しい作品の番号), n(作品数)}
+  const a = [...idx].sort((x,y)=>x-y), out = [];
+  for(let s=0; s<a.length;){
+    let e = s;
+    while(e+1<a.length && a[e+1]===a[e]+1 && WORKS[a[e]].kind==='AC' && WORKS[a[e+1]].kind==='AC' && acGroupOf(WORKS[a[e]])!=='地域限定' && acGroupOf(WORKS[a[e+1]])!=='地域限定') e++; // 地域限定（ブラジル版・中国版）は範囲に含めない
+    if(e-s >= 2) out.push({text: wname(WORKS[a[s]]) + '～' + wname(WORKS[a[e]]), last: a[e], n: e-s+1});
+    else for(let k=s;k<=e;k++) out.push({text: wname(WORKS[a[k]]), last: a[k], n: 1});
+    s = e+1;
+  }
+  return out;
+}
+// 表示する収録作品の番号。ドンダフルフェスティバル（Switch版）は、Switch版にしかない譜面（ドンダフルフェスティバル本体に無い譜面）のときだけ表示する
+function shownWorks(r){
+  let all = (r.ws||[]).filter(i=>WORKS[i]);
+  const sw = WORKS.findIndex(w=>w.name==='太鼓の達人 ドンダフルフェスティバル（スイッチ版）'), df = WORKS.findIndex(w=>w.name==='太鼓の達人 ドンダフルフェスティバル');
+  if(sw >= 0 && df >= 0 && all.includes(df)) all = all.filter(i=>i!==sw);
+  return all;
+}
 function worksCell(r){
-  const names = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
-  if(!names.length) return '<div class="k">収録作品</div><div class="v">不明</div>';
+  const all = shownWorks(r);
+  const items = joinWorks(all);
+  if(!items.length) return '<div class="k">収録作品</div><div class="v">不明</div>';
   const MAX = 4;
-  let pick = (r.ws||[]).filter(i=>WORKS[i]);
-  if(pick.length > MAX){
-    // 枠に入りきらないときは、同じタブ（AC の旧筐体・新筐体・ニジイロ、家庭用はハード）からは一番新しい作品 1 つだけを代表にして、
+  let pick = items;
+  if(items.length > MAX){
+    // 枠に入りきらないときは、同じタブ（AC の旧筐体・新筐体・ニジイロ、家庭用はハード）からは一番新しい項目 1 つだけを代表にして、
     // いろいろなタブの作品が並ぶようにする。タブが多すぎるときは新しいタブの代表を優先する
-    const tabOf = w=> w.kind==='AC' ? 'AC:' + acGroupOf(w) : w.kind==='CS' ? 'CS:' + hwsOf(w)[0] : 'OS';
-    const rep = new Map(); // タブ → そのタブで一番新しい（WORKS の並びで後ろの）作品
-    for(const i of pick){ const k = tabOf(WORKS[i]); if(!rep.has(k) || i > rep.get(k)) rep.set(k, i); }
+    const tabOf = it=>{ const w = WORKS[it.last]; return w.kind==='AC' ? 'AC:' + acGroupOf(w) : w.kind==='CS' ? 'CS:' + hwsOf(w)[0] : 'OS'; };
+    const rep = new Map(); // タブ → そのタブで一番新しい項目
+    for(const it of items){ const k = tabOf(it); if(!rep.has(k) || it.last > rep.get(k).last) rep.set(k, it); }
     // AC と家庭用（とその他）から交互に、新しいタブの代表から選ぶ
-    const byKind = k=>[...rep.entries()].filter(([t])=>t.startsWith(k)).map(([, i])=>i).sort((a,b)=>b-a);
+    const byKind = k=>[...rep.entries()].filter(([t])=>t.startsWith(k)).map(([, it])=>it).sort((a,b)=>b.last-a.last);
     const lists = [byKind('AC:'), byKind('CS:'), byKind('OS')], chosen = [];
     while(chosen.length < MAX && lists.some(l=>l.length)) for(const l of lists) if(l.length && chosen.length < MAX) chosen.push(l.shift());
-    pick = chosen.sort((a,b)=>a-b);
+    pick = chosen.sort((a,b)=>a.last-b.last);
   }
-  const rest = names.length - pick.length;
-  const shown = pick.map(i=>WORKS[i].name).join('・') + (rest > 0 ? ` ほか${rest}作品` : '');
+  const rest = all.length - pick.reduce((s,it)=>s+it.n, 0);
+  const full = items.map(it=>it.text).join('・');
+  const shown = pick.map(it=>it.text).join('・') + (rest > 0 ? ` ほか${rest}作品` : '');
   // 省いた作品があるときは、タップで全部の作品と短い表示を切り替える
-  const more = rest > 0 ? ` data-full="${esc(names.join('・'))}" data-short="${esc(shown)}"` : '';
-  return `<div class="k">収録作品</div><div class="v ws${rest > 0 ? ' more' : ''}" title="${esc(names.join('・'))}"${more}>${esc(shown)}</div>`;
+  const more = rest > 0 ? ` data-full="${esc(full)}" data-short="${esc(shown)}"` : '';
+  return `<div class="k">収録作品</div><div class="v ws${rest > 0 ? ' more' : ''}" title="${esc(full)}"${more}>${esc(shown)}</div>`;
 }
 // 出題中に伏せる項目。出題設定で★やジャンルが1つに決まっているときは、それは初めから表示する
 function quizHidden(){
@@ -1850,7 +1903,7 @@ const sf = Object.assign({}, SF_DEFAULT, store.get('sf',{}));
   const groups = acGroups().map(g=>[g, ()=>acWorksOf(g)]).concat(csHardwares().map(hw=>[hw, ()=>csWorksOf(hw)]), [['海外', ()=>WORKS.filter(w=>w.n>0 && w.kind==='OS')]]);
   $('sfWork').innerHTML = opt('','すべて') + groups.map(([label, f])=>{
     const ws = f();
-    return ws.length ? `<optgroup label="${esc(label)}">${ws.map(w=>opt(w.i,w.name)).join('')}</optgroup>` : '';
+    return ws.length ? `<optgroup label="${esc(label)}">${ws.map(w=>opt(w.i,wname(w))).join('')}</optgroup>` : '';
   }).join('');
   const ids = {lv:'sfLv', genre:'sfGenre', work:'sfWork', sort:'sfSort'};
   const sync = ()=>{ for(const [k,id] of Object.entries(ids)){ $(id).value = sf[k]; if($(id).value!==String(sf[k])){ sf[k]=SF_DEFAULT[k]; $(id).value=sf[k]; } $(id).classList.toggle('on', sf[k]!==SF_DEFAULT[k]); } };
@@ -1871,7 +1924,7 @@ const SORTS = {
   lvd:   {cmp:(a,b)=>b.maxLv-a.maxLv, grp:s=>'★'+s.maxLv},
   lva:   {cmp:(a,b)=>a.minLv-b.minLv, grp:s=>'★'+s.minLv},
   genre: {cmp:(a,b)=>genreRank(a)-genreRank(b), grp:genreOf},
-  work:  {cmp:(a,b)=>a.w0-b.w0, grp:s=>s.w0<1e9 ? WORKS[s.w0].name : '収録作品不明'},
+  work:  {cmp:(a,b)=>a.w0-b.w0, grp:s=>s.w0<1e9 ? wname(WORKS[s.w0]) : '収録作品不明'},
   // 初出日の順（初出が分からない譜面はどちらの順でも最後）。見出しは初出の年
   new:   {cmp:(a,b)=>(b.t0??-1)-(a.t0??-1), grp:s=>s.t0 ? Math.floor(s.t0/1e4)+'年' : '初出不明'},
   old:   {cmp:(a,b)=>(a.t0??1e9)-(b.t0??1e9), grp:s=>s.t0 ? Math.floor(s.t0/1e4)+'年' : '初出不明'},
@@ -1950,7 +2003,7 @@ function doSearch(){
   if(nameHits.length > hits.length) box.insertAdjacentHTML('beforeend', `<span class="muted">ほか ${nameHits.length-hits.length} 件（${k?'もっと詳しく入力':'さらに絞り込んで'}ください）</span>`);
   if(wEnt.length){
     const inName = songCount(nameHits.filter(s=>works.some(w=>s.ws.has(w.i))));
-    box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">作品「${works.map(w=>esc(w.name)).join('」「')}」の収録譜面: ${songCount(wEnt) + inName} 譜面</div>`);
+    box.insertAdjacentHTML('beforeend', `<div class="muted" style="flex-basis:100%;margin-top:6px;font-weight:700">作品「${works.map(w=>esc(wname(w))).join('」「')}」の収録譜面: ${songCount(wEnt) + inName} 譜面</div>`);
     addList(wEnt);
   }
   const mEnt = entries(mHits, workSet([]));
@@ -1990,7 +2043,7 @@ function showSong(){
   const s = search.song, r = s.charts[search.idx];
   const d = $('sDetail'); d.classList.remove('hidden');
   $('sList').classList.add('hidden'); // 譜面を1画面に収めるため、候補一覧は閉じる（「検索結果に戻る」でまた開く）
-  const works = (r.ws||[]).map(i=>WORKS[i] && WORKS[i].name).filter(Boolean);
+  const works = joinWorks(shownWorks(r)).map(it=>it.text);
   d.innerHTML = `<div class="sd-head"><button class="sd-back" id="sdBack" title="検索結果の一覧に戻る（Esc）">← 検索結果に戻る</button><span class="title">${esc(dispSong(s.name, s.charts[search.idx]))}</span>${s.yomi?`<span class="muted">${esc(s.yomi)}</span>`:''}
       <div class="sd-tabs">${s.charts.map((c,i)=>`<button data-i="${i}" class="sm${i===search.idx?' on':''}">${chartLabel(c, s.charts.some(x=>/裏譜面/.test(x.n)), s.charts.every(x=>x.s===3))}</button>`).join('')}</div>
       <a href="${wikiUrl(r)}" target="_blank" rel="noopener">Wikiで見る</a></div>
@@ -2154,6 +2207,19 @@ $('plClose').onclick=stopSong; // 閉じたら、その問題ではもう流さ�
 /* ---------- あそびかた ---------- */
 // 日本語 / 英語の切り替え（切り替えるとページを読み込み直す）
 document.querySelectorAll('#langTog button').forEach(b=>{ b.classList.toggle('on', b.dataset.l===window.LANG); b.onclick=()=>{ if(b.dataset.l!==window.LANG) setLang(b.dataset.l); }; });
+/* ---------- お知らせ（news.js: 新しいものが先頭） ---------- */
+(function(){
+  const news = window.QUIZ_NEWS || [];
+  const li = n=>`<li><b>${esc(n.d)}</b>${esc(window.tr ? window.tr(n.t) : n.t)}</li>`;
+  $('newsList').innerHTML = news.slice(0,5).map(li).join('') || '<li class="muted">お知らせはありません</li>';
+  $('newsAll').classList.toggle('hidden', news.length <= 5);
+  $('newsListAll').innerHTML = news.map(li).join('');
+  const m=$('newsModal');
+  $('newsAll').onclick=()=>m.classList.remove('hidden');
+  $('newsClose').onclick=()=>m.classList.add('hidden');
+  m.onclick=e=>{ if(e.target===m) m.classList.add('hidden'); };
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') m.classList.add('hidden'); });
+})();
 $('helpBtn').onclick=()=>$('helpModal').classList.remove('hidden');
 $('homeIcon').onclick=()=>$('homeBtn').click(); // 左上のタイトルと同じ（クイズの途中なら確認してから戻る）
 $('helpClose').onclick=()=>$('helpModal').classList.add('hidden');

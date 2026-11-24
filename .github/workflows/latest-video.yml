@@ -1,0 +1,44 @@
+# YouTube の最新動画を取得して latest-video.js を更新する（トップページに表示される）
+name: YouTube 最新動画の更新
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'   # 3 時間ごと
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: latest-video
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: TikTok の最新動画を取得する（取れなくても前回のままにして先へ進む）
+        continue-on-error: true
+        run: |
+          pip install yt-dlp pillow
+          python scripts/fetch_tiktok.py
+      - name: YouTube の最新動画を取得する
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}   # 無ければ英語のタイトルだけ（RSS）
+        run: python scripts/fetch_youtube.py
+      - name: 変更があればコミットする
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add latest-video.js latest-tiktok.js latest-tiktok.jpg
+          if git diff --cached --quiet; then
+            echo "変更なし"
+          else
+            git commit -m "YouTube の最新動画を更新 ($(TZ=Asia/Tokyo date +%Y-%m-%d))"
+            git pull --rebase --autostash
+            git push
+          fi

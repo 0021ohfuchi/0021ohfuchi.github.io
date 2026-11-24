@@ -333,9 +333,16 @@ for s in lists:
     if yt:
         r['yt'] = [i for _, i in yt]
         r['ytk'] = yt[0][0]  # 0=自動生成音源 1=公式音源/MV
-    if r['p'] in song_works:
-        r['ws'] = sorted(song_works[r['p']])
-        mp = [WORK_INDEX[w] for w, ps in MP_ONLY.items() if r['p'] in ps and WORK_INDEX.get(w) in r['ws']]
+    wkey = r['p']
+    if r['n'].startswith('【双打】'):
+        # 双打譜面は裏譜面などでページ名が通常の譜面と同じになる。作品ごとの収録曲には「【双打】○○」の名前で載っているので、
+        # その名前で引く（裏譜面は「【双打】○○」の収録作品で代用。載っていなければ通常の譜面の作品を使わず作品なし扱い）
+        nk = lambda t: unicodedata.normalize('NFKC', t).replace(' ', '')  # Ⅱ と II などの表記ゆれを吸収
+        sw_norm = {nk(k): k for k in song_works if k.startswith('【双打】')}
+        wkey = next((sw_norm[nk(k)] for k in (r['n'], re.sub(r'\(裏譜面\)$', '', r['n'])) if nk(k) in sw_norm), None)
+    if wkey in song_works:
+        r['ws'] = sorted(song_works[wkey])
+        mp = [WORK_INDEX[w] for w, ps in MP_ONLY.items() if wkey in ps and WORK_INDEX.get(w) in r['ws']]
         if mp:
             r['mp'] = mp  # この作品ではミュージックパスの曲
     elif s['section'] in OVERSEAS_SECTIONS or g not in JP_GENRES:

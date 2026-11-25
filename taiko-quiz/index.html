@@ -9,7 +9,7 @@
 <title>譜面を見て当てろ！ 太鼓の達人 曲当てクイズ</title>
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<script src="i18n.js?v=20261125c"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
+<script src="i18n.js?v=20261125e"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
@@ -516,7 +516,7 @@ a{color:var(--ka-d);font-weight:700}
       <li>譜面は枠の中でスクロールでき、スマホでは2本指で拡大できます</li>
       <li>正解・あきらめた後は、YouTube に公式音源がある曲なら左下で流れます（「サウンド」で BGM・効果音・音源を切り替えられます）</li>
       <li>最後に結果発表。マスを押すと問題ごとの答え・使ったヒント・回答時間が見られ、X・Threads・Instagram などでシェアできます</li>
-      <li>「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます</li>
+      <li>「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます。「ランダムマッチ」では同じ難易度を選んだ人と自動で対戦します</li>
       <li>「譜面検索」では、曲名・読み・作品名・アーティスト・作曲者・アニメ名などから譜面を探して、譜面・情報・収録作品を見られます</li>
     </ul>
     <h3 style="margin:14px 0 6px;font-size:16px">動画・配信での利用について</h3>
@@ -529,6 +529,7 @@ a{color:var(--ka-d);font-weight:700}
     <!-- 更新履歴（新しいものを上に足す） -->
     <h3 style="margin:4px 0 6px;font-size:16px">更新履歴</h3>
     <ul class="changelog">
+      <li><b>2026/11/25</b> オンライン対戦に「ランダムマッチ」を追加しました</li>
       <li><b>2026/11/25</b> オンライン対戦を追加しました（出題設定の画面の「オンライン対戦」から）</li>
       <li><b>2026/11/24</b> 動画・配信での利用についてのご案内をヘルプに追加しました</li>
       <li><b>2026/11/23</b> 出題設定の画面の下に「お知らせ」を追加しました。曲の追加や更新内容をここでお知らせします</li>
@@ -556,13 +557,17 @@ a{color:var(--ka-d);font-weight:700}
       <div class="onl-or">または</div>
       <div><label for="onlCode">部屋コード</label>
         <div class="row"><input class="onl-input" id="onlCode" maxlength="6" autocomplete="off" placeholder="ABC123"><button class="blue" id="onlJoin">参加する</button></div></div>
+      <div class="onl-or">または</div>
+      <div><label for="onlPubMode">ランダムマッチ</label>
+        <div class="row"><select id="onlPubMode"></select><button class="primary" id="onlRandom">ランダムマッチ</button></div>
+        <p class="muted" style="margin:6px 0 0">同じ難易度を選んだ人と対戦します（★8〜10・10問。2人そろうと10秒後に開始）</p></div>
       <div class="onl-msg" id="onlMsg"></div>
       <div style="text-align:center"><button id="onlBack">戻る</button></div>
     </div>
   </div>
   <div class="card onl-card hidden" id="onlLobby">
-    <h2>対戦ロビー</h2>
-    <div class="onl-codebox"><div class="k">部屋コード</div><div class="v" id="onlCodeShow"></div><button class="blue sm" id="onlCopy">招待リンクをコピー</button></div>
+    <h2 id="onlLobbyTitle">対戦ロビー</h2>
+    <div class="onl-codebox" id="onlCodeBox"><div class="k">部屋コード</div><div class="v" id="onlCodeShow"></div><button class="blue sm" id="onlCopy">招待リンクをコピー</button></div>
     <div style="font-weight:800" id="onlCount"></div>
     <div class="onl-players" id="onlPlayers"></div>
     <div style="font-weight:800;margin-bottom:4px">出題設定</div>
@@ -715,7 +720,7 @@ a{color:var(--ka-d);font-weight:700}
       <div id="endTable"></div>
       <div class="qdetail hidden" id="endDetail"></div>
       <div id="onlEnd" class="hidden"><h3>順位</h3><div id="onlRank"></div>
-        <div class="row" style="justify-content:center;margin-top:10px"><button class="primary hidden" id="onlAgain">この部屋でもう一度</button>
+        <div class="row" style="justify-content:center;margin-top:10px"><button class="primary hidden" id="onlAgain">この部屋でもう一度</button><button class="primary hidden" id="onlRematch">もう一度ランダムマッチ</button>
         <span class="onl-wait hidden" id="onlEndNote">ホストが次の対戦を始めるのを待っています…</span></div></div>
     </div>
   </div>
@@ -2334,5 +2339,5 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('helpModal').cla
 renderSetup();
 show('scSetup');
 </script>
-<script src="online.js?v=20261125a"></script><!-- オンライン対戦（部屋コード）。変更したら v を変える -->
+<script src="online.js?v=20261125b"></script><!-- オンライン対戦（部屋コード）。変更したら v を変える -->
 </body>

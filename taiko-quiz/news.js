@@ -3,6 +3,11 @@
 window.QUIZ_NEWS=[
  {
   "d": "2026/11/25",
+  "t": "オンライン対戦に「ランダムマッチ」を追加しました。同じ難易度を選んだ人と自動で対戦できます",
+  "en": "Added \"Random match\" to online battles. You are automatically matched with players who chose the same difficulty"
+ },
+ {
+  "d": "2026/11/25",
   "t": "オンライン対戦を追加しました。部屋コードで友達と同じ問題を解いて得点を競えます（最大8人）",
   "en": "Added online battles. Share a room code to play the same questions with friends and compete for points (up to 8 players)"
  },

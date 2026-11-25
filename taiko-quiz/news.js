@@ -2,6 +2,11 @@
 // en: トップページを英語で見たときに出す文（無ければ日本語の t を出す）
 window.QUIZ_NEWS=[
  {
+  "d": "2026/11/25",
+  "t": "オンライン対戦を追加しました。部屋コードで友達と同じ問題を解いて得点を競えます（最大8人）",
+  "en": "Added online battles. Share a room code to play the same questions with friends and compete for points (up to 8 players)"
+ },
+ {
   "d": "2026/11/24",
   "t": "動画・配信での利用についてのご案内をヘルプに追加しました",
   "en": "Added a guide on using this content in videos and live streams to the Help"

@@ -8,6 +8,7 @@
 | ファイル | 内容 |
 | --- | --- |
 | `index.html` | クイズ本体 |
+| `online.js` | オンライン対戦（部屋コード）。Firebase Realtime Database を使う |
 | `fumen-parse.js` | 譜面画像の読み取り処理と、譜面の描画処理 |
 | `charts/` | 譜面データ（`tools/parse_charts.py` が譜面画像から作る）。クイズはこれを読み込んで譜面を描く |
 | `data.js` | 曲データ（`tools/build_data.py` が自動で作る） |
@@ -24,6 +25,30 @@
 
 このフォルダは `0021ohfuchi.github.io` リポジトリの `taiko-quiz/` に置いてあり、
 https://0021ohfuchi.github.io/taiko-quiz/ で公開されます（YouTube の曲もそのまま流れる）。
+
+## オンライン対戦（Firebase）
+
+トップの「オンライン対戦」で部屋を作り、6文字の部屋コード（または招待リンク `?room=XXXXXX`）で友達が入ると、同じ問題で対戦できます（最大8人）。
+通信は Firebase Realtime Database を使い、送るのは出題する譜面の番号・何問目か・各自の回答（正誤・時間）だけです。譜面は各自が `charts/` から読みます。
+
+- 得点: 正解 100 点＋早さのボーナス（すぐ答えるほど多く、最大 100 点）。1問の制限時間（30〜180秒）はホストがロビーで決める
+- 出題設定（★・ジャンル・作品・問題数・難易度）はホストのトップ画面の設定を使う。4択は全員同じ並び
+- 全員が答えるか時間切れで答えを出し、ホストが「次の問題へ」で進める。ホストが抜けたら、残った人のうち最初に入った人が引き継ぐ
+- 読み込み直しても URL の部屋コードで同じ部屋・同じ問題に戻る
+
+### 設定のしかた（最初の1回）
+
+1. https://console.firebase.google.com/ でプロジェクトを作る（無料の Spark プラン）
+2. 「構築 → Realtime Database」でデータベースを作る（場所はシンガポールなど。ロックモードで作成）
+3. 「ルール」タブに `tools/firebase_rules.json` の中身を貼って公開する
+4. 「構築 → Authentication」で「匿名」ログインを有効にする
+5. 「プロジェクトの設定 → マイアプリ」でウェブアプリを追加し、表示される `firebaseConfig` を `online.js` の `FIREBASE_CONFIG = null` の `null` と置き換える（この値は公開してよいもの。安全はルールで守る）
+
+`FIREBASE_CONFIG` が `null` の間は「オンライン対戦」ボタンは出ません。
+
+### 手元での確認
+
+`start_server.bat` で開き、`http://localhost:8000/?mock=1` を2つのタブで開くと、Firebase なしでタブ同士で対戦できます（localhost のときだけ）。
 
 ## 譜面画像の扱い
 

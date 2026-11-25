@@ -144,10 +144,39 @@
     'バグ報告はこちら：X': 'Bug reports: X', '／ YouTube': '/ YouTube',
     '曲データ（data.js）を読み込めませんでした。そのため作品・譜面が表示されません。ダウンロードしたファイルを直接開くと読み込めないことがあります（特にスマホ）。公開ページ（GitHub Pages など）か、パソコンの start_server.bat から開いてください。':
       'Could not load the song data (data.js). Open the published page, or start_server.bat on a PC.',
+    // オンライン対戦
+    'オンライン対戦を追加しました（出題設定の画面の「オンライン対戦」から）': 'Added online battles (from "Online battle" on the settings screen)',
+    '「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます':
+      'In "Online battle", create a room and send the code or invite link to friends to play the same questions (up to 8 players). 100 points per correct answer plus a speed bonus. The host (room creator) chooses the settings and the time per question.',
+    'オンライン対戦': 'Online battle', '部屋を作る': 'Create room', 'または': 'or', '部屋コード': 'Room code', '参加する': 'Join', '戻る': 'Back',
+    '名前': 'Name', '12文字まで': 'Up to 12 characters', '対戦ロビー': 'Lobby', '招待リンクをコピー': 'Copy invite link', 'コピーしました': 'Copied',
+    '出題設定': 'Quiz settings', '1問の制限時間': 'Time per question', '出題設定を変える': 'Change settings', '部屋を出る': 'Leave room',
+    '部屋に戻る': 'Back to room', 'ホスト': 'Host', 'あなた': 'You', '難易度': 'Difficulty', '問題数': 'Questions', '制限時間': 'Time limit',
+    '部屋を作って部屋コードを友達に教えると、同じ問題で対戦できます（最大8人）。正解すると100点、早く答えるほどボーナス（最大100点）がもらえます。':
+      'Create a room and share the code with friends to play the same questions (up to 8 players). A correct answer is worth 100 points, plus a speed bonus of up to 100.',
+    '出題候補がありません。「出題設定を変える」で★の数・ジャンル・収録作品を選んでください': 'No charts match. Use "Change settings" to choose stars, genres and games.',
+    'ホストがスタートするのを待っています…': 'Waiting for the host to start…', 'ホストが次へ進むのを待っています…': 'Waiting for the host to continue…',
+    'ホストが次の対戦を始めるのを待っています…': 'Waiting for the host to start the next match…', 'ほかの人の回答を待っています…': 'Waiting for the others to answer…',
+    '順位': 'Ranking', '点': 'pts', 'この部屋でもう一度': 'Play again in this room', '回答済み': 'Answered', '考え中': 'Thinking',
+    '名前を入力してください': 'Please enter your name', '部屋コード（6文字）を入力してください': 'Please enter the 6-character room code',
+    '部屋を作っています…': 'Creating the room…', '部屋に入っています…': 'Joining the room…',
+    'この部屋コードの部屋は見つかりませんでした': 'No room was found with this code', 'この部屋は満員です（最大8人）': 'This room is full (max 8 players)',
+    '通信できませんでした。少し待ってからもう一度お試しください': 'Could not connect. Please wait a moment and try again.',
+    '名前を入力して「参加する」を押してください': 'Enter your name and press "Join"', '部屋がなくなりました': 'The room no longer exists',
+    '部屋を出てトップに戻りますか？': 'Leave the room and go back to the top?', 'ここで対戦を終了して、全員で結果を見ますか？': 'End the match here and show everyone the results?',
+    'このリンクを友達に送ってください': 'Send this link to your friends', '譜面を読み込めませんでした': 'Could not load the chart',
+    '曲データが合わないため、この部屋に参加できませんでした。時間をおいてページを読み込み直してください': 'Could not join because the song data does not match. Please reload the page later.',
   };
   // 決まった形の文言（数が入るもの）
   const fmtT = s=>s.replace(/(\d+)分(\d+)秒/g, '$1m $2s').replace(/([\d.]+)秒/g, '$1s');
   const R = [
+    [/^参加者（(\d+)\/(\d+)）$/, 'Players ($1/$2)'],
+    [/^部屋 (\w+) に参加中$/, 'In room $1'],
+    [/^(\d+)問$/, '$1'],
+    [/^(\d+)秒$/, '$1s'],
+    [/^\+(\d+)点$/, '+$1 pts'],
+    [/^○ \+(\d+)$/, '○ +$1'],
+    [/^（(\d+)\/(\d+)）$/, '($1/$2)'],
     [/^正解 (\d+) \/ (\d+)$/, 'Correct $1 / $2'],
     [/^第(\d+)問 \/ (\d+)$/, 'Q$1 / $2'],
     [/^第(\d+)問$/, 'Q$1'],

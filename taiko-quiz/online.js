@@ -23,9 +23,12 @@ const MAX_PLAYERS = 8, MAX_Q = 100;
 const GRACE = 1500;            // 制限時間を過ぎてから答えを出すまでの猶予(ms)。通信の遅れで回答が届くのを待つ
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 見間違えやすい I・O・0・1 は使わない
 const LIMITS = [30, 60, 90, 120, 180];
-// 使い終わった部屋の片付け: 最後に使われてから OLD_ROOM たった部屋を、部屋を作るたびに OLD_BATCH 件まで消す
-// （無料プランの容量を使い切らないように。消してよい条件はデータベースのルールでも確かめる）
-const OLD_ROOM = 24*60*60*1000, OLD_BATCH = 20;
+// 使い終わった部屋の片付け（無料プランの容量を使い切らないように）:
+// 部屋を使った日ごとに gc/<日の番号>/c/<部屋コード> に記録しておき、部屋を作るたびに 3〜9 日前の記録を読んで、
+// そこに載っている部屋を消す。消してよいのは 24 時間使われていない部屋だけ（データベースのルールでも確かめる）。
+// 3 日以上前の記録しか読めないので、いま使われている部屋のコードが知られることはない
+const DAY = 24*60*60*1000, GC_FROM = 3, GC_TO = 9;
+const dayNo = ()=>Math.floor(net.now() / DAY);
 // 難易度が おに のときは、曲の情報と譜面が時間とともに少しずつ表示される（index.html の autoReveal・chartFrac）
 
 /* ---------- 通信（Firebase / 手元確認用） ---------- */
@@ -46,8 +49,6 @@ function fbNet(){
     now: ()=>Date.now() + offset, // サーバーの時計（全員で同じ時刻を使う）
     TS: ()=>firebase.database.ServerValue.TIMESTAMP,
     get: p=>db.ref(p).get().then(s=>s.val()),
-    // 最後に使われた時刻（last）が cut より前の部屋のコードを、古い順に n 件まで
-    oldRooms: (cut, n)=>db.ref('rooms').orderByChild('last').endAt(cut).limitToFirst(n).get().then(s=>Object.keys(s.val() || {})),
     set: (p, v)=>db.ref(p).set(v),
     update: (p, v)=>db.ref(p).update(v),
     on(p, cb){ const r = db.ref(p), f = r.on('value', s=>cb(s.val()), ()=>cb(null)); return ()=>r.off('value', f); },
@@ -83,7 +84,6 @@ function mockNet(){
   return {
     init: ()=>Promise.resolve(uid), now: ()=>Date.now(), TS: ()=>({'.sv': 'timestamp'}),
     get: p=>Promise.resolve(at(read(), p)),
-    oldRooms: (cut, n)=>{ const R = at(read(), 'rooms') || {}; return Promise.resolve(Object.keys(R).filter(c=>(R[c].last || 0) <= cut).sort((a, b)=>(R[a].last || 0) - (R[b].last || 0)).slice(0, n)); },
     set: (p, v)=>write(()=>store1(p, res(v))),
     update: (p, v)=>write(()=>{ for(const k in v) store1(p + '/' + k, res(v[k])); }),
     on(p, cb){ const s = {p, cb}; subs.add(s); setTimeout(()=>{ if(subs.has(s)) cb(at(read(), p)); }, 0); return ()=>subs.delete(s); },
@@ -155,17 +155,28 @@ async function makeRoom(name){
     players: {[uid]: {name, joined: net.TS(), on: true}}});
   return c;
 }
+// この部屋を今日使ったことを記録する（ホストが、部屋を作った・始めた・次の問題へ進めたときに呼ぶ）
+function gcMark(){
+  if(!code) return;
+  const d = dayNo();
+  net.set('gc/' + d + '/t', net.TS()).catch(()=>{}); // その日の記録を最初に書いた時刻（2 回目以降は拒否されるが気にしない）
+  net.set('gc/' + d + '/c/' + code, true).catch(()=>{});
+}
 // 古い部屋を消す（失敗しても対戦には関係ないので何もしない）
 async function cleanOld(){
-  try{
-    const old = await net.oldRooms(net.now() - OLD_ROOM - 60000, OLD_BATCH); // 時計のずれのぶん 1 分余分に古いものだけ
-    for(const c of old) if(c !== code) await net.set('rooms/' + c, null).catch(()=>{});
-  }catch(e){ console.warn('cleanOld', e); }
+  const d = dayNo();
+  for(let k = GC_FROM; k <= GC_TO; k++){
+    try{
+      const b = await net.get('gc/' + (d - k)); if(!b) continue;
+      for(const c of Object.keys(b.c || {})) if(c !== code) await net.set('rooms/' + c, null).catch(()=>{}); // まだ使われている部屋はルールで拒否される
+      await net.set('gc/' + (d - k), null).catch(()=>{});
+    }catch(e){}
+  }
 }
 async function create(){
   if(busy) return; const name = getName(); if(!name) return;
   busy = true; msg('部屋を作っています…');
-  try{ uid = await net.init(); enter(await makeRoom(name)); cleanOld(); }catch(e){ fail(e); }
+  try{ uid = await net.init(); enter(await makeRoom(name)); gcMark(); cleanOld(); }catch(e){ fail(e); }
   busy = false;
 }
 
@@ -328,6 +339,7 @@ function revealRow(qi){
 function advance(qi, end){
   if(!isHost() || room.state !== 'play' || room.qi !== qi || room.phase !== 'a') return;
   net.update(path(), end ? {state: 'end', n: qi + 1, last: net.TS()} : {qi: qi + 1, phase: 'q', qt: net.TS(), last: net.TS()}).catch(()=>{});
+  gcMark();
 }
 // ホストの仕事: 全員が答えたか、制限時間を過ぎたら、答えを出す段階に進める
 function hostCheck(){
@@ -403,6 +415,7 @@ function start(){
   const s = hostSet(), list = shuffle(uniquePool()).slice(0, s.count).map(r=>r.ch);
   if(!list.length) return;
   net.update(path(), {state: 'play', round: (room.round || 0) + 1, list, mode: s.mode, sum: s.sum, set: s, qi: 0, phase: 'q', qt: net.TS(), ans: null, n: null, last: net.TS()}).catch(fail);
+  gcMark();
 }
 
 /* ---------- 画面 ---------- */

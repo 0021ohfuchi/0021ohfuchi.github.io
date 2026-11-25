@@ -23,6 +23,9 @@ const MAX_PLAYERS = 8, MAX_Q = 100;
 const GRACE = 1500;            // 制限時間を過ぎてから答えを出すまでの猶予(ms)。通信の遅れで回答が届くのを待つ
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 見間違えやすい I・O・0・1 は使わない
 const LIMITS = [30, 60, 90, 120, 180];
+// 使い終わった部屋の片付け: 最後に使われてから OLD_ROOM たった部屋を、部屋を作るたびに OLD_BATCH 件まで消す
+// （無料プランの容量を使い切らないように。消してよい条件はデータベースのルールでも確かめる）
+const OLD_ROOM = 24*60*60*1000, OLD_BATCH = 20;
 // 難易度が おに のときは、曲の情報と譜面が時間とともに少しずつ表示される（index.html の autoReveal・chartFrac）
 
 /* ---------- 通信（Firebase / 手元確認用） ---------- */
@@ -43,6 +46,8 @@ function fbNet(){
     now: ()=>Date.now() + offset, // サーバーの時計（全員で同じ時刻を使う）
     TS: ()=>firebase.database.ServerValue.TIMESTAMP,
     get: p=>db.ref(p).get().then(s=>s.val()),
+    // 最後に使われた時刻（last）が cut より前の部屋のコードを、古い順に n 件まで
+    oldRooms: (cut, n)=>db.ref('rooms').orderByChild('last').endAt(cut).limitToFirst(n).get().then(s=>Object.keys(s.val() || {})),
     set: (p, v)=>db.ref(p).set(v),
     update: (p, v)=>db.ref(p).update(v),
     on(p, cb){ const r = db.ref(p), f = r.on('value', s=>cb(s.val()), ()=>cb(null)); return ()=>r.off('value', f); },
@@ -78,6 +83,7 @@ function mockNet(){
   return {
     init: ()=>Promise.resolve(uid), now: ()=>Date.now(), TS: ()=>({'.sv': 'timestamp'}),
     get: p=>Promise.resolve(at(read(), p)),
+    oldRooms: (cut, n)=>{ const R = at(read(), 'rooms') || {}; return Promise.resolve(Object.keys(R).filter(c=>(R[c].last || 0) <= cut).sort((a, b)=>(R[a].last || 0) - (R[b].last || 0)).slice(0, n)); },
     set: (p, v)=>write(()=>store1(p, res(v))),
     update: (p, v)=>write(()=>{ for(const k in v) store1(p + '/' + k, res(v[k])); }),
     on(p, cb){ const s = {p, cb}; subs.add(s); setTimeout(()=>{ if(subs.has(s)) cb(at(read(), p)); }, 0); return ()=>subs.delete(s); },
@@ -145,14 +151,21 @@ async function makeRoom(name){
   for(let i = 0; i < 6; i++){ c = randCode(); if(await net.get('rooms/' + c + '/host') == null) break; c = ''; }
   if(!c) throw new Error('code');
   const lim = +store.get('onlLimit', 60);
-  await net.set('rooms/' + c, {host: uid, created: net.TS(), state: 'lobby', round: 0, limit: LIMITS.includes(lim) ? lim : 60, set: hostSet(),
+  await net.set('rooms/' + c, {host: uid, created: net.TS(), last: net.TS(), state: 'lobby', round: 0, limit: LIMITS.includes(lim) ? lim : 60, set: hostSet(),
     players: {[uid]: {name, joined: net.TS(), on: true}}});
   return c;
+}
+// 古い部屋を消す（失敗しても対戦には関係ないので何もしない）
+async function cleanOld(){
+  try{
+    const old = await net.oldRooms(net.now() - OLD_ROOM - 60000, OLD_BATCH); // 時計のずれのぶん 1 分余分に古いものだけ
+    for(const c of old) if(c !== code) await net.set('rooms/' + c, null).catch(()=>{});
+  }catch(e){ console.warn('cleanOld', e); }
 }
 async function create(){
   if(busy) return; const name = getName(); if(!name) return;
   busy = true; msg('部屋を作っています…');
-  try{ uid = await net.init(); enter(await makeRoom(name)); }catch(e){ fail(e); }
+  try{ uid = await net.init(); enter(await makeRoom(name)); cleanOld(); }catch(e){ fail(e); }
   busy = false;
 }
 
@@ -314,7 +327,7 @@ function revealRow(qi){
 }
 function advance(qi, end){
   if(!isHost() || room.state !== 'play' || room.qi !== qi || room.phase !== 'a') return;
-  net.update(path(), end ? {state: 'end', n: qi + 1} : {qi: qi + 1, phase: 'q', qt: net.TS()}).catch(()=>{});
+  net.update(path(), end ? {state: 'end', n: qi + 1, last: net.TS()} : {qi: qi + 1, phase: 'q', qt: net.TS(), last: net.TS()}).catch(()=>{});
 }
 // ホストの仕事: 全員が答えたか、制限時間を過ぎたら、答えを出す段階に進める
 function hostCheck(){
@@ -389,7 +402,7 @@ function start(){
   if(!isHost() || room.state !== 'lobby') return;
   const s = hostSet(), list = shuffle(uniquePool()).slice(0, s.count).map(r=>r.ch);
   if(!list.length) return;
-  net.update(path(), {state: 'play', round: (room.round || 0) + 1, list, mode: s.mode, sum: s.sum, set: s, qi: 0, phase: 'q', qt: net.TS(), ans: null, n: null}).catch(fail);
+  net.update(path(), {state: 'play', round: (room.round || 0) + 1, list, mode: s.mode, sum: s.sum, set: s, qi: 0, phase: 'q', qt: net.TS(), ans: null, n: null, last: net.TS()}).catch(fail);
 }
 
 /* ---------- 画面 ---------- */
@@ -425,7 +438,7 @@ $('onlEdit').onclick = ()=>{ away = true; renderSetup(); show('scSetup'); };
 $('onlBannerBack').onclick = O.open;
 $('onlLimit').innerHTML = LIMITS.map(s=>`<option value="${s}">${s}秒</option>`).join('');
 $('onlLimit').onchange = ()=>{ const v = +$('onlLimit').value; store.set('onlLimit', v); if(isHost() && room.state === 'lobby') net.update(path(), {limit: v}).catch(()=>{}); };
-$('onlAgain').onclick = ()=>{ if(isHost() && room.state === 'end') net.update(path(), {state: 'lobby', set: hostSet()}).catch(()=>{}); };
+$('onlAgain').onclick = ()=>{ if(isHost() && room.state === 'end') net.update(path(), {state: 'lobby', set: hostSet(), last: net.TS()}).catch(()=>{}); };
 $('onlCopy').onclick = async ()=>{
   const u = new URL(location.href); u.search = ''; u.hash = ''; u.searchParams.set('room', code);
   const b = $('onlCopy'), t = b.textContent;

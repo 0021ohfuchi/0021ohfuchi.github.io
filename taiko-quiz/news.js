@@ -3,18 +3,8 @@
 window.QUIZ_NEWS=[
  {
   "d": "2026/11/25",
-  "t": "オンライン対戦で、曲の情報が時間とともに1つずつ、譜面が上から6回に分けて表示されるようにしました",
-  "en": "In online battles, song hints now appear one at a time and the chart is revealed from the top in 6 steps"
- },
- {
-  "d": "2026/11/25",
-  "t": "オンライン対戦に「ランダムマッチ」を追加しました。知らない人と自動で対戦できます",
-  "en": "Added \"Random match\" to online battles. You are automatically matched with other players"
- },
- {
-  "d": "2026/11/25",
-  "t": "オンライン対戦を追加しました。部屋コードで友達と同じ問題を解いて得点を競えます（最大8人）",
-  "en": "Added online battles. Share a room code to play the same questions with friends and compete for points (up to 8 players)"
+  "t": "オンライン対戦を追加しました。「部屋コードで対戦」では部屋コードを教え合って友達と、「ランダムマッチ」では知らない人と自動で、同じ問題を解いて得点を競えます（最大8人）",
+  "en": "Added online battles. Play the same questions and compete for points with friends using a room code, or with other players via Random match (up to 8 players)"
  },
  {
   "d": "2026/11/24",

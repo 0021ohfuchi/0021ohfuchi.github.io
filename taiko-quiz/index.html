@@ -9,7 +9,7 @@
 <title>譜面を見て当てろ！ 太鼓の達人 曲当てクイズ</title>
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<script src="i18n.js?v=20261125f"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
+<script src="i18n.js?v=20261125g"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
@@ -518,7 +518,7 @@ button.onl-open{background:#8a4fd8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.
       <li>譜面は枠の中でスクロールでき、スマホでは2本指で拡大できます</li>
       <li>正解・あきらめた後は、YouTube に公式音源がある曲なら左下で流れます（「サウンド」で BGM・効果音・音源を切り替えられます）</li>
       <li>最後に結果発表。マスを押すと問題ごとの答え・使ったヒント・回答時間が見られ、X・Threads・Instagram などでシェアできます</li>
-      <li>「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます。「ランダムマッチ」では知らない人と自動で対戦します（おに・1問60秒、曲の情報は8秒ごとに1つずつ表示）</li>
+      <li>「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます。「ランダムマッチ」では知らない人と自動で対戦します（おに・1問60秒）。オンライン対戦では、曲の情報は時間が経つと1つずつ、譜面は上から4回に分けて表示されます</li>
       <li>「譜面検索」では、曲名・読み・作品名・アーティスト・作曲者・アニメ名などから譜面を探して、譜面・情報・収録作品を見られます</li>
     </ul>
     <h3 style="margin:14px 0 6px;font-size:16px">動画・配信での利用について</h3>
@@ -531,6 +531,7 @@ button.onl-open{background:#8a4fd8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.
     <!-- 更新履歴（新しいものを上に足す） -->
     <h3 style="margin:4px 0 6px;font-size:16px">更新履歴</h3>
     <ul class="changelog">
+      <li><b>2026/11/25</b> オンライン対戦で、曲の情報が時間とともに1つずつ、譜面が上から4回に分けて表示されるようにしました</li>
       <li><b>2026/11/25</b> オンライン対戦に「ランダムマッチ」を追加しました</li>
       <li><b>2026/11/25</b> オンライン対戦を追加しました（出題設定の画面の「オンライン対戦」から）</li>
       <li><b>2026/11/24</b> 動画・配信での利用についてのご案内をヘルプに追加しました</li>
@@ -552,7 +553,7 @@ button.onl-open{background:#8a4fd8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.
 <section id="scOnline" class="hidden">
   <div class="card onl-card" id="onlEntry">
     <h2>オンライン対戦</h2>
-    <p class="muted" style="margin-top:0">部屋を作って部屋コードを友達に教えると、同じ問題で対戦できます（最大8人）。正解すると100点、早く答えるほどボーナス（最大100点）がもらえます。</p>
+    <p class="muted" style="margin-top:0">部屋を作って部屋コードを友達に教えると、同じ問題で対戦できます（最大8人）。正解すると100点、早く答えるほどボーナス（最大100点）がもらえます。オンライン対戦では、曲の情報は時間が経つと1つずつ、譜面は上から4回に分けて表示されます。</p>
     <div class="onl-form">
       <div><label for="onlName">名前</label><input class="onl-input" id="onlName" maxlength="12" autocomplete="nickname" placeholder="12文字まで"></div>
       <button class="primary big" id="onlCreate">部屋を作る</button>
@@ -561,7 +562,7 @@ button.onl-open{background:#8a4fd8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.
         <div class="row"><input class="onl-input" id="onlCode" maxlength="6" autocomplete="off" placeholder="ABC123"><button class="blue" id="onlJoin">参加する</button></div></div>
       <div class="onl-or">または</div>
       <div><button class="primary big" id="onlRandom" style="width:100%">ランダムマッチ</button>
-        <p class="muted" style="margin:6px 0 0">知らない人と自動で対戦します。難易度は「おに」、★8〜10・10問・1問60秒。曲の情報は8秒ごとに1つずつ表示されます（2人そろうと10秒後に開始）</p></div>
+        <p class="muted" style="margin:6px 0 0">知らない人と自動で対戦します。難易度は「おに」、★8〜10・10問・1問60秒（2人そろうと10秒後に開始）</p></div>
       <div class="onl-msg" id="onlMsg"></div>
       <div style="text-align:center"><button id="onlBack">戻る</button></div>
     </div>
@@ -754,7 +755,7 @@ button.onl-open{background:#8a4fd8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.
 
 <!-- 曲データは毎日更新されるので、ブラウザに古いものが残らないよう 1 分ごとに変わる番号を付けて読み込む -->
 <script>document.write('<script src="data.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
-<script src="fumen-parse.js?v=20261122b"></script><!-- 変更したら v を変える（スマホに古いファイルが残らないように） -->
+<script src="fumen-parse.js?v=20261125a"></script><!-- 変更したら v を変える（スマホに古いファイルが残らないように） -->
 <script src="bgm.js"></script>
 <script>document.write('<script src="news.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
 <script>
@@ -1218,6 +1219,7 @@ function nextQ(){
   $('qScore').innerHTML = `<span class="mode-tag ${MODES[game.mode].cls}">${MODES[game.mode].name}</span>` +
     (OPEN_LIMIT[game.mode] ? ' <span class="open-left" id="openLeft"></span>' : '') + (game.mode==='oni' || game.online ? ' <span class="timer" id="timer"></span>' : '');
   updateOpenLeft();
+  if(game.online && !OPEN_LIMIT[game.mode]) $('info').querySelectorAll('.hid .mask').forEach(m=>m.textContent='時間で表示');
   startTimer();
   window.scrollTo(0,0); // 次の問題はいつも一番上から
   renderChart();
@@ -1303,7 +1305,10 @@ function startTimer(){
     const left = Math.max(0, lim - (performance.now() - q.t0));
     const el = $('timer');
     if(el){ el.textContent = `残り ${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,'0')}`; el.classList.toggle('low', left < (lim <= 60000 ? 10000 : 30000)); }
-    if(game.online && game.online.auto) autoReveal(lim - left);
+    if(game.online){
+      autoReveal(lim - left, lim);
+      const st = chartStage(lim - left, lim); if(st !== q.stage){ q.stage = st; redrawQuizChart(); } // 譜面を見せる段を増やす
+    }
     if(left <= 0){ stopTimer(); finishQ(false, '時間切れ…'); }
   };
   tick(); timerId = setInterval(tick, 250);
@@ -1398,7 +1403,15 @@ function chartOpts(wrap, maxH, extra){
   return Object.assign(isPhonePortrait() ? {maxW, cols: 1} : {maxW, maxH}, extra);
 }
 // 出題中、BPM を伏せている間は譜面の中の BPM の表示も描かない
-function quizChartExtra(){ return {hideBpm: !!$('info').querySelector('.hid[data-k="bpm"]')}; }
+function quizChartExtra(){ return {hideBpm: !!$('info').querySelector('.hid[data-k="bpm"]'), showFrac: chartFrac()}; }
+// オンライン対戦: 譜面は上の段から 4 回に分けて見せる（制限時間の 0・1/4・1/2・3/4 の時点で 1/4 ずつ）。答えたら全部見せる
+const CHART_STAGES = 4;
+function chartStage(elapsed, lim){ return Math.min(CHART_STAGES, 1 + Math.floor(elapsed / (lim / CHART_STAGES))); }
+function chartFrac(){
+  const q = game && game.q;
+  if(!game || !game.online || !q || q.done) return undefined;
+  return chartStage(performance.now() - q.t0, game.online.limit) / CHART_STAGES;
+}
 // 描いた結果、縦スクロールバーのぶん横にはみ出したら、その幅に合わせて描き直す
 function fitWidth(cv, f, sc, opts){
   if(sc.scrollWidth > sc.clientWidth + 1) FumenParse.renderFumen(cv, f, Object.assign({}, opts, {maxW: sc.clientWidth - 1}));
@@ -1452,7 +1465,7 @@ function finishQ(ok, ngText){
   stopTimer();
   game.history.push({r:q.r, ok, ms: Math.min(performance.now() - q.t0, qLimit() || Infinity), shown: [...q.shown], timeout: !!ngText}); // 回答にかかった時間
   if(ok) playSE(true); // あきらめたときは効果音なし
-  if(game.online){ ONL.answered(ok, ngText); return; } // オンライン対戦: 答えと音源は全員が答え終わってから出す（online.js）
+  if(game.online){ ONL.answered(ok, ngText); redrawQuizChart(); return; } // オンライン対戦: 答えと音源は全員が答え終わってから出す（online.js）
   playSong(q.r); // 正解・あきらめたとき、その曲を流す
   revealInfo();  // 答えが出たら、伏せていた情報も全部見せる
   $('answerArea').classList.add('hidden');
@@ -1887,6 +1900,7 @@ function worksCell(r){
 }
 // 出題中に伏せる項目。出題設定で★やジャンルが1つに決まっているときは、それは初めから表示する
 function quizHidden(){
+  if(game && game.online) return new Set(HINT_KEYS.map(h=>h[0])); // オンライン対戦は全部伏せ、時間で 1 つずつ出す
   if(game && game.mode!=='oni') return new Set(); // おに以外は最初から全部表示
   const h = new Set(['lv','bpm','combo','genre','work','ws']);
   if(cfg.lv.length===1) h.delete('lv');
@@ -1916,7 +1930,7 @@ function donSVG(ok){
 function fmtTime(ms){ const s = ms/1000; if(s < 60) return s.toFixed(1) + '秒'; const m = Math.floor(s/60); return `${m}分${String(Math.floor(s%60)).padStart(2,'0')}秒`; }
 // 開ける情報の残りの数（制限が無い難易度は Infinity）
 const OPEN_LIMIT = {oni: 3};
-function openLeft(){ const lim = game && OPEN_LIMIT[game.mode]; return lim ? lim - ((game.q && game.q.opened) || 0) : Infinity; }
+function openLeft(){ if(game && game.online && !OPEN_LIMIT[game.mode]) return 0; /* オンラインで おに 以外は自分では開けない */ const lim = game && OPEN_LIMIT[game.mode]; return lim ? lim - ((game.q && game.q.opened) || 0) : Infinity; }
 function updateOpenLeft(){
   const el = $('openLeft'); if(!el) return;
   const left = openLeft(); el.textContent = `開ける情報 残り${left}`; el.classList.toggle('zero', left<=0);
@@ -1927,11 +1941,12 @@ function revealInfo(){
   $('info').querySelectorAll('.hid').forEach(d=>d.classList.remove('hid'));
   if(hadBpm) redrawQuizChart();
 }
-// ランダムマッチ: 時間が経つと伏せた情報を 1 つずつ自動で表示する（弱いヒントから順に）
-const AUTO_ORDER = ['lv', 'genre', 'bpm', 'combo', 'work', 'ws'], AUTO_STEP = 8000;
-function autoReveal(elapsed){
+// オンライン対戦: 時間が経つと伏せた情報を 1 つずつ自動で表示する（弱いヒントから順に）。
+// 間隔は制限時間の 2/15（60秒なら 8 秒ごと）で、制限時間の 8 割で全部出る
+const AUTO_ORDER = ['lv', 'genre', 'bpm', 'combo', 'work', 'ws'];
+function autoReveal(elapsed, lim){
   const q = game && game.q; if(!q || q.done) return;
-  const n = Math.min(AUTO_ORDER.length, Math.floor(elapsed / AUTO_STEP));
+  const n = Math.min(AUTO_ORDER.length, Math.floor(elapsed / (lim * 2 / 15)));
   let bpm = false;
   for(const k of AUTO_ORDER.slice(0, n)){
     const d = $('info').querySelector(`.hid[data-k="${k}"]`); if(!d) continue;
@@ -2359,5 +2374,5 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('helpModal').cla
 renderSetup();
 show('scSetup');
 </script>
-<script src="online.js?v=20261125c"></script><!-- オンライン対戦（部屋コード）。変更したら v を変える -->
+<script src="online.js?v=20261125d"></script><!-- オンライン対戦（部屋コード）。変更したら v を変える -->
 </body>

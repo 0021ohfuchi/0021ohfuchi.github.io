@@ -24,7 +24,7 @@ const GRACE = 1500;            // 制限時間を過ぎてから答えを出す�
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 見間違えやすい I・O・0・1 は使わない
 const LIMITS = [30, 60, 90, 120, 180];
 // ランダムマッチ: 決まった出題設定（おに・★8〜10・全ジャンル・海外以外の全作品・10問・1問60秒）で対戦する。
-// 曲の情報は時間が経つと 1 つずつ自動で表示される（index.html の autoReveal）
+// 曲の情報と譜面は、オンライン対戦ではいつも時間が経つと少しずつ表示される（index.html の autoReveal・chartFrac）
 const PUB_COUNT = 10, PUB_WAIT = 10000, PUB_STALE = 10*60*1000, PUB_MERGE = 3000;
 const PUB_CFG = ()=>({lv: [8, 9, 10], genre: GENRES.map(g=>g[0]), mp: true,
   worksOff: [...new Set(WORKS.filter(w=>w.kind === 'OS').map(wkey).concat(['海外の曲']))]});
@@ -323,7 +323,7 @@ function ensureGame(r){
   }
   stopSong(); stopTimer();
   game = {list, pos: -1, target: list.length, all: false, history: [], ended: false, mode: MODES[r.mode] ? r.mode : 'hard', sum: r.sum || (r.set && r.set.sum) || [],
-    online: {round: r.round, limit: limitMs(r), auto: !!r.pub}};
+    online: {round: r.round, limit: limitMs(r)}};
   shownKey = '';
   return true;
 }

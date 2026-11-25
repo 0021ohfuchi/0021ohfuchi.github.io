@@ -477,7 +477,8 @@
       }
       return cols;
     };
-    // opt.cols: 列数を固定する（スマホの縦画面では 1 列で幅いっぱいに描き、縦にスクロールして見る）
+    // opt.showFrac: 0〜1。上の段からこの割合だけ描き、残りの段は伏せる（オンライン対戦で譜面を少しずつ見せる）。配置は全体を描くときと同じ
+  // opt.cols: 列数を固定する（スマホの縦画面では 1 列で幅いっぱいに描き、縦にスクロールして見る）
     let best = null;
     for (let c = opt.cols || 1; c <= (opt.cols || 4); c++) {
       const cols = split(c);
@@ -500,18 +501,28 @@
     const numStart = new Map();
     for (const r of rows) { numStart.set(r, num); num += Math.max(0, r.bars.length - 1); }
 
+    const shown = opt.showFrac == null ? rows.length : Math.max(1, Math.ceil(rows.length * opt.showFrac - 1e-9));
     best.cols.forEach((col, ci) => {
       let cy0 = 0;
       for (const b of col) {
         const ox = ci * (W + GAP), oy = cy0 - b.y0;
         g.setTransform(dpr * s, 0, 0, dpr * s, dpr * s * ox, dpr * s * oy);
-        drawRow(g, b.r, numStart.get(b.r), opt);
+        if (rows.indexOf(b.r) < shown) drawRow(g, b.r, numStart.get(b.r), opt);
+        else drawHiddenRow(g, b.r);
         cy0 += b.h;
       }
     });
     return { height: cssH, width: cssW, scale: s, cols: best.cols.length };
   }
 
+  // 伏せた段: 段の場所だけ灰色の帯で示す（音符・小節番号・BPM は描かない）
+  function drawHiddenRow(g, r) {
+    const x0 = r.laneStart || 0, top = r.lineY, bot = r.bottom + 7;
+    g.fillStyle = '#e6ddd0'; roundRect(g, x0, top, r.laneEnd + 1 - x0, bot - top + 1, 6); g.fill();
+    g.font = 'bold 13px "M PLUS Rounded 1c", sans-serif'; g.fillStyle = '#b3a593'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('？', (x0 + r.laneEnd) / 2, (top + bot) / 2);
+    g.textAlign = 'start'; g.textBaseline = 'alphabetic';
+  }
   function drawRow(g, r, numStart, opt) {
     opt = opt || {};
     const bandTop = r.lineY, bandBot = r.bottom + 7;

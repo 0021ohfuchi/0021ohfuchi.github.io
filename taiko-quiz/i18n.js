@@ -145,6 +145,7 @@
     '曲データ（data.js）を読み込めませんでした。そのため作品・譜面が表示されません。ダウンロードしたファイルを直接開くと読み込めないことがあります（特にスマホ）。公開ページ（GitHub Pages など）か、パソコンの start_server.bat から開いてください。':
       'Could not load the song data (data.js). Open the published page, or start_server.bat on a PC.',
     // オンライン対戦
+    'オンライン対戦を追加しました。部屋コードで友達と同じ問題を解いて得点を競えます（最大8人）': 'Added online battles. Share a room code to play the same questions with friends and compete for points (up to 8 players)',
     'オンライン対戦を追加しました（出題設定の画面の「オンライン対戦」から）': 'Added online battles (from "Online battle" on the settings screen)',
     '「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます':
       'In "Online battle", create a room and send the code or invite link to friends to play the same questions (up to 8 players). 100 points per correct answer plus a speed bonus. The host (room creator) chooses the settings and the time per question.',

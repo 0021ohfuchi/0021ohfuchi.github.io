@@ -1,6 +1,24 @@
 // 自動生成: scripts/fetch_youtube.py（YouTube の最新動画。新しいものが先頭。short: ショートかどうか）
 window.LATEST_VIDEOS=[
  {
+  "id": "z2mpHKIOvQQ",
+  "title": "Let's貢献! ～恋の懲役は1,000,000年～ （裏譜面） 全良【太鼓の達人 Vバージョン】",
+  "desc": "★×8 536コンボ キャプチャはVitaUSBStreamを使用",
+  "title_en": "Let's Contribute: Imprisonment of Love for 1,000,000 years (Ura) [Taiko no Tatsujin: V Version]",
+  "desc_en": "★×8 536 combo",
+  "date": "2026/11/25",
+  "short": false
+ },
+ {
+  "id": "JDAgOFssqvI",
+  "title": "Let's貢献! ～恋の懲役は1,000,000年～ （裏譜面） 全良【太鼓の達人 Vバージョン】",
+  "desc": "",
+  "title_en": "Let's Contribute: Imprisonment of Love for 1,000,000 years [Taiko no Tatsujin: V Version] #shorts",
+  "desc_en": "",
+  "date": "2026/11/25",
+  "short": true
+ },
+ {
   "id": "dR7stGL8ENc",
   "title": "はたラク2000 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人",
   "desc": "★×10 876コンボ 前回のプレイ動画↓ https://youtu.be/7_Tw6Q5iyYM 11月23日は勤労感謝の日！ということで、この曲をプレイ 等速でのプレイは初めてでしたが、最近サボり気味なのもあって見た目32分音符が全然精度取れませんでした… BPM揺れがところどころあるため正確に押しているのに可が",
@@ -89,23 +107,5 @@ window.LATEST_VIDEOS=[
   "desc_en": "",
   "date": "2026/11/16",
   "short": true
- },
- {
-  "id": "VIwqp_iFeU4",
-  "title": "其方、激昂 全良【太鼓の達人Steam版ドンダフルフェスティバル】#キーボード #asmr #shorts",
-  "desc": "",
-  "title_en": "SONATA, GEKKO (Oni) DFC [Taiko no Tatsujin Rhythm Festival] #keyboard #asmr #shorts",
-  "desc_en": "",
-  "date": "2026/11/15",
-  "short": true
- },
- {
-  "id": "RLKM3gXPjTE",
-  "title": "其方、激昂 全良【太鼓の達人Steam版ドンダフルフェスティバル】#キーボード #asmr",
-  "desc": "★×10 994コンボ",
-  "title_en": "SONATA, GEKKO (Oni) DFC [Taiko no Tatsujin Rhythm Festival] #keyboard #asmr",
-  "desc_en": "★×10 994 combo",
-  "date": "2026/11/14",
-  "short": false
  }
 ];

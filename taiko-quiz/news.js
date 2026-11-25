@@ -3,8 +3,8 @@
 window.QUIZ_NEWS=[
  {
   "d": "2026/11/25",
-  "t": "オンライン対戦で、曲の情報が時間とともに1つずつ、譜面が上から4回に分けて表示されるようにしました",
-  "en": "In online battles, song hints now appear one at a time and the chart is revealed from the top in 4 steps"
+  "t": "オンライン対戦で、曲の情報が時間とともに1つずつ、譜面が上から6回に分けて表示されるようにしました",
+  "en": "In online battles, song hints now appear one at a time and the chart is revealed from the top in 6 steps"
  },
  {
   "d": "2026/11/25",

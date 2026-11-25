@@ -9,7 +9,7 @@
 <title>譜面を見て当てろ！ 太鼓の達人 曲当てクイズ</title>
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<script src="i18n.js?v=20261125k"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
+<script src="i18n.js?v=20261125l"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
@@ -525,7 +525,7 @@ button.onl-open{background:#8a4fd8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.
       <li>譜面は枠の中でスクロールでき、スマホでは2本指で拡大できます</li>
       <li>正解・あきらめた後は、YouTube に公式音源がある曲なら左下で流れます（「サウンド」で BGM・効果音・音源を切り替えられます）</li>
       <li>最後に結果発表。マスを押すと問題ごとの答え・使ったヒント・回答時間が見られ、X・Threads・Instagram などでシェアできます</li>
-      <li>「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます。「ランダムマッチ」では知らない人と自動で対戦します（おに・1問60秒）。難易度が「おに」のときは、曲の情報は時間が経つと1つずつ、譜面は上から6回に分けて表示されます</li>
+      <li>「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます。「ランダムマッチ」では知らない人と自動で対戦します（おに・1問60秒）。難易度が「おに」のときは、曲の情報は時間が経つと1つずつ、譜面は情報が開くたびに上から少しずつ表示されます</li>
       <li>「譜面検索」では、曲名・読み・作品名・アーティスト・作曲者・アニメ名などから譜面を探して、譜面・情報・収録作品を見られます</li>
     </ul>
     <h3 style="margin:14px 0 6px;font-size:16px">動画・配信での利用について</h3>
@@ -558,7 +558,7 @@ button.onl-open{background:#8a4fd8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.
 <section id="scOnline" class="hidden">
   <div class="card onl-card" id="onlEntry">
     <h2>オンライン対戦</h2>
-    <p class="muted" style="margin-top:0">ほかの人と同じ問題を同時に解いて対戦します（最大8人）。正解すると100点、早く答えるほどボーナス（最大100点）がもらえます。難易度が「おに」のときは、曲の情報は時間が経つと1つずつ、譜面は上から6回に分けて表示されます。</p>
+    <p class="muted" style="margin-top:0">ほかの人と同じ問題を同時に解いて対戦します（最大8人）。正解すると100点、早く答えるほどボーナス（最大100点）がもらえます。難易度が「おに」のときは、曲の情報は時間が経つと1つずつ、譜面は情報が開くたびに上から少しずつ表示されます。</p>
     <div class="onl-form">
       <!-- 名前（どの遊び方でも使う）は、遊び方のボタンとは別の欄にする -->
       <div class="onl-namebox"><label for="onlName">あなたの名前</label>
@@ -1416,15 +1416,16 @@ function chartOpts(wrap, maxH, extra){
 }
 // 出題中、BPM を伏せている間は譜面の中の BPM の表示も描かない
 function quizChartExtra(){ return {hideBpm: !!$('info').querySelector('.hid[data-k="bpm"]'), showFrac: chartFrac()}; }
-// オンライン対戦（おに）: 譜面は上の段から 6 回に分けて見せる。最初に 1/6、あとは曲の情報が自動で 1 つ開くたびに 1/6 ずつ増やす（同じタイミング）。答えたら全部見せる
-const CHART_STAGES = 6;
+// オンライン対戦（おに）: 譜面は上の段から少しずつ見せる。最初に 1/6、あとは曲の情報が自動で 1 つ開くたびに同じだけ増やし、
+// 最後の情報（収録作品）が開くと同時に全部見せる。答えたら全部見せる
+const CHART_FIRST = 1/6;
 // 情報と譜面を時間で少しずつ見せるのは、オンライン対戦の おに（ランダムマッチは いつも おに）だけ。かんたん〜むずかしいは最初から全部見せる
 function staged(){ return !!(game && game.online && game.mode === 'oni'); }
-function chartStage(elapsed, lim){ return Math.min(CHART_STAGES, 1 + Math.floor(elapsed / autoStep(lim))); }
+function chartStage(elapsed, lim){ return Math.min(AUTO_ORDER.length, Math.floor(elapsed / autoStep(lim))); } // 開いた情報の数 0〜6
 function chartFrac(){
   const q = game && game.q;
   if(!staged() || !q || q.done) return undefined;
-  return chartStage(performance.now() - q.t0, game.online.limit) / CHART_STAGES;
+  return CHART_FIRST + (1 - CHART_FIRST) * chartStage(performance.now() - q.t0, game.online.limit) / AUTO_ORDER.length;
 }
 // 描いた結果、縦スクロールバーのぶん横にはみ出したら、その幅に合わせて描き直す
 function fitWidth(cv, f, sc, opts){

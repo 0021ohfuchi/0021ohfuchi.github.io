@@ -1416,11 +1416,11 @@ function chartOpts(wrap, maxH, extra){
 }
 // 出題中、BPM を伏せている間は譜面の中の BPM の表示も描かない
 function quizChartExtra(){ return {hideBpm: !!$('info').querySelector('.hid[data-k="bpm"]'), showFrac: chartFrac()}; }
-// オンライン対戦: 譜面は上の段から 6 回に分けて見せる（制限時間の 0・1/6・…・5/6 の時点で 1/6 ずつ）。答えたら全部見せる
+// オンライン対戦（おに）: 譜面は上の段から 6 回に分けて見せる。最初に 1/6、あとは曲の情報が自動で 1 つ開くたびに 1/6 ずつ増やす（同じタイミング）。答えたら全部見せる
 const CHART_STAGES = 6;
 // 情報と譜面を時間で少しずつ見せるのは、オンライン対戦の おに（ランダムマッチは いつも おに）だけ。かんたん〜むずかしいは最初から全部見せる
 function staged(){ return !!(game && game.online && game.mode === 'oni'); }
-function chartStage(elapsed, lim){ return Math.min(CHART_STAGES, 1 + Math.floor(elapsed / (lim / CHART_STAGES))); }
+function chartStage(elapsed, lim){ return Math.min(CHART_STAGES, 1 + Math.floor(elapsed / autoStep(lim))); }
 function chartFrac(){
   const q = game && game.q;
   if(!staged() || !q || q.done) return undefined;
@@ -1958,9 +1958,10 @@ function revealInfo(){
 // オンライン対戦: 時間が経つと伏せた情報を 1 つずつ自動で表示する（弱いヒントから順に）。
 // 間隔は制限時間の 2/15（60秒なら 8 秒ごと）で、制限時間の 8 割で全部出る
 const AUTO_ORDER = ['lv', 'genre', 'bpm', 'combo', 'work', 'ws'];
+function autoStep(lim){ return lim * 2 / 15; } // 情報を 1 つ開く間隔（譜面を増やす間隔も同じ）
 function autoReveal(elapsed, lim){
   const q = game && game.q; if(!q || q.done) return;
-  const n = Math.min(AUTO_ORDER.length, Math.floor(elapsed / (lim * 2 / 15)));
+  const n = Math.min(AUTO_ORDER.length, Math.floor(elapsed / autoStep(lim)));
   let bpm = false;
   for(const k of AUTO_ORDER.slice(0, n)){
     const d = $('info').querySelector(`.hid[data-k="${k}"]`); if(!d) continue;

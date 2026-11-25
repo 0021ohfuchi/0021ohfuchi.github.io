@@ -155,14 +155,14 @@
       'Play against other players automatically. Oni difficulty, ★8–10, 10 questions, 60 s each (starts 10 s after 2 players gather).',
     '友達と部屋コードで対戦したり、ランダムマッチで知らない人と対戦したりできます。同じ問題を同時に解いて、正解の数と答えの早さで競います（最大8人）':
       'Battle friends with a room code, or play strangers with Random match. Everyone answers the same questions at the same time and competes on correct answers and speed (up to 8 players).', 'もう一度ランダムマッチ': 'Random match again', '対戦相手を探しています…': 'Looking for opponents…',
-    '「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます。「ランダムマッチ」では知らない人と自動で対戦します（おに・1問60秒）。オンライン対戦では、曲の情報は時間が経つと1つずつ、譜面は上から6回に分けて表示されます':
-      'In "Online battle", create a room and send the code or invite link to friends to play the same questions (up to 8 players). 100 points per correct answer plus a speed bonus. The host (room creator) chooses the settings and the time per question. In "Random match" you are matched with other players automatically (Oni, 60 s per question). In online battles, song hints appear one at a time and the chart is revealed from the top in 6 steps.',
+    '「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます。「ランダムマッチ」では知らない人と自動で対戦します（おに・1問60秒）。難易度が「おに」のときは、曲の情報は時間が経つと1つずつ、譜面は上から6回に分けて表示されます':
+      'In "Online battle", create a room and send the code or invite link to friends to play the same questions (up to 8 players). 100 points per correct answer plus a speed bonus. The host (room creator) chooses the settings and the time per question. In "Random match" you are matched with other players automatically (Oni, 60 s per question). On Oni difficulty, song hints appear one at a time and the chart is revealed from the top in 6 steps.',
     'オンライン対戦': 'Online battle', '部屋を作る': 'Create room', 'または': 'or', '部屋コード': 'Room code', '参加する': 'Join', '戻る': 'Back',
     '名前': 'Name', '12文字まで': 'Up to 12 characters', '対戦ロビー': 'Lobby', '招待リンクをコピー': 'Copy invite link', 'コピーしました': 'Copied',
     '出題設定': 'Quiz settings', '1問の制限時間': 'Time per question', '出題設定を変える': 'Change settings', '部屋を出る': 'Leave room',
     '部屋に戻る': 'Back to room', 'ホスト': 'Host', 'あなた': 'You', '難易度': 'Difficulty', '問題数': 'Questions', '制限時間': 'Time limit',
-    'ほかの人と同じ問題を同時に解いて対戦します（最大8人）。正解すると100点、早く答えるほどボーナス（最大100点）がもらえます。オンライン対戦では、曲の情報は時間が経つと1つずつ、譜面は上から6回に分けて表示されます。':
-      'Answer the same questions at the same time as other players (up to 8 players). A correct answer is worth 100 points, plus a speed bonus of up to 100. In online battles, song hints appear one at a time and the chart is revealed from the top in 6 steps.',
+    'ほかの人と同じ問題を同時に解いて対戦します（最大8人）。正解すると100点、早く答えるほどボーナス（最大100点）がもらえます。難易度が「おに」のときは、曲の情報は時間が経つと1つずつ、譜面は上から6回に分けて表示されます。':
+      'Answer the same questions at the same time as other players (up to 8 players). A correct answer is worth 100 points, plus a speed bonus of up to 100. On Oni difficulty, song hints appear one at a time and the chart is revealed from the top in 6 steps.',
     '出題候補がありません。「出題設定を変える」で★の数・ジャンル・収録作品を選んでください': 'No charts match. Use "Change settings" to choose stars, genres and games.',
     'ホストがスタートするのを待っています…': 'Waiting for the host to start…', 'ホストが次へ進むのを待っています…': 'Waiting for the host to continue…',
     'ホストが次の対戦を始めるのを待っています…': 'Waiting for the host to start the next match…', 'ほかの人の回答を待っています…': 'Waiting for the others to answer…',

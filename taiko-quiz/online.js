@@ -23,11 +23,12 @@ const MAX_PLAYERS = 8, MAX_Q = 100;
 const GRACE = 1500;            // 制限時間を過ぎてから答えを出すまでの猶予(ms)。通信の遅れで回答が届くのを待つ
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 見間違えやすい I・O・0・1 は使わない
 const LIMITS = [30, 60, 90, 120, 180];
-// ランダムマッチ: 同じ難易度を選んだ人と、決まった出題設定（★8〜10・全ジャンル・海外以外の全作品・10問）で対戦する
+// ランダムマッチ: 決まった出題設定（おに・★8〜10・全ジャンル・海外以外の全作品・10問・1問60秒）で対戦する。
+// 曲の情報は時間が経つと 1 つずつ自動で表示される（index.html の autoReveal）
 const PUB_COUNT = 10, PUB_WAIT = 10000, PUB_STALE = 10*60*1000, PUB_MERGE = 3000;
 const PUB_CFG = ()=>({lv: [8, 9, 10], genre: GENRES.map(g=>g[0]), mp: true,
   worksOff: [...new Set(WORKS.filter(w=>w.kind === 'OS').map(wkey).concat(['海外の曲']))]});
-const pubLimit = mode=>mode === 'oni' ? 180 : 60;
+const PUB_MODE = 'oni', pubLimit = ()=>60;
 
 /* ---------- 通信（Firebase / 手元確認用） ---------- */
 function fbNet(){
@@ -202,8 +203,7 @@ async function pubJoin(c, name){
 }
 async function randomMatch(mode){
   if(busy) return; const name = getName(); if(!name) return;
-  mode = MODES[mode] ? mode : 'hard';
-  store.set('onlPubMode', mode);
+  mode = PUB_MODE;
   busy = true; msg('対戦相手を探しています…');
   try{
     uid = await net.init();
@@ -323,7 +323,7 @@ function ensureGame(r){
   }
   stopSong(); stopTimer();
   game = {list, pos: -1, target: list.length, all: false, history: [], ended: false, mode: MODES[r.mode] ? r.mode : 'hard', sum: r.sum || (r.set && r.set.sum) || [],
-    online: {round: r.round, limit: limitMs(r)}};
+    online: {round: r.round, limit: limitMs(r), auto: !!r.pub}};
   shownKey = '';
   return true;
 }
@@ -510,13 +510,11 @@ O.confirmLeave = function(){
   O.leave(); return true;
 };
 
-$('onlBtn').classList.toggle('hidden', !ENABLED);
+$('onlBox').classList.toggle('hidden', !ENABLED);
 $('onlBtn').onclick = O.open;
 $('onlBack').onclick = ()=>{ renderSetup(); show('scSetup'); };
 $('onlCreate').onclick = create;
-$('onlRandom').onclick = ()=>randomMatch($('onlPubMode').value);
-$('onlPubMode').innerHTML = Object.keys(MODES).map(k=>`<option value="${k}">${MODES[k].name}</option>`).join('');
-$('onlPubMode').value = store.get('onlPubMode', MODES[cfg.mode] ? cfg.mode : 'hard');
+$('onlRandom').onclick = ()=>randomMatch(PUB_MODE);
 $('onlRematch').onclick = ()=>{ const m = room && room.pub; O.leave(); O.open(); randomMatch(m); };
 $('onlJoin').onclick = ()=>join($('onlCode').value);
 $('onlCode').addEventListener('keydown', e=>{ if(e.key === 'Enter' && !e.isComposing) join($('onlCode').value); });

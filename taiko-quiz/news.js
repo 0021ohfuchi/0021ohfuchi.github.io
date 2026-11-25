@@ -3,8 +3,8 @@
 window.QUIZ_NEWS=[
  {
   "d": "2026/11/25",
-  "t": "オンライン対戦に「ランダムマッチ」を追加しました。同じ難易度を選んだ人と自動で対戦できます",
-  "en": "Added \"Random match\" to online battles. You are automatically matched with players who chose the same difficulty"
+  "t": "オンライン対戦に「ランダムマッチ」を追加しました。知らない人と自動で対戦できます",
+  "en": "Added \"Random match\" to online battles. You are automatically matched with other players"
  },
  {
   "d": "2026/11/25",

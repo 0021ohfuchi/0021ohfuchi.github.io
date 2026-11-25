@@ -23,12 +23,7 @@ const MAX_PLAYERS = 8, MAX_Q = 100;
 const GRACE = 1500;            // 制限時間を過ぎてから答えを出すまでの猶予(ms)。通信の遅れで回答が届くのを待つ
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 見間違えやすい I・O・0・1 は使わない
 const LIMITS = [30, 60, 90, 120, 180];
-// ランダムマッチ: 決まった出題設定（おに・★8〜10・全ジャンル・海外以外の全作品・10問・1問60秒）で対戦する。
-// 曲の情報と譜面は、オンライン対戦ではいつも時間が経つと少しずつ表示される（index.html の autoReveal・chartFrac）
-const PUB_COUNT = 10, PUB_WAIT = 10000, PUB_STALE = 10*60*1000, PUB_MERGE = 3000;
-const PUB_CFG = ()=>({lv: [8, 9, 10], genre: GENRES.map(g=>g[0]), mp: true,
-  worksOff: [...new Set(WORKS.filter(w=>w.kind === 'OS').map(wkey).concat(['海外の曲']))]});
-const PUB_MODE = 'oni', pubLimit = ()=>60;
+// 難易度が おに のときは、曲の情報と譜面が時間とともに少しずつ表示される（index.html の autoReveal・chartFrac）
 
 /* ---------- 通信（Firebase / 手元確認用） ---------- */
 function fbNet(){
@@ -141,28 +136,17 @@ function uniquePool(){ // 同じ曲（表・裏など）は 1 回の対戦で 1 
   for(const r of pool()){ const k = keyOf(baseName(r)); if(seen.has(k)) continue; seen.add(k); list.push(r); }
   return list;
 }
-// cfg の一部を一時的に差し替えて fn を呼ぶ（ランダムマッチの決まった出題設定で pool() や要約を作るため）
-function withCfg(over, fn){ const keep = {}; for(const k in over){ keep[k] = cfg[k]; cfg[k] = over[k]; } try{ return fn(); }finally{ Object.assign(cfg, keep); } }
-// 出題設定はホストのトップ画面のものを使う（ランダムマッチは決まった設定）。ロビーに出すために部屋にも書いておく
-function pubSet(mode){ return withCfg(PUB_CFG(), ()=>({mode, count: PUB_COUNT, n: uniquePool().length, sum: settingsSummary()})); }
-function hostSet(){
-  if(room && room.pub) return pubSet(room.pub);
-  return {mode: MODES[cfg.mode] ? cfg.mode : 'hard', count: Math.min(cfg.count || MAX_Q, MAX_Q), n: uniquePool().length, sum: settingsSummary()};
-}
-function hostPool(){ return room && room.pub ? withCfg(PUB_CFG(), uniquePool) : uniquePool(); }
+// 出題設定はホストのトップ画面のものを使う。ロビーに出すために部屋にも書いておく
+function hostSet(){ return {mode: MODES[cfg.mode] ? cfg.mode : 'hard', count: Math.min(cfg.count || MAX_Q, MAX_Q), n: uniquePool().length, sum: settingsSummary()}; }
 function randCode(){ const a = new Uint32Array(6); crypto.getRandomValues(a); return [...a].map(x=>CODE_CHARS[x % CODE_CHARS.length]).join(''); }
 
-// 部屋を作る。pub に難易度を渡すとランダムマッチの待ち部屋になる
-async function makeRoom(name, pub){
+async function makeRoom(name){
   let c = '';
   for(let i = 0; i < 6; i++){ c = randCode(); if(await net.get('rooms/' + c + '/host') == null) break; c = ''; }
   if(!c) throw new Error('code');
   const lim = +store.get('onlLimit', 60);
-  const r = {host: uid, created: net.TS(), state: 'lobby', round: 0, limit: pub ? pubLimit(pub) : LIMITS.includes(lim) ? lim : 60,
-    set: pub ? pubSet(pub) : hostSet(), players: {[uid]: {name, joined: net.TS(), on: true}}};
-  if(pub) r.pub = pub;
-  await net.set('rooms/' + c, r);
-  if(pub) await pubEntry(c, pub, 1, await net.get('rooms/' + c + '/created')); // 一覧の時刻は部屋を作った時刻と同じにする
+  await net.set('rooms/' + c, {host: uid, created: net.TS(), state: 'lobby', round: 0, limit: LIMITS.includes(lim) ? lim : 60, set: hostSet(),
+    players: {[uid]: {name, joined: net.TS(), on: true}}});
   return c;
 }
 async function create(){
@@ -172,79 +156,6 @@ async function create(){
   busy = false;
 }
 
-/* ---------- ランダムマッチ ---------- */
-// 待ち部屋の一覧（lobby/<難易度>/<部屋コード> = {n: 人数, t: 作った時刻}）。部屋を作った人（ホスト）だけが書く
-const pubPath = (mode, c)=>'lobby/' + mode + '/' + c;
-let pubReg = '';   // onDisconnect で消すように登録した一覧の場所
-let pubN = -1;     // 一覧に書いた人数
-async function pubEntry(c, mode, n, t){
-  const p = pubPath(mode, c);
-  await net.set(p, {n, t});
-  if(pubReg !== p){ pubReg = p; net.onDisc(p, null); } // 回線が切れたら一覧から消す
-  pubN = n;
-}
-function pubRemove(){
-  if(!pubReg) return;
-  const p = pubReg; pubReg = ''; pubN = -1;
-  net.offDisc(p); net.set(p, null).catch(()=>{});
-}
-// 入れる待ち部屋を古い順に
-async function pubFind(mode, except){
-  const L = await net.get('lobby/' + mode) || {}, now = net.now();
-  return Object.keys(L).filter(c=>c !== except && L[c] && L[c].n < MAX_PLAYERS && now - (L[c].t || 0) < PUB_STALE)
-    .sort((a, b)=>(L[a].t - L[b].t) || (a < b ? -1 : 1)).map(c=>({c, t: L[c].t}));
-}
-async function pubJoin(c, name){
-  const r = await net.get('rooms/' + c);
-  if(!r || !r.pub || r.state !== 'lobby' || onlineUids(r).length >= MAX_PLAYERS) return false;
-  await net.update('rooms/' + c + '/players/' + uid, {name, on: true, joined: net.TS()});
-  enter(c);
-  return true;
-}
-async function randomMatch(mode){
-  if(busy) return; const name = getName(); if(!name) return;
-  mode = PUB_MODE;
-  busy = true; msg('対戦相手を探しています…');
-  try{
-    uid = await net.init();
-    let ok = false;
-    for(const x of (await pubFind(mode)).slice(0, 5)) if(ok = await pubJoin(x.c, name)) break;
-    if(!ok) enter(await makeRoom(name, mode));
-  }catch(e){ fail(e); }
-  busy = false;
-}
-// 1人で待っているホストは、もっと前からある待ち部屋を見つけたらそちらに移る（同時に探し始めた2人が別々に待ち続けないように）
-let mergeAt = 0, merging = false;
-async function pubMerge(){
-  if(merging || net.now() < mergeAt) return;
-  mergeAt = net.now() + PUB_MERGE;
-  const mode = room.pub, mine = code, t0 = room.created;
-  merging = true;
-  try{
-    const older = (await pubFind(mode, mine)).filter(x=>x.t < t0 || (x.t === t0 && x.c < mine));
-    if(!older.length || code !== mine || !room || room.state !== 'lobby' || onlineUids(room).length > 1) return;
-    const name = (players(room)[uid] || {}).name || store.get('onlName', '');
-    pubRemove();
-    closeRoom();
-    net.set('rooms/' + mine, null).catch(()=>{}); // 自分しかいない部屋は消す
-    for(const x of older.slice(0, 5)) if(await pubJoin(x.c, name)) return;
-    enter(await makeRoom(name, mode)); // 入れなかったら、また待ち部屋を作る
-  }catch(e){ console.error(e); }
-  finally{ merging = false; }
-}
-// ホストの仕事（ロビー）: 一覧の人数を合わせ、2人以上そろったら少し待って自動で始める
-function pubHost(){
-  const on = onlineUids(room).length;
-  if(pubN !== on || !pubReg) pubEntry(code, room.pub, on, room.created).catch(()=>{});
-  if(on < 2){ if(room.startAt) net.update(path(), {startAt: null}).catch(()=>{}); pubMerge(); return; }
-  if(!room.startAt){ room.startAt = net.now() + PUB_WAIT; net.update(path(), {startAt: room.startAt}).catch(()=>{}); return; }
-  if(on >= MAX_PLAYERS || net.now() >= room.startAt) start();
-}
-function pubWaitText(){
-  if(!room || !room.pub || room.state !== 'lobby') return;
-  const left = room.startAt ? Math.max(0, Math.ceil((room.startAt - net.now()) / 1000)) : -1;
-  $('onlWaitHost').textContent = left >= 0 ? `まもなく開始します（${left}秒）` : '対戦相手を探しています…';
-}
 async function join(c){
   if(busy) return;
   c = String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -273,7 +184,6 @@ function enter(c){
   unsub.push((t=>()=>clearInterval(t))(setInterval(hostCheck, 500)));
 }
 function closeRoom(){ // この画面側の後片付け（部屋そのものは残る）
-  pubRemove();
   unsub.forEach(f=>f()); unsub = [];
   code = null; room = null; shownKey = ''; away = false;
   setUrl('');
@@ -408,7 +318,6 @@ function advance(qi, end){
 }
 // ホストの仕事: 全員が答えたか、制限時間を過ぎたら、答えを出す段階に進める
 function hostCheck(){
-  if(code && room && room.pub && room.state === 'lobby'){ pubWaitText(); if(isHost()) pubHost(); return; }
   if(!code || !isHost() || room.state !== 'play' || room.phase !== 'q' || !room.qt) return;
   const on = onlineUids(room), a = ansOf(room, room.qi);
   if((on.length && on.every(u=>a[u])) || net.now() > room.qt + limitMs(room) + GRACE){
@@ -453,30 +362,24 @@ O.renderEnd = function(){
   const list = scores(room), host = isHost();
   $('onlRank').innerHTML = list.map(e=>`<div class="onl-rrow${e.u === uid ? ' me' : ''}${e.rank === 1 ? ' top' : ''}"><b class="rk">${e.rank}</b>${nameHTML(e.name)}` +
     `<span class="ok"><span>正解</span> ${e.ok}</span><span class="sc">${e.score}<small>点</small></span></div>`).join('');
-  // ランダムマッチは部屋に戻らず、それぞれが次の相手を探す
-  $('onlAgain').classList.toggle('hidden', !host || !!room.pub);
-  $('onlEndNote').classList.toggle('hidden', host || !!room.pub);
-  $('onlRematch').classList.toggle('hidden', !room.pub);
+  $('onlAgain').classList.toggle('hidden', !host);
+  $('onlEndNote').classList.toggle('hidden', host);
 };
 
 /* ---------- ロビー ---------- */
 function renderLobby(){
   const r = room, ps = players(r), on = onlineUids(r), host = isHost(), s = r.set || {};
-  const pub = !!r.pub;
   $('onlCodeShow').textContent = code;
-  $('onlCodeBox').classList.toggle('hidden', pub);
-  $('onlLobbyTitle').textContent = pub ? 'ランダムマッチ' : '対戦ロビー';
   $('onlCount').textContent = `参加者（${on.length}/${MAX_PLAYERS}）`;
   $('onlPlayers').innerHTML = on.map(u=>`<span class="onl-chip${u === uid ? ' me' : ''}">${nameHTML(ps[u].name)}${u === r.host ? '<span class="tag">ホスト</span>' : ''}${u === uid ? '<span class="tag you">あなた</span>' : ''}</span>`).join('');
   const mode = MODES[s.mode] || MODES.hard;
   $('onlSet').innerHTML = `<span><i>難易度</i><b class="mode-tag ${mode.cls}">${mode.name}</b></span><span><i>問題数</i><span>${Math.min(s.count || 0, s.n || 0)}問</span></span>` +
     (host ? '' : `<span><i>制限時間</i><span>${r.limit}秒</span></span>`) +
     (s.sum || []).map(([k, v])=>`<span><i>${esc(k)}</i><span>${esc(v)}</span></span>`).join('');
-  $('onlHost').classList.toggle('hidden', !host || pub);
-  $('onlStart').classList.toggle('hidden', !host || pub);
+  $('onlHost').classList.toggle('hidden', !host);
+  $('onlStart').classList.toggle('hidden', !host);
   $('onlStart').disabled = !(s.n > 0);
-  $('onlWaitHost').classList.toggle('hidden', host && !pub);
-  if(pub) pubWaitText(); else $('onlWaitHost').textContent = 'ホストがスタートするのを待っています…';
+  $('onlWaitHost').classList.toggle('hidden', host);
   $('onlNoPool').classList.toggle('hidden', !host || s.n > 0);
   if(host) $('onlLimit').value = String(r.limit);
   // ホストを引き継いだときは、自分の出題設定を出しておく
@@ -484,10 +387,9 @@ function renderLobby(){
 }
 function start(){
   if(!isHost() || room.state !== 'lobby') return;
-  const s = hostSet(), list = shuffle(hostPool()).slice(0, s.count).map(r=>r.ch);
-  if(room.pub) pubRemove(); // 始まったら待ち部屋の一覧から消す
+  const s = hostSet(), list = shuffle(uniquePool()).slice(0, s.count).map(r=>r.ch);
   if(!list.length) return;
-  net.update(path(), {state: 'play', round: (room.round || 0) + 1, list, mode: s.mode, sum: s.sum, set: s, qi: 0, phase: 'q', qt: net.TS(), ans: null, n: null, startAt: null}).catch(fail);
+  net.update(path(), {state: 'play', round: (room.round || 0) + 1, list, mode: s.mode, sum: s.sum, set: s, qi: 0, phase: 'q', qt: net.TS(), ans: null, n: null}).catch(fail);
 }
 
 /* ---------- 画面 ---------- */
@@ -514,8 +416,6 @@ $('onlBox').classList.toggle('hidden', !ENABLED);
 $('onlBtn').onclick = O.open;
 $('onlBack').onclick = ()=>{ renderSetup(); show('scSetup'); };
 $('onlCreate').onclick = create;
-$('onlRandom').onclick = ()=>randomMatch(PUB_MODE);
-$('onlRematch').onclick = ()=>{ const m = room && room.pub; O.leave(); O.open(); randomMatch(m); };
 $('onlJoin').onclick = ()=>join($('onlCode').value);
 $('onlCode').addEventListener('keydown', e=>{ if(e.key === 'Enter' && !e.isComposing) join($('onlCode').value); });
 $('onlCode').addEventListener('input', ()=>{ const v = $('onlCode').value.toUpperCase().replace(/[^A-Z0-9]/g, ''); if(v !== $('onlCode').value) $('onlCode').value = v; });

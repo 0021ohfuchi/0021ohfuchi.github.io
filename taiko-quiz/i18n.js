@@ -145,18 +145,15 @@
     '曲データ（data.js）を読み込めませんでした。そのため作品・譜面が表示されません。ダウンロードしたファイルを直接開くと読み込めないことがあります（特にスマホ）。公開ページ（GitHub Pages など）か、パソコンの start_server.bat から開いてください。':
       'Could not load the song data (data.js). Open the published page, or start_server.bat on a PC.',
     // オンライン対戦
-    'オンライン対戦を追加しました。「部屋コードで対戦」では部屋コードを教え合って友達と、「ランダムマッチ」では知らない人と自動で、同じ問題を解いて得点を競えます（最大8人）': 'Added online battles. Play the same questions and compete for points with friends using a room code, or with other players via Random match (up to 8 players)',
-    'オンライン対戦（部屋コードで対戦・ランダムマッチ）を追加しました': 'Added online battles (room code battles and Random match)',
-    'ランダムマッチ': 'Random match',
+    'オンライン対戦を追加しました。部屋コードを教え合って、友達と同じ問題を解いて得点を競えます（最大8人）': 'Added online battles. Share a room code to play the same questions with friends and compete for points (up to 8 players)',
+    'オンライン対戦（部屋コードで対戦）を追加しました': 'Added online battles (room code battles)',
     'あなたの名前': 'Your name', '対戦中にほかの人に表示されます': 'Shown to other players during the battle', '遊び方を選ぶ': 'Choose how to play',
     '友達と対戦': 'Play with friends', '部屋を作って、部屋コードを友達に教えます。出題設定と制限時間はあなたが決めます': 'Create a room and share the room code with your friends. You choose the quiz settings and time limit.',
     '部屋コードで参加': 'Join with a room code', '友達から教えてもらった6文字の部屋コードを入力します': 'Enter the 6-character room code you got from a friend', '時間で表示': 'Shown later',
-    '知らない人と自動で対戦します。難易度は「おに」、★8〜10・10問・1問60秒（2人そろうと10秒後に開始）':
-      'Play against other players automatically. Oni difficulty, ★8–10, 10 questions, 60 s each (starts 10 s after 2 players gather).',
-    '友達と部屋コードで対戦したり、ランダムマッチで知らない人と対戦したりできます。同じ問題を同時に解いて、正解の数と答えの早さで競います（最大8人）':
-      'Battle friends with a room code, or play strangers with Random match. Everyone answers the same questions at the same time and competes on correct answers and speed (up to 8 players).', 'もう一度ランダムマッチ': 'Random match again', '対戦相手を探しています…': 'Looking for opponents…',
-    '「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます。「ランダムマッチ」では知らない人と自動で対戦します（おに・1問60秒）。難易度が「おに」のときは、曲の情報は時間が経つと1つずつ、譜面は情報が開くたびに上から少しずつ表示されます':
-      'In "Online battle", create a room and send the code or invite link to friends to play the same questions (up to 8 players). 100 points per correct answer plus a speed bonus. The host (room creator) chooses the settings and the time per question. In "Random match" you are matched with other players automatically (Oni, 60 s per question). On Oni difficulty, song hints appear one at a time and the chart is revealed little by little from the top as each hint opens.',
+    '部屋コードを教え合って、友達と対戦できます。同じ問題を同時に解いて、正解の数と答えの早さで競います（最大8人）':
+      'Battle friends by sharing a room code. Everyone answers the same questions at the same time and competes on correct answers and speed (up to 8 players).',
+    '「オンライン対戦」では、部屋を作って部屋コードか招待リンクを友達に送ると、同じ問題で対戦できます（最大8人）。正解で100点＋早く答えるほどボーナス。出題設定と1問の制限時間はホスト（部屋を作った人）が決めます。難易度が「おに」のときは、曲の情報は時間が経つと1つずつ、譜面は情報が開くたびに上から少しずつ表示されます':
+      'In "Online battle", create a room and send the code or invite link to friends to play the same questions (up to 8 players). 100 points per correct answer plus a speed bonus. The host (room creator) chooses the settings and the time per question. On Oni difficulty, song hints appear one at a time and the chart is revealed little by little from the top as each hint opens.',
     'オンライン対戦': 'Online battle', '部屋を作る': 'Create room', 'または': 'or', '部屋コード': 'Room code', '参加する': 'Join', '戻る': 'Back',
     '名前': 'Name', '12文字まで': 'Up to 12 characters', '対戦ロビー': 'Lobby', '招待リンクをコピー': 'Copy invite link', 'コピーしました': 'Copied',
     '出題設定': 'Quiz settings', '1問の制限時間': 'Time per question', '出題設定を変える': 'Change settings', '部屋を出る': 'Leave room',
@@ -182,7 +179,6 @@
     [/^参加者（(\d+)\/(\d+)）$/, 'Players ($1/$2)'],
     [/^部屋 (\w+) に参加中$/, 'In room $1'],
     [/^次の情報まで あと(\d+)秒$/, 'Next hint in $1s'],
-    [/^まもなく開始します（(\d+)秒）$/, 'Starting in $1 s'],
     [/^(\d+)問$/, '$1'],
     [/^(\d+)秒$/, '$1s'],
     [/^\+(\d+)点$/, '+$1 pts'],

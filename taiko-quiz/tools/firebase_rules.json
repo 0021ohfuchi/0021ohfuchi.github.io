@@ -2,16 +2,6 @@
   "rules": {
     ".read": false,
     ".write": false,
-    "lobby": {
-      "$mode": {
-        ".read": "auth != null",
-        ".validate": "$mode.matches(/^(easy|normal|hard|oni)$/)",
-        "$code": {
-          ".write": "auth != null && root.child('rooms').child($code).child('host').val() === auth.uid",
-          ".validate": "newData.hasChildren(['n', 't']) && newData.child('n').isNumber() && newData.child('t').isNumber()"
-        }
-      }
-    },
     "rooms": {
       "$code": {
         ".read": "auth != null",
@@ -23,10 +13,18 @@
         "players": {
           "$uid": {
             ".write": "auth != null && $uid === auth.uid",
-            "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 12" },
-            "on": { ".validate": "newData.isBoolean()" },
-            "joined": { ".validate": "newData.isNumber()" },
-            "$other": { ".validate": false }
+            "name": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 12"
+            },
+            "on": {
+              ".validate": "newData.isBoolean()"
+            },
+            "joined": {
+              ".validate": "newData.isNumber()"
+            },
+            "$other": {
+              ".validate": false
+            }
           }
         },
         "ans": {
@@ -34,11 +32,21 @@
             "$uid": {
               ".write": "auth != null && $uid === auth.uid && !data.exists() && data.parent().parent().parent().child('state').val() === 'play' && 'q' + data.parent().parent().parent().child('qi').val() === $q && data.parent().parent().parent().child('phase').val() === 'q'",
               ".validate": "newData.hasChildren(['ok', 'ms']) && newData.child('ok').isBoolean() && newData.child('ms').isNumber()",
-              "a": { ".validate": "newData.isString() && newData.val().length <= 60" },
-              "to": { ".validate": "newData.isBoolean()" },
-              "ok": { ".validate": true },
-              "ms": { ".validate": true },
-              "$other": { ".validate": false }
+              "a": {
+                ".validate": "newData.isString() && newData.val().length <= 60"
+              },
+              "to": {
+                ".validate": "newData.isBoolean()"
+              },
+              "ok": {
+                ".validate": true
+              },
+              "ms": {
+                ".validate": true
+              },
+              "$other": {
+                ".validate": false
+              }
             }
           }
         }

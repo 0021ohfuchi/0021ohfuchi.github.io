@@ -3,8 +3,8 @@
 window.QUIZ_NEWS=[
  {
   "d": "2026/11/25",
-  "t": "オンライン対戦を追加しました。「部屋コードで対戦」では部屋コードを教え合って友達と、「ランダムマッチ」では知らない人と自動で、同じ問題を解いて得点を競えます（最大8人）",
-  "en": "Added online battles. Play the same questions and compete for points with friends using a room code, or with other players via Random match (up to 8 players)"
+  "t": "オンライン対戦を追加しました。部屋コードを教え合って、友達と同じ問題を解いて得点を競えます（最大8人）",
+  "en": "Added online battles. Share a room code to play the same questions with friends and compete for points (up to 8 players)"
  },
  {
   "d": "2026/11/24",

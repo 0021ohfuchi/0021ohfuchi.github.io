@@ -9,7 +9,7 @@
 <title>譜面を見て当てろ！ 太鼓の達人 曲当てクイズ</title>
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<script src="i18n.js?v=20261125h"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
+<script src="i18n.js?v=20261125i"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
@@ -377,6 +377,12 @@ button.onl-open{background:#8a4fd8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.
 .onl-input{width:100%;font:inherit;font-weight:700;font-size:18px;padding:9px 18px;border-radius:999px;border:3px solid var(--line);background:#fff;color:var(--text);outline:none}
 .onl-input:focus{border-color:var(--ka);box-shadow:0 0 0 4px rgba(47,184,232,.2)}
 #onlCode{text-transform:uppercase;letter-spacing:.25em;font-family:ui-monospace,Consolas,monospace;flex:1;min-width:0;max-width:12em}
+.onl-namebox{background:#fff3c4;border-radius:18px;padding:12px 16px 14px}
+.onl-head{font-weight:800;font-size:16px;margin-top:6px;padding-top:14px;border-top:3px dashed #e8cfa8}
+.onl-opt{border:3px solid var(--line);border-radius:18px;padding:12px 16px 14px;background:#fff}
+.onl-opt .t{font-weight:800;font-size:17px}
+.onl-opt p.muted{margin:2px 0 10px}
+.onl-opt>button{width:100%}
 .onl-or{text-align:center;color:var(--sub);font-weight:800;font-size:13px}
 .onl-msg{min-height:1.5em;text-align:center;font-weight:700;color:var(--don-d)}
 .onl-codebox{text-align:center;background:#fff3c4;border-radius:18px;padding:10px 12px 12px;margin-bottom:14px}
@@ -554,16 +560,22 @@ button.onl-open{background:#8a4fd8;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.
 <section id="scOnline" class="hidden">
   <div class="card onl-card" id="onlEntry">
     <h2>オンライン対戦</h2>
-    <p class="muted" style="margin-top:0">部屋を作って部屋コードを友達に教えると、同じ問題で対戦できます（最大8人）。正解すると100点、早く答えるほどボーナス（最大100点）がもらえます。オンライン対戦では、曲の情報は時間が経つと1つずつ、譜面は上から6回に分けて表示されます。</p>
+    <p class="muted" style="margin-top:0">ほかの人と同じ問題を同時に解いて対戦します（最大8人）。正解すると100点、早く答えるほどボーナス（最大100点）がもらえます。オンライン対戦では、曲の情報は時間が経つと1つずつ、譜面は上から6回に分けて表示されます。</p>
     <div class="onl-form">
-      <div><label for="onlName">名前</label><input class="onl-input" id="onlName" maxlength="12" autocomplete="nickname" placeholder="12文字まで"></div>
-      <button class="primary big" id="onlCreate">部屋を作る</button>
-      <div class="onl-or">または</div>
-      <div><label for="onlCode">部屋コード</label>
-        <div class="row"><input class="onl-input" id="onlCode" maxlength="6" autocomplete="off" placeholder="ABC123"><button class="blue" id="onlJoin">参加する</button></div></div>
-      <div class="onl-or">または</div>
-      <div><button class="primary big" id="onlRandom" style="width:100%">ランダムマッチ</button>
-        <p class="muted" style="margin:6px 0 0">知らない人と自動で対戦します。難易度は「おに」、★8〜10・10問・1問60秒（2人そろうと10秒後に開始）</p></div>
+      <!-- 名前（どの遊び方でも使う）は、遊び方のボタンとは別の欄にする -->
+      <div class="onl-namebox"><label for="onlName">あなたの名前</label>
+        <input class="onl-input" id="onlName" maxlength="12" autocomplete="nickname" placeholder="12文字まで">
+        <p class="muted" style="margin:6px 0 0">対戦中にほかの人に表示されます</p></div>
+      <div class="onl-head">遊び方を選ぶ</div>
+      <div class="onl-opt"><div class="t">友達と対戦</div>
+        <p class="muted">部屋を作って、部屋コードを友達に教えます。出題設定と制限時間はあなたが決めます</p>
+        <button class="primary" id="onlCreate">部屋を作る</button></div>
+      <div class="onl-opt"><div class="t">部屋コードで参加</div>
+        <p class="muted">友達から教えてもらった6文字の部屋コードを入力します</p>
+        <div class="row"><input class="onl-input" id="onlCode" maxlength="6" autocomplete="off" placeholder="ABC123" aria-label="部屋コード"><button class="blue" id="onlJoin">参加する</button></div></div>
+      <div class="onl-opt"><div class="t">ランダムマッチ</div>
+        <p class="muted">知らない人と自動で対戦します。難易度は「おに」、★8〜10・10問・1問60秒（2人そろうと10秒後に開始）</p>
+        <button class="primary" id="onlRandom">ランダムマッチ</button></div>
       <div class="onl-msg" id="onlMsg"></div>
       <div style="text-align:center"><button id="onlBack">戻る</button></div>
     </div>

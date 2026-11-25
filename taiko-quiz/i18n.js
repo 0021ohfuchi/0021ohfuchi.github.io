@@ -148,7 +148,10 @@
     'オンライン対戦に「ランダムマッチ」を追加しました。知らない人と自動で対戦できます': 'Added "Random match" to online battles. You are automatically matched with other players',
     'オンライン対戦に「ランダムマッチ」を追加しました': 'Added "Random match" to online battles',
     'オンライン対戦で、曲の情報が時間とともに1つずつ、譜面が上から6回に分けて表示されるようにしました': 'In online battles, song hints now appear one at a time and the chart is revealed from the top in 6 steps',
-    'ランダムマッチ': 'Random match', '時間で表示': 'Shown later',
+    'ランダムマッチ': 'Random match',
+    'あなたの名前': 'Your name', '対戦中にほかの人に表示されます': 'Shown to other players during the battle', '遊び方を選ぶ': 'Choose how to play',
+    '友達と対戦': 'Play with friends', '部屋を作って、部屋コードを友達に教えます。出題設定と制限時間はあなたが決めます': 'Create a room and share the room code with your friends. You choose the quiz settings and time limit.',
+    '部屋コードで参加': 'Join with a room code', '友達から教えてもらった6文字の部屋コードを入力します': 'Enter the 6-character room code you got from a friend', '時間で表示': 'Shown later',
     '知らない人と自動で対戦します。難易度は「おに」、★8〜10・10問・1問60秒（2人そろうと10秒後に開始）':
       'Play against other players automatically. Oni difficulty, ★8–10, 10 questions, 60 s each (starts 10 s after 2 players gather).',
     '友達と部屋コードで対戦したり、ランダムマッチで知らない人と対戦したりできます。同じ問題を同時に解いて、正解の数と答えの早さで競います（最大8人）':
@@ -161,8 +164,8 @@
     '名前': 'Name', '12文字まで': 'Up to 12 characters', '対戦ロビー': 'Lobby', '招待リンクをコピー': 'Copy invite link', 'コピーしました': 'Copied',
     '出題設定': 'Quiz settings', '1問の制限時間': 'Time per question', '出題設定を変える': 'Change settings', '部屋を出る': 'Leave room',
     '部屋に戻る': 'Back to room', 'ホスト': 'Host', 'あなた': 'You', '難易度': 'Difficulty', '問題数': 'Questions', '制限時間': 'Time limit',
-    '部屋を作って部屋コードを友達に教えると、同じ問題で対戦できます（最大8人）。正解すると100点、早く答えるほどボーナス（最大100点）がもらえます。オンライン対戦では、曲の情報は時間が経つと1つずつ、譜面は上から6回に分けて表示されます。':
-      'Create a room and share the code with friends to play the same questions (up to 8 players). A correct answer is worth 100 points, plus a speed bonus of up to 100. In online battles, song hints appear one at a time and the chart is revealed from the top in 6 steps.',
+    'ほかの人と同じ問題を同時に解いて対戦します（最大8人）。正解すると100点、早く答えるほどボーナス（最大100点）がもらえます。オンライン対戦では、曲の情報は時間が経つと1つずつ、譜面は上から6回に分けて表示されます。':
+      'Answer the same questions at the same time as other players (up to 8 players). A correct answer is worth 100 points, plus a speed bonus of up to 100. In online battles, song hints appear one at a time and the chart is revealed from the top in 6 steps.',
     '出題候補がありません。「出題設定を変える」で★の数・ジャンル・収録作品を選んでください': 'No charts match. Use "Change settings" to choose stars, genres and games.',
     'ホストがスタートするのを待っています…': 'Waiting for the host to start…', 'ホストが次へ進むのを待っています…': 'Waiting for the host to continue…',
     'ホストが次の対戦を始めるのを待っています…': 'Waiting for the host to start the next match…', 'ほかの人の回答を待っています…': 'Waiting for the others to answer…',

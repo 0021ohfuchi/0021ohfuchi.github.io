@@ -1,6 +1,15 @@
 // 自動生成: scripts/fetch_youtube.py（YouTube の最新動画。新しいものが先頭。short: ショートかどうか）
 window.LATEST_VIDEOS=[
  {
+  "id": "H-4hQmQZ5cs",
+  "title": "好きすぎて滅！ (裏譜面) 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人",
+  "desc": "★×9 658コンボ 2026年11月26日に追加された楽曲 流行りの曲を太鼓の達人で初めて聴く、ということをよくやるのですが、この曲も今日初めて聴きました… 難易度は★×8でもいいくらいに感じます",
+  "title_en": "Sukisugite METSU! (Ura) [Taiko no Tatsujin: Rhythm Festival] #keyboard",
+  "desc_en": "★×9 658 combo Songs added on November 26, 2026 I often hear popular songs for the first time while playing \"Taiko no Tatsujin\", and I heard this one for the fir",
+  "date": "2026/11/25",
+  "short": false
+ },
+ {
   "id": "z2mpHKIOvQQ",
   "title": "Let's貢献! ～恋の懲役は1,000,000年～ （裏譜面） 全良【太鼓の達人 Vバージョン】",
   "desc": "★×8 536コンボ キャプチャはVitaUSBStreamを使用",
@@ -78,15 +87,6 @@ window.LATEST_VIDEOS=[
   "desc": "★×9 563コンボ 2026年11月19日に追加された楽曲 先週の追加楽曲が「女々しくて」だったのはこの曲の伏線、ということだったんですね…！ 曲調的に裏の高難易度譜面がありそうですが、表譜面だけのようです 倍速に見える高速地帯は、実際は低速地帯よりもBPMが速く（BPM 134の等速＆BPM288の等速）、同じリズ",
   "title_en": "Kimi wa doko? / GOLDEN BOMBER (Oni) [Taiko no Tatsujin: Rhythm Festival] #keyboard",
   "desc_en": "★×9 563 combo Songs added on November 19, 2026 So last week’s added song, “Memeshikute” was actually a setup for this one…! Given the song’s style, you’d expect",
-  "date": "2026/11/19",
-  "short": false
- },
- {
-  "id": "9orSLYOrPl4",
-  "title": "クルクルクロックル 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人",
-  "desc": "★×8 615コンボ 2026年11月19日に追加された楽曲 ラスト16小節がだんだん何叩いてるか分からなくなる… 難所を切り抜けたらまた難所、とひたすら続くので集中力が必要でした",
-  "title_en": "KURU KURU KUROKKURU (Oni) [Taiko no Tatsujin: Rhythm Festival] #keyboard",
-  "desc_en": "★×8 615 combo Songs added on November 19, 2026",
   "date": "2026/11/19",
   "short": false
  },

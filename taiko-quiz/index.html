@@ -9,7 +9,7 @@
 <title>譜面を見て当てろ！ 太鼓の達人 曲当てクイズ</title>
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<script src="i18n.js?v=20261125l"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
+<script src="i18n.js?v=20261125m"></script><!-- 日本語 / 英語の切り替え（英語のときは画面の文言を置き換える） -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
@@ -1228,7 +1228,7 @@ function nextQ(){
   if(choice) renderChoices(r);
   // 難易度の印と、おにの残り時間
   $('qScore').innerHTML = `<span class="mode-tag ${MODES[game.mode].cls}">${MODES[game.mode].name}</span>` +
-    (OPEN_LIMIT[game.mode] && !game.online ? ' <span class="open-left" id="openLeft"></span>' : '') + (game.mode==='oni' || game.online ? ' <span class="timer" id="timer"></span>' : '');
+    (OPEN_LIMIT[game.mode] && !game.online ? ' <span class="open-left" id="openLeft"></span>' : '') + (staged() ? ' <span class="open-left" id="nextHint"></span>' : '') + (game.mode==='oni' || game.online ? ' <span class="timer" id="timer"></span>' : '');
   updateOpenLeft();
   $('info').classList.toggle('auto-only', !!game.online);
   if(game.online) $('info').querySelectorAll('.hid .mask').forEach(m=>m.textContent='時間で表示');
@@ -1319,6 +1319,7 @@ function startTimer(){
     if(el){ el.textContent = `残り ${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,'0')}`; el.classList.toggle('low', left < (lim <= 60000 ? 10000 : 30000)); }
     if(staged()){
       autoReveal(lim - left, lim);
+      updateNextHint(lim - left, lim);
       const st = chartStage(lim - left, lim); if(st !== q.stage){ q.stage = st; redrawQuizChart(); } // 譜面を見せる段を増やす
     }
     if(left <= 0){ stopTimer(); finishQ(false, '時間切れ…'); }
@@ -1957,20 +1958,33 @@ function revealInfo(){
   if(hadBpm) redrawQuizChart();
 }
 // オンライン対戦: 時間が経つと伏せた情報を 1 つずつ自動で表示する（弱いヒントから順に）。
-// 間隔は制限時間の 2/15（60秒なら 8 秒ごと）で、制限時間の 8 割で全部出る
+// 間隔は制限時間の 2/15（60秒なら 8 秒ごと）で、制限時間の 8 割で全部出る。開く順番は問題ごとにランダム
 const AUTO_ORDER = ['lv', 'genre', 'bpm', 'combo', 'work', 'ws'];
 function autoStep(lim){ return lim * 2 / 15; } // 情報を 1 つ開く間隔（譜面を増やす間隔も同じ）
+// 開く順番は問題ごとにランダム（部屋・回・問題番号から決めるので、全員同じ順番になる）
+function autoOrder(){
+  const q = game.q;
+  if(!q.autoOrder) q.autoOrder = shuffle(AUTO_ORDER.slice(), window.ONL ? ONL.rng('hint') : Math.random);
+  return q.autoOrder;
+}
 function autoReveal(elapsed, lim){
   const q = game && game.q; if(!q || q.done) return;
   const n = Math.min(AUTO_ORDER.length, Math.floor(elapsed / autoStep(lim)));
   let bpm = false;
-  for(const k of AUTO_ORDER.slice(0, n)){
+  for(const k of autoOrder().slice(0, n)){
     const d = $('info').querySelector(`.hid[data-k="${k}"]`); if(!d) continue;
     d.classList.remove('hid'); q.shown.add(k);
     d.classList.add('auto'); setTimeout(()=>d.classList.remove('auto'), 700);
     if(k === 'bpm') bpm = true;
   }
   if(bpm) redrawQuizChart();
+}
+// 「次の情報まで あと○秒」（全部開いたら消す）
+function updateNextHint(elapsed, lim){
+  const el = $('nextHint'); if(!el) return;
+  const step = autoStep(lim), n = Math.floor(elapsed / step);
+  if(n >= AUTO_ORDER.length){ el.remove(); return; }
+  el.textContent = `次の情報まで あと${Math.max(1, Math.ceil(((n + 1) * step - elapsed) / 1000))}秒`;
 }
 function redrawQuizChart(){ if(game && game.q && game.q.redraw) game.q.redraw(); }
 
@@ -2390,5 +2404,5 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('helpModal').cla
 renderSetup();
 show('scSetup');
 </script>
-<script src="online.js?v=20261125d"></script><!-- オンライン対戦（部屋コード）。変更したら v を変える -->
+<script src="online.js?v=20261125e"></script><!-- オンライン対戦（部屋コード）。変更したら v を変える -->
 </body>

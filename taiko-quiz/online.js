@@ -126,7 +126,7 @@ function seeded(str){
   let a = h >>> 0;
   return ()=>{ a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 }
-O.rng = ()=>seeded(code + ':' + (room && room.round) + ':' + (game ? game.pos : 0));
+O.rng = tag=>seeded(code + ':' + (room && room.round) + ':' + (game ? game.pos : 0) + (tag ? ':' + tag : '')); // tag: 使い道ごとに別の並びにする
 O.elapsed = ()=>room && room.qt ? Math.max(0, net.now() - room.qt) : 0; // いまの問題が出てからの時間(ms)
 
 /* ---------- 部屋を作る・入る・出る ---------- */

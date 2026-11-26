@@ -68,7 +68,7 @@ WIKIWIKI の利用ルールでは、他サイトから Wiki の画像を直接�
 
 ## 曲データの自動更新（GitHub Actions）
 
-リポジトリの一番上の `.github/workflows/taiko-quiz-update.yml` が毎日 3:00（日本時間）に `tools/update.py` を実行し、
+リポジトリの一番上の `.github/workflows/taiko-quiz-update.yml` が毎日 12:00（日本時間）に `tools/update.py` を実行し、
 変わったデータ（`data.js` と `tools/*.json`）をコミットします。コミットされると GitHub Pages にも反映されます。
 
 1回の実行で行うこと:

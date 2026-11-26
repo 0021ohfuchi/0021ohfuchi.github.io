@@ -50,14 +50,29 @@ def page_names():
     names = set()
     for f in ('lists.json', 'extra_lists.json'):
         try:
-            for s in json.load(open(os.path.join(HERE, f), encoding='utf-8')):
+            d = json.load(open(os.path.join(HERE, f), encoding='utf-8'))
+            for s in (d.values() if isinstance(d, dict) else d):  # extra_lists.json は曲名をキーにした辞書
                 names.add(re.sub(r'\(裏譜面\)$', '', s['page'].split('/', 2)[-1]))
         except Exception:
             pass
     return names
 
 
+def chart_names():
+    # 「(裏譜面)」をまとめずに、譜面ごとの名前を返す（既存の曲に裏譜面が足されたのを見つけるため）
+    names = set()
+    for f in ('lists.json', 'extra_lists.json'):
+        try:
+            d = json.load(open(os.path.join(HERE, f), encoding='utf-8'))
+            for s in (d.values() if isinstance(d, dict) else d):
+                names.add(s['page'].split('/', 2)[-1])
+        except Exception:
+            pass
+    return names
+
+
 names_before = page_names()
+charts_before = chart_names()
 
 # 1. 一覧（取得に失敗して曲数が大きく減ったら、前の一覧に戻す）
 lists = os.path.join(HERE, 'lists.json')
@@ -100,20 +115,33 @@ run('en', ['scrape_en.py'])
 # 7. data.js
 ok &= run('build', ['build_data.py'])
 
-# 8. 新しく増えた曲を、お知らせ（news.js）に足す（最初の実行など、元の一覧が空のときは足さない）
+# 8. 新しく増えた曲と、既存の曲に増えた裏譜面を、お知らせ（news.js）に足す（最初の実行など、元の一覧が空のときは足さない）
 added = sorted(page_names() - names_before) if names_before else []
-if added:
+# 新しい曲の裏譜面は曲のお知らせに含まれるので、既存の曲に足された裏譜面だけを数える
+added_ura = sorted(n for n in (chart_names() - charts_before)
+                   if n.endswith('(裏譜面)') and re.sub(r'\(裏譜面\)$', '', n) not in added) if charts_before else []
+if added or added_ura:
     news_js = os.path.join(HERE, '..', 'news.js')
     try:
         src = open(news_js, encoding='utf-8').read()
         head, body = src.split('window.QUIZ_NEWS=', 1)
         news = json.loads(body.rsplit(';', 1)[0])
-        shown = '、'.join(added[:8]) + (f' ほか{len(added) - 8}曲' if len(added) > 8 else '')
-        shown_en = ', '.join(added[:8]) + (f' and {len(added) - 8} more' if len(added) > 8 else '')
-        news.insert(0, {'d': time.strftime('%Y/%m/%d', time.gmtime(time.time() + 9 * 3600)), 't': f'{len(added)}曲を追加しました: {shown}',
-                        'en': f'Added {len(added)} song{"s" if len(added) != 1 else ""}: {shown_en}'})  # en: トップページの英語表示用
+        today = time.strftime('%Y/%m/%d', time.gmtime(time.time() + 9 * 3600))
+
+        def entry(items, unit, unit_en):
+            shown = '、'.join(items[:8]) + (f' ほか{len(items) - 8}{unit}' if len(items) > 8 else '')
+            shown_en = ', '.join(items[:8]) + (f' and {len(items) - 8} more' if len(items) > 8 else '')
+            n = len(items)
+            return {'d': today, 't': f'{n}{unit}を追加しました: {shown}',
+                    'en': f'Added {n} {unit_en}{"s" if n != 1 else ""}: {shown_en}'}  # en: トップページの英語表示用
+
+        # 先頭に近いほうが新しい。曲のお知らせを一番上にする
+        if added_ura:
+            news.insert(0, entry(added_ura, '譜面', 'chart'))
+        if added:
+            news.insert(0, entry(added, '曲', 'song'))
         open(news_js, 'w', encoding='utf-8', newline='\n').write(head + 'window.QUIZ_NEWS=' + json.dumps(news, ensure_ascii=False, indent=1) + ';\n')
-        print('news: +', len(added), flush=True)
+        print('news: songs +', len(added), ' charts +', len(added_ura), flush=True)
     except Exception as e:
         print('!! お知らせの更新に失敗', e, flush=True)
 

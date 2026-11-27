@@ -1,6 +1,15 @@
 // 自動生成: scripts/fetch_youtube.py（YouTube の最新動画。新しいものが先頭。short: ショートかどうか）
 window.LATEST_VIDEOS=[
  {
+  "id": "mvr-RHJWVQY",
+  "title": "アンパンマンたいそう (裏譜面) 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人 #shorts",
+  "desc": "",
+  "title_en": "Anpanman Exercise (Ura) / From \"Anpanman\" [Taiko no Tatsujin: Rhythm Festival] #keyboard #shorts",
+  "desc_en": "",
+  "date": "2026/11/27",
+  "short": true
+ },
+ {
   "id": "G9r0dt7PYD4",
   "title": "アンパンマンたいそう (裏譜面) 全良【太鼓の達人 ドンダフルフェスティバル】#キーボード #太鼓の達人",
   "desc": "★×10 510コンボ 2026年11月26日に追加された楽曲 なんだこれ…笑 とっとこハム太郎もですが、ドンダフルフェスティバルには子供向けアニメに高難易度譜面入れるのが流行ってる…？ 見た目のインパクトは凄いですが、BPMは135と低いので、シングルでも割と間に合います",
@@ -97,15 +106,6 @@ window.LATEST_VIDEOS=[
   "title_en": "Tank! (Oni＆Ura) [Taiko no Tatsujin: Rhythm Festival] #keyboard #shorts",
   "desc_en": "",
   "date": "2026/11/18",
-  "short": true
- },
- {
-  "id": "u48f8CFPrmU",
-  "title": "World Kepps Turning 全良【太鼓の達人Steam版ドンダフルフェスティバル】#shorts",
-  "desc": "",
-  "title_en": "World Keeps Turning (Oni) DFC [Taiko no Tatsujin Rhythm Festival] #shorts",
-  "desc_en": "",
-  "date": "2026/11/16",
   "short": true
  }
 ];
